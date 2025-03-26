@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { InferRequestType, InferResponseType } from "hono";
+import { InferResponseType, InferRequestType } from "hono";
 
 import { client } from "@/lib/rpc";
 
@@ -12,8 +12,8 @@ export const useCreateTask = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
-      const response = await client.api.tasks["$post"]({ json });
+    mutationFn: async ({ form }) => {
+      const response = await client.api.tasks["$post"]({ form });
       if(!response.ok) {
         throw new Error("Failed to create task");
       }

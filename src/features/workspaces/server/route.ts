@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import {
   DATABASE_ID,
-  IMAGES_BUCKET_ID,
+  ATTACHMENTS_BUCKET_ID,
   WORKSPACES_ID,
   MEMBERS_ID,
   TASKS_ID,
@@ -96,13 +96,13 @@ const app = new Hono()
 
       if (image instanceof File) {
         const file = await storage.createFile(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           ID.unique(),
           image
         );
 
         const arrayBuffer = await storage.getFilePreview(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           file.$id
         );
 
@@ -158,13 +158,13 @@ const app = new Hono()
 
       if (image instanceof File) {
         const file = await storage.createFile(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           ID.unique(),
           image
         );
 
         const arrayBuffer = await storage.getFilePreview(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           file.$id
         );
 

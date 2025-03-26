@@ -12,8 +12,8 @@ export const useUpdateTask = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json, param }) => {
-      const response = await client.api.tasks[":taskId"]["$patch"]({ json, param });
+    mutationFn: async ({ form, param }) => {
+      const response = await client.api.tasks[":taskId"]["$patch"]({ form, param });
       if(!response.ok) {
         throw new Error("Failed to update task");
       }
@@ -25,6 +25,7 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] });
+      queryClient.invalidateQueries({ queryKey: ["task-logs", data.$id]});
     },
     onError: ()=> {
       toast.error("Failed to update task");

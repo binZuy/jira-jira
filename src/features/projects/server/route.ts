@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
-import { DATABASE_ID, IMAGES_BUCKET_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import { DATABASE_ID, ATTACHMENTS_BUCKET_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 import { getMember } from "@/features/members/utils";
 
 import { Project } from "../types";
@@ -96,16 +96,16 @@ const app = new Hono()
 
       if (image instanceof File) {
         const file = await storage.createFile(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           ID.unique(),
           image
         );
 
         const arrayBuffer = await storage.getFilePreview(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           file.$id
         );
-
+        
         uploadedImageUrl = `data:image/png;base64,${Buffer.from(
           arrayBuffer
         ).toString("base64")}`;
@@ -157,13 +157,13 @@ const app = new Hono()
 
       if (image instanceof File) {
         const file = await storage.createFile(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           ID.unique(),
           image
         );
 
         const arrayBuffer = await storage.getFilePreview(
-          IMAGES_BUCKET_ID,
+          ATTACHMENTS_BUCKET_ID,
           file.$id
         );
 

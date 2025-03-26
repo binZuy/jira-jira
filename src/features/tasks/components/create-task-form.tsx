@@ -6,6 +6,8 @@ import { useCreateTask } from "../api/use-create-task";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef } from "react";
+import Image from "next/image";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,6 +34,7 @@ import {
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { TaskStatus } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { FileIcon, XIcon } from "lucide-react";
 
 interface CreateTaskFormProps {
   onCancel?: () => void;
@@ -49,28 +52,49 @@ export const CreateTaskForm = ({
   memberOptions,
 }: CreateTaskFormProps) => {
   const workspaceId = useWorkspaceId();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { mutate, isPending } = useCreateTask();
-  // const router = useRouter();
 
   const form = useForm<z.infer<typeof createTaskSchema>>({
     resolver: zodResolver(createTaskSchema.omit({ workspaceId: true })),
     defaultValues: {
       workspaceId,
+      attachments: [],
     },
   });
 
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
-    mutate(
-      { json: { ...values, workspaceId } },
-      {
-        onSuccess: () => {
-          form.reset();
-          // Redirect to new tasks
-          onCancel?.();
-        },
-      }
-    );
+    const formData = {
+      ...values, 
+      workspaceId,
+      attachments: values.attachments ?? [],
+      dueDate: values.dueDate?.toISOString(), // Convert Date to ISO string
+    }
+
+    console.log(form)
+    console.log(formData);
+    mutate({ form: formData }, {
+      onSuccess: () => {
+        form.reset();
+        onCancel?.();
+      },
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Get an array of File objects directly from the file input.
+    const files = Array.from(e.target.files || []);
+    // Set the form field "attachments" to the array of File objects.
+    form.setValue("attachments", files);
+  };
+
+  const removeAttachment = (index: number) => {
+    // Get the current array of File objects.
+    const attachments: File[] = form.getValues("attachments") || [];
+    // Remove the file at the specified index.
+    const updatedAttachments = attachments.filter((_, i) => i !== index);
+    form.setValue("attachments", updatedAttachments);
   };
 
   return (
@@ -117,7 +141,6 @@ export const CreateTaskForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Assignee</FormLabel>
-
                     <Select
                       defaultValue={field.value}
                       onValueChange={field.onChange}
@@ -142,7 +165,6 @@ export const CreateTaskForm = ({
                         ))}
                       </SelectContent>
                     </Select>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -153,7 +175,6 @@ export const CreateTaskForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-
                     <Select
                       defaultValue={field.value}
                       onValueChange={field.onChange}
@@ -172,7 +193,6 @@ export const CreateTaskForm = ({
                         <SelectItem value={TaskStatus.DONE}>Done</SelectItem>
                       </SelectContent>
                     </Select>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -183,7 +203,6 @@ export const CreateTaskForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project</FormLabel>
-
                     <Select
                       defaultValue={field.value}
                       onValueChange={field.onChange}
@@ -209,10 +228,87 @@ export const CreateTaskForm = ({
                         ))}
                       </SelectContent>
                     </Select>
-
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+              <FormField
+                  control={form.control}
+                  name="attachments"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-y-2">
+                      <div className="flex flex-col gap-y-2">
+                        <p className="text-sm font-medium">Attachments</p>
+                        <p className="text-sm text-muted-foreground">
+                          Upload files (Images, PDF, DOC, XLS) up to 1MB
+                        </p>
+                        <input
+                          className="hidden"
+                          type="file"
+                          multiple
+                          accept=".jpg,.jpeg,.png,.svg,.pdf,.doc,.docx,.xls,.xlsx"
+                          ref={inputRef}
+                          onChange={handleFileChange}
+                          disabled={isPending}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => inputRef.current?.click()}
+                          disabled={isPending}
+                        >
+                          Upload Files
+                        </Button>
+                      </div>
+                      {field.value && field.value.length > 0 && (
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                          {field.value.map((file: File, index: number) => {
+                            // Compute the preview URL on the fly for images.
+                            const preview =
+                              file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined;
+                            return (
+                              <div
+                                key={index}
+                                className="relative flex items-center gap-x-2 p-2 border rounded-md"
+                              >
+                                {preview ? (
+                                  <div className="relative w-12 h-12 rounded-md overflow-hidden">
+                                    <Image
+                                      src={preview}
+                                      alt={file.name}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
+                                    <FileIcon className="w-6 h-6 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{file.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  </p>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="w-8 h-8"
+                                  onClick={() => removeAttachment(index)}
+                                  disabled={isPending}
+                                >
+                                  <XIcon className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <FormMessage />   
+                    </div>
+                  )}
               />
             </div>
             <DottedSeparator className="py-7" />

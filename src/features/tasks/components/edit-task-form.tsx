@@ -32,6 +32,8 @@ import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { Task, TaskStatus } from "../types";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useUpdateTask } from "../api/use-update-task";
+import { useRef } from "react";
+import { FileIcon, XIcon } from "lucide-react";
 
 interface EditTaskFormProps {
   onCancel?: () => void;
@@ -50,10 +52,9 @@ export const EditTaskForm = ({
   memberOptions,
   initialValues,
 }: EditTaskFormProps) => {
-
   const { mutate, isPending } = useUpdateTask();
-  // const router = useRouter();
-
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  console.log(initialValues);
   const form = useForm<z.infer<typeof createTaskSchema>>({
     resolver: zodResolver(
       createTaskSchema.omit({ workspaceId: true, description: true })
@@ -63,16 +64,51 @@ export const EditTaskForm = ({
       dueDate: initialValues.dueDate
         ? new Date(initialValues.dueDate)
         : undefined,
+      attachments: initialValues.attachments || [],
     },
   });
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newAttachments = Array.from(files).map((file) => ({
+        fileName: file.name,
+        fileType: file.type,
+        fileUrl: URL.createObjectURL(file), // Temporary URL for preview
+        size: file.size,
+        file, // Store the actual File object for upload
+      }));
+      form.setValue("attachments", [
+        ...(form.getValues("attachments") || []),
+        ...newAttachments,
+      ]);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    const attachments = form.getValues("attachments") || [];
+    attachments.splice(index, 1);
+    form.setValue("attachments", attachments);
+  };
+
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
+    const formData = {
+      ...values,
+      attachments: values.attachments.map((attachment: any) => {
+        if (attachment.file) {
+          // New file uploaded by the user
+          return attachment.file;
+        }
+        // Existing attachment metadata
+        return attachment;
+      }),
+    };
+
     mutate(
-      { json: values, param: { taskId: initialValues.$id } },
+      { form: formData, param: { taskId: initialValues.$id } },
       {
         onSuccess: () => {
           form.reset();
-          // Redirect to new tasks
           onCancel?.();
         },
       }
@@ -82,7 +118,7 @@ export const EditTaskForm = ({
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <CardTitle className="text-xl font-bold">Edit a new task</CardTitle>
+        <CardTitle className="text-xl font-bold">Edit Task</CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
@@ -224,6 +260,100 @@ export const EditTaskForm = ({
 
                     <FormMessage />
                   </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="attachments"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-y-2">
+                    <div className="flex flex-col gap-y-2">
+                      <p className="text-sm font-medium">Attachments</p>
+                      <p className="text-sm text-muted-foreground">
+                        Upload files (Images, PDF, DOC, XLS) up to 1MB
+                      </p>
+                      <input
+                        className="hidden"
+                        type="file"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.svg,.pdf,.doc,.docx,.xls,.xlsx"
+                        ref={inputRef}
+                        onChange={handleFileChange}
+                        disabled={isPending}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => inputRef.current?.click()}
+                        disabled={isPending}
+                      >
+                        Upload Files
+                      </Button>
+                    </div>
+                    {field.value && field.value.length > 0 && (
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        {field.value.map((attachment: any, index: number) => {
+                          const isImage = attachment.fileType?.startsWith(
+                            "image/"
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="relative flex items-center gap-x-2 p-2 border rounded-md"
+                            >
+                              {isImage ? (
+                                <div className="relative w-12 h-12 rounded-md overflow-hidden">
+                                  <img
+                                    src={
+                                      attachment.fileUrl ||
+                                      URL.createObjectURL(attachment.file)
+                                    }
+                                    alt={attachment.fileName}
+                                    className="object-cover w-full h-full"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
+                                  <FileIcon className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {isImage ? (
+                                    attachment.fileName
+                                  ) : (
+                                    <a
+                                      href={attachment.fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 hover:underline"
+                                    >
+                                      {attachment.fileName}
+                                    </a>
+                                  )}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {(attachment.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="w-8 h-8"
+                                onClick={() => removeAttachment(index)}
+                                disabled={isPending}
+                              >
+                                <XIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <FormMessage />
+                  </div>
                 )}
               />
             </div>

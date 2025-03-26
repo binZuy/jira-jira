@@ -3,19 +3,19 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTaskSchema } from "../schemas";
 import { getMember } from "@/features/members/utils";
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, COMMENTS_ID, TASKLOGS_ID, ATTACHMENTS_BUCKET_ID, TASK_ATTACHMENT_ID, APPWRITE_ENDPOINT } from "@/config";
 import { ID, Query } from "node-appwrite";
-import { Task, TaskStatus } from "../types";
+import { Task, TaskStatus, TaskComment } from "../types";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
 
 const app = new Hono()
-
   .delete("/:taskId", sessionMiddleware, async (c) => {
     const { taskId } = c.req.param();
     const user = c.get("user");
     const databases = c.get("databases");
+    const storage = c.get("storage");
 
     const task = await databases.getDocument<Task>(
       DATABASE_ID,
@@ -33,9 +33,52 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+    // Get all attachments for this task
+    const attachments = await databases.listDocuments(
+      DATABASE_ID,
+      TASK_ATTACHMENT_ID,
+      [Query.equal("taskId", taskId)]
+    );
+
+    // Delete all attachment files from storage
+    for (const attachment of attachments.documents) {
+      try {
+        await storage.deleteFile(ATTACHMENTS_BUCKET_ID, attachment.fileId);
+      } catch (error) {
+        console.error(`Failed to delete file ${attachment.fileId}:`, error);
+      }
+    }
+
+    // Delete all attachment records from database
+    for (const attachment of attachments.documents) {
+      try {
+        await databases.deleteDocument(
+          DATABASE_ID,
+          TASK_ATTACHMENT_ID,
+          attachment.$id
+        );
+      } catch (error) {
+        console.error(`Failed to delete attachment record ${attachment.$id}:`, error);
+      }
+    }
+
+    // Delete the task
     await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
 
-    return c.json({ data: { $id: task.$id } });
+    // Create log for task deletion
+    await databases.createDocument(
+      DATABASE_ID,
+      TASKLOGS_ID,
+      ID.unique(),
+      {
+        taskId,
+        userId: user.$id,
+        action: "deleted",
+        details: "Task deleted"
+      }
+    );
+
+    return c.json({ data: { message: "Task deleted successfully" } });
   })
   .get(
     "/",
@@ -149,12 +192,20 @@ const app = new Hono()
   .patch(
     "/:taskId",
     sessionMiddleware,
-    zValidator("json", createTaskSchema.partial()),
+    zValidator("form", createTaskSchema.partial()),
     async (c) => {
       const user = c.get("user");
       const databases = c.get("databases");
-      const { name, status, description, projectId, assigneeId, dueDate } =
-        c.req.valid("json");
+      const storage = c.get("storage");
+      const formData = await c.req.formData();
+
+      const name = formData.get("name") as string;
+      const status = formData.get("status") as TaskStatus;
+      const projectId = formData.get("projectId") as string;
+      const dueDate = formData.get("dueDate") as string;
+      const assigneeId = formData.get("assigneeId") as string;
+      const description = formData.get("description") as string | null;
+      const attachments = formData.getAll("attachments") as File[];
 
       const { taskId } = c.req.param();
 
@@ -174,6 +225,30 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      // Handle new attachments if any
+      if (attachments && attachments.length > 0) {
+        for (const file of attachments) {
+          if (file instanceof File) {
+            const fileId = ID.unique();
+            await storage.createFile(ATTACHMENTS_BUCKET_ID, fileId, file);
+            const fileUrl = `${APPWRITE_ENDPOINT}/storage/buckets/${ATTACHMENTS_BUCKET_ID}/files/${fileId}/view?project=${DATABASE_ID}&mode=admin`;
+            
+            await databases.createDocument(
+              DATABASE_ID,
+              TASK_ATTACHMENT_ID,
+              ID.unique(),
+              {
+                taskId,
+                fileId,
+                fileName: file.name,
+                fileType: file.type,
+                fileUrl,
+              }
+            );
+          }
+        }
+      }
+
       const task = await databases.updateDocument<Task>(
         DATABASE_ID,
         TASKS_ID,
@@ -187,60 +262,122 @@ const app = new Hono()
           description,
         }
       );
+
+      // Create log for task update
+      await databases.createDocument(
+        DATABASE_ID,
+        TASKLOGS_ID,
+        ID.unique(),
+        {
+          taskId,
+          userId: user.$id,
+          action: "updated",
+          details: "Task updated"
+        }
+      );
+
       return c.json({ data: task });
     }
   )
   .post(
     "/",
     sessionMiddleware,
-    zValidator("json", createTaskSchema),
+    zValidator("form", createTaskSchema),
     async (c) => {
-      const user = c.get("user");
-      const databases = c.get("databases");
-      const { name, status, workspaceId, projectId, assigneeId, dueDate } =
-        c.req.valid("json");
+        const user = c.get("user");
+        const databases = c.get("databases");
+        const storage = c.get("storage");
+        const formData = await c.req.formData();
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
-
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const highestPositionTask = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_ID,
-        [
-          Query.equal("status", status),
-          Query.equal("workspaceId", workspaceId),
-          Query.orderAsc("position"),
-          Query.limit(1),
-        ]
-      );
-
-      const newPosition =
-        highestPositionTask.documents.length > 0
-          ? highestPositionTask.documents[0].position + 1000
-          : 1000;
-
-      const task = await databases.createDocument(
-        DATABASE_ID,
-        TASKS_ID,
-        ID.unique(),
-        {
-          name,
-          status,
-          workspaceId,
-          projectId,
-          dueDate,
-          assigneeId,
-          position: newPosition,
+        // Retrieve fields
+        const name = formData.get("name") as string;
+        const status = formData.get("status") as TaskStatus;
+        const workspaceId = formData.get("workspaceId") as string;
+        const projectId = formData.get("projectId") as string;
+        const assigneeId = formData.get("assigneeId") as string;
+        const dueDate = formData.get("dueDate") as string;
+        const description = formData.get("description") as string;
+        
+        // Process attachments (multiple file uploads using "attachments[]")
+        const files = formData.getAll("attachments");
+        console.log(formData);
+        const attachments = [];
+        
+        for (const file of files) {
+          if (file instanceof File) {
+            const fileId = ID.unique();
+            await storage.createFile(ATTACHMENTS_BUCKET_ID, fileId, file);
+            const fileUrl = `${APPWRITE_ENDPOINT}/storage/buckets/${ATTACHMENTS_BUCKET_ID}/files/${fileId}/view?project=${DATABASE_ID}&mode=admin`;
+            
+            attachments.push({
+              taskId: "", // Will be updated after task creation
+              fileId,
+              fileName: file.name,
+              fileType: file.type,
+              fileUrl,
+            });
+          }
         }
-      );
-      return c.json({ data: task });
+        
+        // Determine new position if needed (or use existing logic)
+        const highestPositionTask = await databases.listDocuments(
+          DATABASE_ID,
+          TASKS_ID,
+          [
+            Query.equal("status", status),
+            Query.equal("workspaceId", workspaceId),
+            Query.orderAsc("position"),
+            Query.limit(1),
+          ]
+        );
+
+        const newPosition =
+          highestPositionTask.documents.length > 0
+            ? highestPositionTask.documents[0].position + 1000
+            : 1000;
+
+        // Create task document including attachments field if needed
+        const task = await databases.createDocument(
+          DATABASE_ID,
+          TASKS_ID,
+          ID.unique(),
+          {
+            name,
+            status,
+            workspaceId,
+            projectId,
+            assigneeId,
+            dueDate,
+            description,
+            position: newPosition,
+          }
+        );
+        
+        // Now create attachment records with the task ID
+        for (const attachment of attachments) {
+          attachment.taskId = task.$id;
+          await databases.createDocument(
+            DATABASE_ID,
+            TASK_ATTACHMENT_ID,
+            ID.unique(),
+            attachment
+          );
+        }
+
+        // Log activity for creation
+        await databases.createDocument(
+          DATABASE_ID,
+          TASKLOGS_ID,
+          ID.unique(),
+          {
+            taskId: task.$id,
+            action: "created",
+            userId: user.$id,
+            details: `Created task "${name}" with ${attachments.length} attachment(s)`,
+          }
+        );
+        
+        return c.json({data: task});
     }
   )
   .get("/:taskId", sessionMiddleware, async (c) => {
@@ -356,6 +493,110 @@ const app = new Hono()
         })
       );
       return c.json({ data: updatedTasks });
+    }
+  )
+  // Comments routes
+  .post(
+    "/:taskId/comments",
+    sessionMiddleware,
+    zValidator("json", z.object({
+      content: z.string().min(1)
+    })),
+    async (c) => {
+      const { taskId } = c.req.param();
+      const { content } = c.req.valid("json");
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const comment = await databases.createDocument(
+        DATABASE_ID,
+        COMMENTS_ID,
+        ID.unique(),
+        {
+          taskId,
+          userId: user.$id,
+          content
+        }
+      );
+
+      // Create log for comment
+      await databases.createDocument(
+        DATABASE_ID,
+        TASKLOGS_ID,
+        ID.unique(),
+        {
+          taskId,
+          userId: user.$id,
+          action: "commented",
+          details: "User commented on task",
+        }
+      );
+
+      return c.json({ data: comment });
+    }
+  )
+  .get(
+    "/:taskId/comments",
+    sessionMiddleware,
+    async (c) => {
+      const { taskId } = c.req.param();
+      const { users } = await createAdminClient();
+      const databases = c.get("databases");
+
+      const comments = await databases.listDocuments<TaskComment>(
+        DATABASE_ID,
+        COMMENTS_ID,
+        [Query.equal("taskId", taskId)]
+      );
+
+      const populatedComments = await Promise.all(
+        comments.documents.map(async (comment) => {
+          const user = await users.get(comment.userId);
+          return {
+            ...comment,
+            user: {
+              name: user.name,
+              imageUrl: user.prefs.avatarUrl,
+            },
+          };
+        })
+      );
+
+      return c.json({ data: populatedComments });
+    }
+  )
+  // Task Logs routes
+  .get(
+    "/:taskId/logs",
+    sessionMiddleware,
+    async (c) => {
+      const { taskId } = c.req.param();
+      const { users } = await createAdminClient();
+      const databases = c.get("databases");
+
+      const logs = await databases.listDocuments(
+        DATABASE_ID,
+        TASKLOGS_ID,
+        [
+          Query.equal("taskId", taskId),
+          Query.orderDesc("$createdAt")
+        ]
+      );
+
+      const populatedLogs = await Promise.all(
+        logs.documents.map(async (log) => {
+          const user = await users.get(log.userId);
+          return {
+            ...log,
+            user: {
+              name: user.name,
+              imageUrl: user.prefs.avatarUrl,
+            },
+          };
+        })
+      );
+
+      return c.json({ data: populatedLogs });
     }
   );
 
