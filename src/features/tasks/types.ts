@@ -19,7 +19,6 @@ export type Task = Models.Document & {
   dueDate: string;
   description?: string;
   attachments?: File[] | any[];
-  
 }
 
 export type TaskComment = Models.Document & {

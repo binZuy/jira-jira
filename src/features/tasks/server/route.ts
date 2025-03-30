@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTaskSchema } from "../schemas";
 import { getMember } from "@/features/members/utils";
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, COMMENTS_ID, TASKLOGS_ID, ATTACHMENTS_BUCKET_ID, TASK_ATTACHMENT_ID, APPWRITE_ENDPOINT } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, COMMENTS_ID, TASKLOGS_ID, ATTACHMENTS_BUCKET_ID, TASK_ATTACHMENT_ID} from "@/config";
 import { ID, Query } from "node-appwrite";
 import { Task, TaskStatus, TaskComment } from "../types";
 import { z } from "zod";
@@ -231,7 +231,15 @@ const app = new Hono()
           if (file instanceof File) {
             const fileId = ID.unique();
             await storage.createFile(ATTACHMENTS_BUCKET_ID, fileId, file);
-            const fileUrl = `${APPWRITE_ENDPOINT}/storage/buckets/${ATTACHMENTS_BUCKET_ID}/files/${fileId}/view?project=${DATABASE_ID}&mode=admin`;
+            
+            let fileUrl;
+            if (file.type.startsWith('image/')) {
+              const arrayBuffer = await storage.getFilePreview(ATTACHMENTS_BUCKET_ID, fileId);
+              fileUrl = `data:${file.type};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+            } else {
+              const arrayBuffer = await storage.getFileDownload(ATTACHMENTS_BUCKET_ID, fileId);
+              fileUrl = `data:${file.type};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+            }
             
             await databases.createDocument(
               DATABASE_ID,
@@ -284,100 +292,108 @@ const app = new Hono()
     sessionMiddleware,
     zValidator("form", createTaskSchema),
     async (c) => {
-        const user = c.get("user");
-        const databases = c.get("databases");
-        const storage = c.get("storage");
-        const formData = await c.req.formData();
+      const user = c.get("user");
+      const databases = c.get("databases");
+      const storage = c.get("storage");
+      const formData = await c.req.formData();
 
-        // Retrieve fields
-        const name = formData.get("name") as string;
-        const status = formData.get("status") as TaskStatus;
-        const workspaceId = formData.get("workspaceId") as string;
-        const projectId = formData.get("projectId") as string;
-        const assigneeId = formData.get("assigneeId") as string;
-        const dueDate = formData.get("dueDate") as string;
-        const description = formData.get("description") as string;
-        
-        // Process attachments (multiple file uploads using "attachments[]")
-        const files = formData.getAll("attachments");
-        console.log(formData);
-        const attachments = [];
-        
-        for (const file of files) {
-          if (file instanceof File) {
-            const fileId = ID.unique();
-            await storage.createFile(ATTACHMENTS_BUCKET_ID, fileId, file);
-            const fileUrl = `${APPWRITE_ENDPOINT}/storage/buckets/${ATTACHMENTS_BUCKET_ID}/files/${fileId}/view?project=${DATABASE_ID}&mode=admin`;
-            
-            attachments.push({
-              taskId: "", // Will be updated after task creation
-              fileId,
-              fileName: file.name,
-              fileType: file.type,
-              fileUrl,
-            });
+      // Retrieve fields
+      const name = formData.get("name") as string;
+      const status = formData.get("status") as TaskStatus;
+      const workspaceId = formData.get("workspaceId") as string;
+      const projectId = formData.get("projectId") as string;
+      const assigneeId = formData.get("assigneeId") as string;
+      const dueDate = formData.get("dueDate") as string;
+      const description = formData.get("description") as string;
+
+      // Process attachments (normalize to always be an array)
+      const files = formData.getAll("attachments");
+      const normalizedFiles = Array.isArray(files) ? files : [files]; // Ensure it's always an array
+      const attachments = [];
+
+      for (const file of normalizedFiles) {
+        if (file instanceof File) {
+          const fileId = ID.unique();
+          await storage.createFile(ATTACHMENTS_BUCKET_ID, fileId, file);
+          
+          let fileUrl;
+          if (file.type.startsWith('image/')) {
+            const arrayBuffer = await storage.getFilePreview(ATTACHMENTS_BUCKET_ID, fileId);
+            fileUrl = `data:${file.type};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+          } else {
+            const arrayBuffer = await storage.getFileDownload(ATTACHMENTS_BUCKET_ID, fileId);
+            fileUrl = `data:${file.type};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
           }
+          
+          attachments.push({
+            taskId: "", // Will be updated after task creation
+            fileId,
+            fileName: file.name,
+            fileType: file.type,
+            fileUrl
+          });
         }
-        
-        // Determine new position if needed (or use existing logic)
-        const highestPositionTask = await databases.listDocuments(
-          DATABASE_ID,
-          TASKS_ID,
-          [
-            Query.equal("status", status),
-            Query.equal("workspaceId", workspaceId),
-            Query.orderAsc("position"),
-            Query.limit(1),
-          ]
-        );
+      }
 
-        const newPosition =
-          highestPositionTask.documents.length > 0
-            ? highestPositionTask.documents[0].position + 1000
-            : 1000;
+      // Determine new position if needed (or use existing logic)
+      const highestPositionTask = await databases.listDocuments(
+        DATABASE_ID,
+        TASKS_ID,
+        [
+          Query.equal("status", status),
+          Query.equal("workspaceId", workspaceId),
+          Query.orderAsc("position"),
+          Query.limit(1),
+        ]
+      );
 
-        // Create task document including attachments field if needed
-        const task = await databases.createDocument(
-          DATABASE_ID,
-          TASKS_ID,
-          ID.unique(),
-          {
-            name,
-            status,
-            workspaceId,
-            projectId,
-            assigneeId,
-            dueDate,
-            description,
-            position: newPosition,
-          }
-        );
-        
-        // Now create attachment records with the task ID
-        for (const attachment of attachments) {
-          attachment.taskId = task.$id;
-          await databases.createDocument(
-            DATABASE_ID,
-            TASK_ATTACHMENT_ID,
-            ID.unique(),
-            attachment
-          );
+      const newPosition =
+        highestPositionTask.documents.length > 0
+          ? highestPositionTask.documents[0].position + 1000
+          : 1000;
+
+      // Create task document including attachments field if needed
+      const task = await databases.createDocument(
+        DATABASE_ID,
+        TASKS_ID,
+        ID.unique(),
+        {
+          name,
+          status,
+          workspaceId,
+          projectId,
+          assigneeId,
+          dueDate,
+          description,
+          position: newPosition,
         }
+      );
 
-        // Log activity for creation
+      // Now create attachment records with the task ID
+      for (const attachment of attachments) {
+        attachment.taskId = task.$id;
         await databases.createDocument(
           DATABASE_ID,
-          TASKLOGS_ID,
+          TASK_ATTACHMENT_ID,
           ID.unique(),
-          {
-            taskId: task.$id,
-            action: "created",
-            userId: user.$id,
-            details: `Created task "${name}" with ${attachments.length} attachment(s)`,
-          }
+          attachment
         );
-        
-        return c.json({data: task});
+      }
+
+      // Log activity for creation
+      await databases.createDocument(
+        DATABASE_ID,
+        TASKLOGS_ID,
+        ID.unique(),
+        {
+          taskId: task.$id,
+          action: "created",
+          userId: user.$id,
+          details: `Created task "${name}" withattachment(s)`,
+        }
+      );
+
+      return c.json({ data: task });
     }
   )
   .get("/:taskId", sessionMiddleware, async (c) => {
@@ -386,12 +402,14 @@ const app = new Hono()
     const { users } = await createAdminClient();
     const { taskId } = await c.req.param();
 
-    const task = await databases.getDocument<Task>(
+    // Fetch task details
+    const task = await databases.getDocument(
       DATABASE_ID,
       TASKS_ID,
       taskId
     );
 
+    // Check if the user is authorized to access the task
     const currentMember = await getMember({
       databases,
       workspaceId: task.workspaceId,
@@ -402,12 +420,14 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+    // Fetch project details
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
       task.projectId
     );
 
+    // Fetch assignee details
     const member = await databases.getDocument(
       DATABASE_ID,
       MEMBERS_ID,
@@ -418,11 +438,20 @@ const app = new Hono()
 
     const assignee = { ...member, name: user.name, email: user.email };
 
+    // Fetch attachments for the task
+    const attachments = await databases.listDocuments(
+      DATABASE_ID,
+      TASK_ATTACHMENT_ID,
+      [Query.equal("taskId", taskId)]
+    );
+
+    // Return task details along with project, assignee, and attachments
     return c.json({
       data: {
         ...task,
         project,
         assignee,
+        attachments: attachments.documents, // Include attachments here
       },
     });
   })

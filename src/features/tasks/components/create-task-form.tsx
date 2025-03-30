@@ -68,12 +68,11 @@ export const CreateTaskForm = ({
     const formData = {
       ...values, 
       workspaceId,
-      attachments: values.attachments ?? [],
+      attachments: values.attachments || [],
       dueDate: values.dueDate?.toISOString(), // Convert Date to ISO string
     }
-
-    console.log(form)
     console.log(formData);
+
     mutate({ form: formData }, {
       onSuccess: () => {
         form.reset();

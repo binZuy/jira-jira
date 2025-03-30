@@ -3,6 +3,7 @@
 import { createTaskSchema } from "../schemas";
 
 import { z } from "zod";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -62,46 +63,46 @@ export const EditTaskForm = ({
     defaultValues: {
       ...initialValues,
       dueDate: initialValues.dueDate
-        ? new Date(initialValues.dueDate)
-        : undefined,
-      attachments: initialValues.attachments || [],
+      ? new Date(initialValues.dueDate)
+      : undefined,
+      attachments: [],
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newAttachments = Array.from(files).map((file) => ({
-        fileName: file.name,
-        fileType: file.type,
-        fileUrl: URL.createObjectURL(file), // Temporary URL for preview
-        size: file.size,
-        file, // Store the actual File object for upload
-      }));
-      form.setValue("attachments", [
-        ...(form.getValues("attachments") || []),
-        ...newAttachments,
-      ]);
-    }
+  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = event.target.files;
+  //   if (files) {
+  //     const newAttachments = Array.from(files);
+  //     form.setValue("attachments", [
+  //       ...(form.getValues("attachments") || []),
+  //       ...newAttachments,
+  //     ]);
+  //   }
+  // };
+
+  // const removeAttachment = (index: number) => {
+  //   const attachments = (form.getValues("attachments") || []).filter(
+  //     (attachment): attachment is File => attachment instanceof File
+  //   );
+  //   attachments.splice(index, 1);
+  //   form.setValue("attachments", attachments);
+  // };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    form.setValue("attachments", files);
   };
 
   const removeAttachment = (index: number) => {
-    const attachments = form.getValues("attachments") || [];
-    attachments.splice(index, 1);
-    form.setValue("attachments", attachments);
+    const attachments: File[] = form.getValues("attachments") || [];
+    const updatedAttachments = attachments.filter((_, i) => i !== index);
+    form.setValue("attachments", updatedAttachments);
   };
 
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
     const formData = {
       ...values,
-      attachments: values.attachments.map((attachment: any) => {
-        if (attachment.file) {
-          // New file uploaded by the user
-          return attachment.file;
-        }
-        // Existing attachment metadata
-        return attachment;
-      }),
+      attachments: values.attachments || [],
+      dueDate: values.dueDate?.toISOString(),
     };
 
     mutate(
@@ -290,26 +291,60 @@ export const EditTaskForm = ({
                         Upload Files
                       </Button>
                     </div>
+                    {(initialValues.attachments?.length || 0) > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {(initialValues.attachments ?? []).map((attachment) => (
+                          <div
+                            key={attachment.fileId}
+                            className="relative flex items-center gap-x-2 p-2 border rounded-md"
+                          >
+                            {attachment.fileType.startsWith("image/") ? (
+                              <div className="relative w-12 h-12 rounded-md overflow-hidden">
+                                <Image
+                                  src={attachment.fileUrl}
+                                  alt={attachment.fileName}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
+                                <FileIcon className="w-6 h-6 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <a
+                                href={attachment.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-blue-500 hover:underline truncate"
+                              >
+                                {attachment.fileName}
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {field.value && field.value.length > 0 && (
                       <div className="grid grid-cols-2 gap-4 mt-4">
-                        {field.value.map((attachment: any, index: number) => {
-                          const isImage = attachment.fileType?.startsWith(
-                            "image/"
-                          );
+                        {field.value.map((file: File, index: number) => {
+                          // Compute the preview URL on the fly for images.
+                          const preview = file.type.startsWith("image/")
+                            ? URL.createObjectURL(file)
+                            : undefined;
                           return (
                             <div
                               key={index}
                               className="relative flex items-center gap-x-2 p-2 border rounded-md"
                             >
-                              {isImage ? (
+                              {preview ? (
                                 <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                                  <img
-                                    src={
-                                      attachment.fileUrl ||
-                                      URL.createObjectURL(attachment.file)
-                                    }
-                                    alt={attachment.fileName}
-                                    className="object-cover w-full h-full"
+                                  <Image
+                                    src={preview}
+                                    alt={file.name}
+                                    fill
+                                    className="object-cover"
                                   />
                                 </div>
                               ) : (
@@ -319,22 +354,10 @@ export const EditTaskForm = ({
                               )}
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">
-                                  {isImage ? (
-                                    attachment.fileName
-                                  ) : (
-                                    <a
-                                      href={attachment.fileUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:underline"
-                                    >
-                                      {attachment.fileName}
-                                    </a>
-                                  )}
+                                  {file.name}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {(attachment.size / 1024 / 1024).toFixed(2)}{" "}
-                                  MB
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                               </div>
                               <Button
