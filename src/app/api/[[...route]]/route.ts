@@ -6,7 +6,7 @@ import workspaces from "@/features/workspaces/server/route";
 import members from "@/features/members/server/route";
 import projects from "@/features/projects/server/route";
 import tasks from "@/features/tasks/server/route";
-import ai from "@/features/chat/server/route";
+import ai from "@/features/chatbot/server/route";
 
 const app = new Hono().basePath("/api");
 
