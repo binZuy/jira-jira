@@ -13,6 +13,10 @@ const pathnameMap = {
     title: "My Projects",
     description: "View tasks of your project here"
   },
+  "chats" : {
+    title: "My Chats",
+    description: "Chat with your AI assistant here"
+  }
 }
 
 const defaultMap = {

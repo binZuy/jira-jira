@@ -28,10 +28,12 @@ export const TaskOverview = ({ task }: TaskOverviewProps) => {
         </div>
         <DottedSeparator className="my-4" />
         <div className="flex flex-col gap-y-4">
-          <OverviewProperty label="Assignee">
-            <MemberAvatar name={task.assignee.name} className="size-6" />
-            <p className="text-sm font-medium">{task.assignee.name}</p>
-          </OverviewProperty>
+          {task.assignee && (
+            <OverviewProperty label="Assignee">
+              <MemberAvatar name={task.assignee.name} className="size-6" />
+              <p className="text-sm font-medium">{task.assignee.name}</p>
+            </OverviewProperty>
+          )}
           <OverviewProperty label="Due Date">
             <TaskDate value={task.dueDate} className="text-sm font-medium" />
           </OverviewProperty>

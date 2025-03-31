@@ -6,7 +6,7 @@ import {
   GoCheckCircle,
   GoCheckCircleFill,
 } from "react-icons/go";
-import { SettingsIcon, UsersIcon } from "lucide-react";
+import { BotMessageSquare, SettingsIcon, UsersIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
@@ -32,6 +32,12 @@ const routes = [
     icon: UsersIcon,
     activeIcon: UsersIcon,
   },
+  {
+    label: "AI Chats",
+    href: "/chats",
+    icon: BotMessageSquare,
+    activeIcon: BotMessageSquare,
+  }
 ];
 
 export const Navigation = () => {

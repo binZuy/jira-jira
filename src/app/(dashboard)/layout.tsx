@@ -5,6 +5,7 @@ import { CreateWorkspaceModal } from "@/features/workspaces/components/create-wo
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { EditTaskModal } from "@/features/tasks/components/edit-task-modal";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,7 +25,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="lg:pl-[264px] w-full">
           <div className="mx-auto max-w-screen-2xl h-full">
             <Navbar />
-            <main className="h-full py-8 px-6 flex flex-col">{children}</main>
+            <SidebarProvider>
+            {/* <main className="h-full py-8 px-6 flex flex-col">{children}</main> */}
+            <SidebarInset className="h-full py-8 px-6 flex flex-col">{children}</SidebarInset>
+            </SidebarProvider>
           </div>
         </div>
       </div>
