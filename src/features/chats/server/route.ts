@@ -17,31 +17,62 @@ import {
 import { ID, Query } from "node-appwrite";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { getMostRecentUserMessage } from "@/lib/utils";
+import { useGetChat } from "@/features/chats/api/use-get-chat";
 import { MessageSchema } from "../schemas";
 import { z } from "zod";
 import { Chat } from "@/features/chats/types";
+import { generateTitleFromUserMessage } from "@/app/(standalone)/workspaces/[workspaceId]/chats/actions";
 // import { createAdminClient } from "@/lib/appwrite";
 
 export const maxDuration = 30;
 
 const app = new Hono()
   .post(
-    "/:chatId",
+    "/",
     sessionMiddleware,
     zValidator("json", MessageSchema),
     async (c) => {
-      const { messages } = await c.req.valid("json");
+      const databases = c.get("databases");
+      const user = c.get("user");
+      // const { chatId } = c.req.param();
+      const { id, messages } = await c.req.valid("json");
 
-      const formattedMessages = messages.map((message) => ({
-        id: message.id,
-        role: message.role,
-        content: message.parts.map((part) => part.text).join(" "),
-      }));
+      // if (!messages || messages.length === 0) {
+      //   return c.json({ message: "No messages provided" }, 400);
+      // }
 
-      const result = streamText({
-        model: openai("gpt-4o-mini"),
-        messages: formattedMessages,
+      const userMessage = getMostRecentUserMessage(messages);
+      if (!userMessage) {
+        return c.json({ message: "No user message found" }, 400);
+      }
+
+      if (!user) {
+        return c.json({ message: "Unauthorized" }, 401);
+      }
+
+      const chat = await useGetChat({ id });
+      if (!chat) {
+        const title = await generateTitleFromUserMessage(
+          {messages: userMessage}
+        );
+await databases.createDocument(DATABASE_ID, CHATS_ID, id, {
+      // const formattedMessages = messages.map((message) => ({
+      //   id: message.id,
+      //   role: message.role,
+      //   content: message.parts.map((part) => part.text).join(" "),
+      userId: user.$id,
+      title: title,
+      content: userMessage.parts.map((part) => part.text).join(" "),
       });
+    } else {
+      if (chat.userId !== user.$id) {
+        return c.json({ message: "Unauthorized" }, 401);
+      }
+    }
+
+
+
 
       return result.toDataStreamResponse();
     }

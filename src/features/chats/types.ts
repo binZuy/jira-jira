@@ -1,9 +1,11 @@
 export type Document = {
   id: string;
   title: string;
+  kind: string;
   content: string;
   createdAt: Date;
-  updatedAt: Date;
+  // updatedAt: Date;
+  userId: string;
 };
 
 export type Suggestion = {
@@ -16,9 +18,10 @@ export type Suggestion = {
 
 export type Chat = {
   id: string;
+  title: string;
   userId: string;
-  content: string;
-  createdAt: string;
+  content?: string;
+  createdAt?: Date;
 };
 
 
@@ -28,5 +31,5 @@ export type Message = {
     role: "user" | "assistant";
     parts: Array<{ type: "text"; text: string }>;
     createdAt: Date;
-    updatedAt: Date;
+    // updatedAt: Date;
 }

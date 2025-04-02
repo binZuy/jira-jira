@@ -1,5 +1,5 @@
 import { TerminalWindowIcon, LoaderIcon, CrossSmallIcon } from './icons';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dispatch,
   SetStateAction,
@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/lib/utils';
-import { useArtifactSelector } from '@/hooks/use-artifact';
+import { useArtifactSelector } from '@/features/chats/hooks/use-artifact';
 
 export interface ConsoleOutputContent {
   type: 'text' | 'image';

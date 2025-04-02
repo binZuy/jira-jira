@@ -1,10 +1,10 @@
-// import { codeDocumentHandler } from '@/features/chats/artifacts/code/server';
+import { codeDocumentHandler } from '@/features/chats/artifacts/code/server';
 import { imageDocumentHandler } from '@/features/chats/artifacts/image/server';
-// import { sheetDocumentHandler } from '@/artifacts/sheet/server';
-// import { textDocumentHandler } from '@/artifacts/text/server';
+import { sheetDocumentHandler } from '@/features/chats/artifacts/sheet/server';
+import { textDocumentHandler } from '@/features/chats/artifacts/text/server';
 import { ArtifactKind } from '@/features/chats/components/artifact';
 import { DataStreamWriter } from 'ai';
-import { Document } from '../db/schema';
+import { Document } from '../../types';
 import { saveDocument } from '../db/queries';
 import { Session } from 'next-auth';
 
@@ -90,10 +90,10 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
  * Use this array to define the document handlers for each artifact kind.
  */
 export const documentHandlersByArtifactKind: Array<DocumentHandler> = [
-  // textDocumentHandler,
-  // codeDocumentHandler,
+  textDocumentHandler,
+  codeDocumentHandler,
   imageDocumentHandler,
-  // sheetDocumentHandler,
+  sheetDocumentHandler,
 ];
 
 export const artifactKinds = ['text', 'code', 'image', 'sheet'] as const;

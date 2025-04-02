@@ -106,19 +106,16 @@ function PureMultimodalInput({
   const submitForm = useCallback(() => {
     updateUrlWithChatId(chatId);
     console.log('submitForm', input);
-  //   handleSubmit(undefined, {
-  //     experimental_attachments: attachments,
-  //   });
+    handleSubmit(undefined);
 
-  //   setAttachments([]);
-  //   setLocalStorageInput('');
-  //   resetHeight();
+    setAttachments([]);
+    setLocalStorageInput('');
+    resetHeight();
 
-  //   if (width && width > 768) {
-  //     textareaRef.current?.focus();
-  //   }
+    if (width && width > 768) {
+      textareaRef.current?.focus();
+    }
    }, [
-    attachments,
     handleSubmit,
     setAttachments,
     setLocalStorageInput,
@@ -149,7 +146,7 @@ function PureMultimodalInput({
       const { error } = await response.json();
       toast.error(error);
     } catch (error) {
-      toast.error('Failed to upload file, please try again!');
+      toast.error(`Failed to upload file, please try again!, ${error}`);
     }
   };
 
@@ -360,13 +357,13 @@ const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
 
 const updateUrlWithChatId = (chatId: string) => {
   try {
-    // Preserve existing query parameters if any
+    // Preserve existing URL structure
     const currentUrl = new URL(window.location.href);
-    const newPath = `${currentUrl.search}/chats/${chatId}`;
+    const newPath = `${currentUrl.pathname}/${chatId}`; // Append chatId to the existing path
     window.history.replaceState({}, '', newPath);
   } catch (error) {
     console.warn('Failed to update URL:', error);
     // Fallback to simple replacement if URL parsing fails
-    window.history.replaceState({}, '', `/chats/${chatId}`);
+    window.history.replaceState({}, '', `/chats/${chatId}`); // Ensure workspaceId is defined
   }
 };

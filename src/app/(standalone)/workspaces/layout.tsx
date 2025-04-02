@@ -2,6 +2,8 @@ import { UserButton } from "@/features/auth/components/user-button";
 
 import Image from "next/image";
 import Link from "next/link";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/features/chats/components/app-sidebar";
 
 interface StandAloneLayoutProps {
   children: React.ReactNode;
@@ -17,9 +19,15 @@ const StandAloneLayout = ({ children }: StandAloneLayoutProps) => {
           </Link>
           <UserButton />
         </nav>
-        <div className="flex flex-col items-center justify-center py-4">
+        {/* <div className="flex flex-col items-center justify-center py-4">
           {children}
-        </div>
+        </div> */}
+        <SidebarProvider defaultOpen={false}>
+          <AppSidebar />
+          <SidebarInset>
+            {children}
+          </SidebarInset>
+        </SidebarProvider>
       </div>
     </main>
   );

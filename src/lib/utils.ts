@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { ID } from "node-appwrite";
 import { twMerge } from "tailwind-merge";
+import type { UIMessage } from "ai";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -50,3 +51,8 @@ export const fetcher = async (url: string) => {
 
   return res.json();
 };
+
+export function getMostRecentUserMessage(messages: Array<UIMessage>) {
+  const userMessages = messages.filter((message) => message.role === 'user');
+  return userMessages.at(-1);
+}

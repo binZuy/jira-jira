@@ -6,7 +6,7 @@ import { generateIDChat } from '@/lib/utils';
 // import { useProjectId } from "@/features/projects/hooks/use-project-id";
 // import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 // import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
-import { useChat } from '@ai-sdk/react';
+// import { useChat } from '@ai-sdk/react';
 import { DataStreamHandler } from "@/features/chats/components/data-stream-handler";
 import { Chat } from "@/features/chats/components/chat";
 import { DEFAULT_CHAT_MODEL } from "@/features/chats/libs/ai/models";
