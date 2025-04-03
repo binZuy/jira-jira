@@ -21,20 +21,20 @@ import { ArtifactCloseButton } from './artifact-close-button';
 import { ArtifactMessages } from './artifact-messages';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useArtifact } from '@/features/chats/hooks/use-artifact';
-// import { imageArtifact } from '@/features/chats/artifacts/image/client';
-// import { codeArtifact } from '@/features/chats/artifacts/code/client';
-// import { sheetArtifact } from '@/features/chats/artifacts/sheet/client';
-// import { textArtifact } from '@/features/chats/artifacts/text/client';
+import { imageArtifact } from '@/features/chats/artifacts/image/client';
+import { codeArtifact } from '@/features/chats/artifacts/code/client';
+import { sheetArtifact } from '@/features/chats/artifacts/sheet/client';
+import { textArtifact } from '@/features/chats/artifacts/text/client';
 import equal from 'fast-deep-equal';
 import { UseChatHelpers } from '@ai-sdk/react';
-import { taskArtifact } from '@/features/chats/artifacts/task/client';
+// import { taskArtifact } from '@/features/chats/artifacts/task/client';
 
 export const artifactDefinitions = [
-  // textArtifact,
-  // codeArtifact,
-  // imageArtifact,
-  // sheetArtifact,
-  taskArtifact
+  textArtifact,
+  codeArtifact,
+  imageArtifact,
+  sheetArtifact,
+  // taskArtifact
 ];
 export type ArtifactKind = (typeof artifactDefinitions)[number]['kind'];
 

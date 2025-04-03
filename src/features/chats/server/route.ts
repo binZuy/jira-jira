@@ -16,14 +16,20 @@ import {
 } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
-import { getMostRecentUserMessage } from "@/lib/utils";
+import { createDataStreamResponse, streamText, UIMessage, smoothStream } from "ai";
+import { generateIDChat, getMostRecentUserMessage, getTrailingMessageId } from "@/lib/utils";
 import { useGetChat } from "@/features/chats/api/use-get-chat";
 import { MessageSchema } from "../schemas";
 import { z } from "zod";
 import { Chat } from "@/features/chats/types";
 import { generateTitleFromUserMessage } from "@/app/(standalone)/workspaces/[workspaceId]/chats/actions";
 // import { createAdminClient } from "@/lib/appwrite";
+import { systemPrompt } from "../libs/ai/prompts";
+import { myProvider } from "../libs/ai/providers";
+import { getWeather} from "../libs/ai/tools/get-weather";
+import { createDocument } from "../libs/ai/tools/create-document";
+import { updateDocument } from "../libs/ai/tools/update-document";
+import { requestSuggestions } from "../libs/ai/tools/request-suggestions";
 
 export const maxDuration = 30;
 
@@ -36,7 +42,11 @@ const app = new Hono()
       const databases = c.get("databases");
       const user = c.get("user");
       // const { chatId } = c.req.param();
-      const { id, messages } = await c.req.valid("json");
+      const { id: chatId, messages, selectedChatModel } = (await c.req.valid("json")) as {
+        id: string;
+        messages: Array<UIMessage>;
+        selectedChatModel: string;
+      };
 
       // if (!messages || messages.length === 0) {
       //   return c.json({ message: "No messages provided" }, 400);
@@ -51,30 +61,106 @@ const app = new Hono()
         return c.json({ message: "Unauthorized" }, 401);
       }
 
-      const chat = await useGetChat({ id });
+      const {data: chat} = await useGetChat({ chatId });
       if (!chat) {
-        const title = await generateTitleFromUserMessage(
-          {messages: userMessage}
-        );
-await databases.createDocument(DATABASE_ID, CHATS_ID, id, {
-      // const formattedMessages = messages.map((message) => ({
-      //   id: message.id,
-      //   role: message.role,
-      //   content: message.parts.map((part) => part.text).join(" "),
-      userId: user.$id,
-      title: title,
-      content: userMessage.parts.map((part) => part.text).join(" "),
-      });
-    } else {
-      if (chat.userId !== user.$id) {
-        return c.json({ message: "Unauthorized" }, 401);
+        const title = await generateTitleFromUserMessage({
+          message: userMessage,
+        });
+        await databases.createDocument(DATABASE_ID, CHATS_ID, chatId, {
+          // const formattedMessages = messages.map((message) => ({
+          //   id: message.id,
+          //   role: message.role,
+          //   content: message.parts.map((part) => part.text).join(" "),
+          userId: user.$id,
+          title: title,
+          // content: userMessage.parts.map((part) => part.text).join(" "),
+        });
+      } else {
+        if (chat.userId !== user.$id) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
       }
-    }
 
+      await databases.createDocument(
+        DATABASE_ID,
+        MESSAGES_ID,
+        userMessage.id,
+        {
+          chatId: chatId,
+          role: userMessage.role,
+          parts: userMessage.parts,
+          content: userMessage.content,
+        });
 
-
-
-      return result.toDataStreamResponse();
+      return createDataStreamResponse({
+        execute: (dataStream) => {
+          const result = streamText({
+            model: myProvider.languageModel(selectedChatModel),
+            system: systemPrompt({ selectedChatModel }),
+            messages,
+            maxSteps: 5,
+            experimental_activeTools:
+              selectedChatModel === "chat-model-reasoning"
+                ? []
+                : [
+                  'getWeather',
+                  'createDocument',
+                  'updateDocument',
+                  'requestSuggestions',
+                ],
+                experimental_transform: smoothStream({ chunking: 'word' }),
+                experimental_generateMessageId: generateIDChat,
+                tools: {
+                  getWeather,
+                  createDocument: createDocument({ dataStream }),
+                  updateDocument: updateDocument({ dataStream }),
+                  requestSuggestions: requestSuggestions({
+                    dataStream
+                  }),
+                },
+                onFinish: async ({ response }) => {
+                  if (user?.$id) {
+                    try {
+                      const assistantId = getTrailingMessageId({
+                        messages: response.messages.filter(
+                          (message) => message.role === 'assistant',
+                        ),
+                      });
+      
+                      if (!assistantId) {
+                        throw new Error('No assistant message found!');
+                      }
+      
+                      const [, assistantMessage] = appendResponseMessages({
+                        messages: [userMessage],
+                        responseMessages: response.messages,
+                      });
+      
+                      await saveMessages({
+                        messages: [
+                          {
+                            id: assistantId,
+                            chatId: id,
+                            role: assistantMessage.role,
+                            parts: assistantMessage.parts,
+                            attachments:
+                              assistantMessage.experimental_attachments ?? [],
+                            createdAt: new Date(),
+                          },
+                        ],
+                      });
+                    } catch (_) {
+                      console.error('Failed to save chat');
+                    }
+                  }
+                },
+                experimental_telemetry: {
+                  isEnabled: false,
+                  functionId: 'stream-text',
+                },
+              });
+        }
+      });
     }
   )
   .get("/", sessionMiddleware, async (c) => {
@@ -95,9 +181,9 @@ await databases.createDocument(DATABASE_ID, CHATS_ID, id, {
     const chat = await databases.getDocument(DATABASE_ID, CHATS_ID, chatId);
 
     if (!chat) {
-      return c.json({message: "Chat not found"}, 404);
+      return c.json({ message: "Chat not found" }, 404);
     }
-    
+
     if (chat.userId !== user.$id) {
       return c.json({ message: "Unauthorized" }, 401);
     }
@@ -159,5 +245,5 @@ await databases.createDocument(DATABASE_ID, CHATS_ID, id, {
 
     return c.json({ data: savedMessages });
   });
-  
+
 export default app;
