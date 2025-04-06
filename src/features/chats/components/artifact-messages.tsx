@@ -3,7 +3,7 @@ import { useScrollToBottom } from './use-scroll-to-bottom';
 // import { Vote } from '@/lib/db/schema';
 import { UIMessage } from 'ai';
 import { memo } from 'react';
-import equal from 'fast-deep-equal';
+// import equal from 'fast-deep-equal';
 import { UIArtifact } from './artifact';
 import { UseChatHelpers } from '@ai-sdk/react';
 

@@ -1,4 +1,6 @@
-import type { Attachment, UIMessage } from 'ai';
+import type { 
+  Attachment, 
+  UIMessage } from 'ai';
 import { formatDistance } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -21,7 +23,7 @@ import { ArtifactCloseButton } from './artifact-close-button';
 import { ArtifactMessages } from './artifact-messages';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useArtifact } from '@/features/chats/hooks/use-artifact';
-import { imageArtifact } from '@/features/chats/artifacts/image/client';
+// import { imageArtifact } from '@/features/chats/artifacts/image/client';
 import { codeArtifact } from '@/features/chats/artifacts/code/client';
 import { sheetArtifact } from '@/features/chats/artifacts/sheet/client';
 import { textArtifact } from '@/features/chats/artifacts/text/client';
@@ -32,7 +34,7 @@ import { UseChatHelpers } from '@ai-sdk/react';
 export const artifactDefinitions = [
   textArtifact,
   codeArtifact,
-  imageArtifact,
+  // imageArtifact,
   sheetArtifact,
   // taskArtifact
 ];

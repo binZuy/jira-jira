@@ -1,6 +1,8 @@
 'use client';
 
-import type { Attachment, Message, UIMessage } from 'ai';
+import type { Attachment, 
+  // Message,
+   UIMessage } from 'ai';
 import cx from 'classnames';
 import type React from 'react';
 import {
@@ -21,7 +23,8 @@ import { PreviewAttachment } from './preview-attachment';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SuggestedActions } from './suggested-actions';
-import equal from 'fast-deep-equal';
+import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
+// import equal from 'fast-deep-equal';
 import { UseChatHelpers } from '@ai-sdk/react';
 
 function PureMultimodalInput({
@@ -53,6 +56,7 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const workspaceId = useWorkspaceId();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -181,7 +185,7 @@ function PureMultimodalInput({
       {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
+          <SuggestedActions append={append} chatId={chatId} workspaceId={workspaceId}/>
         )}
 
       <input
@@ -269,7 +273,7 @@ export const MultimodalInput = memo(
   (prevProps, nextProps) => {
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
-    if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    // if (!equal(prevProps.attachments, nextProps.attachments)) return false;
 
     return true;
   },

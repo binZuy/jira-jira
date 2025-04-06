@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Artifact } from '@/features/chats/components/create-artifact';
 import { CodeEditor } from '@/features/chats/components/code-editor';
 import {

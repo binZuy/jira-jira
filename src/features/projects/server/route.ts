@@ -11,6 +11,7 @@ import { Project } from "../types";
 import { ID, Query } from "node-appwrite";
 import { createProjectSchema, updateProjectSchema } from "../schemas";
 import { TaskStatus } from "@/features/tasks/types";
+import { saveProject } from "@/features/chats/queries";
 
 const app = new Hono()
   .get(
@@ -111,16 +112,22 @@ const app = new Hono()
         ).toString("base64")}`;
       }
 
-      const project = await databases.createDocument(
-        DATABASE_ID,
-        PROJECTS_ID,
-        ID.unique(),
-        {
-          name,
-          imageUrl: uploadedImageUrl,
-          workspaceId,
-        }
-      );
+      // const project = await databases.createDocument(
+      //   DATABASE_ID,
+      //   PROJECTS_ID,
+      //   ID.unique(),
+      //   {
+      //     name,
+      //     imageUrl: uploadedImageUrl,
+      //     workspaceId,
+      //   }
+      // );
+
+      const project = await saveProject({
+        workspaceId,
+        name,
+        imageUrl: uploadedImageUrl,
+      })
 
       return c.json({ data: project });
     }

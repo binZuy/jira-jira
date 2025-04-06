@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { PlusIcon } from '@/features/chats/components/icons';
 import { SidebarHistory } from '@/features/chats/components/sidebar-history';
-// import { SidebarUserNav } from '@/components/sidebar-user-nav';
+import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export function AppSidebar() {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
+  const workspaceId = useWorkspaceId();
 
   return (
     <Sidebar>
@@ -46,7 +47,7 @@ export function AppSidebar() {
                   className="p-2 h-fit"
                   onClick={() => {
                     setOpenMobile(false);
-                    router.push('/');
+                    router.push(`/workspaces/${workspaceId}/chats`);
                     router.refresh();
                   }}
                 >
@@ -61,7 +62,6 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarHistory />
       </SidebarContent>
-      {/* <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter> */}
     </Sidebar>
   );
 }

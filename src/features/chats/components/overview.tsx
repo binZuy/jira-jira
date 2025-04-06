@@ -35,7 +35,7 @@ export const Overview = () => {
           <code className="rounded-md bg-muted px-1 py-0.5">useChat</code> hook
           on the client to create a seamless chat experience.
         </p>
-        <p>
+        {/* <p>
           You can learn more about the AI SDK by visiting the{' '}
           <Link
             className="font-medium underline underline-offset-4"
@@ -45,7 +45,7 @@ export const Overview = () => {
             docs
           </Link>
           .
-        </p>
+        </p> */}
       </div>
     </motion.div>
   );

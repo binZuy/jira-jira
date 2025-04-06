@@ -64,6 +64,7 @@ export function useArtifact() {
   );
 
   const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useSWR<any>(
       () =>
         artifact.documentId ? `artifact-metadata-${artifact.documentId}` : null,

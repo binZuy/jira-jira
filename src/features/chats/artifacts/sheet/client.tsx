@@ -1,15 +1,16 @@
-import { Artifact } from '@/components/create-artifact';
+import { Artifact } from '@/features/chats/components/create-artifact';
 import {
   CopyIcon,
   LineChartIcon,
   RedoIcon,
   SparklesIcon,
   UndoIcon,
-} from '@/components/icons';
-import { SpreadsheetEditor } from '@/components/sheet-editor';
+} from '@/features/chats/components/icons';
+import { SpreadsheetEditor } from '@/features/chats/components/sheet-editor';
 import { parse, unparse } from 'papaparse';
 import { toast } from 'sonner';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Metadata = any;
 
 export const sheetArtifact = new Artifact<'sheet', Metadata>({

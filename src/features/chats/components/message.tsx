@@ -170,13 +170,15 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolCall
-                          type="request-suggestions"
-                          args={args}
-                          isReadonly={isReadonly}
-                        />
-                      ) : null}
+                      ) 
+                      // : toolName === 'requestSuggestions' ? (
+                      //   <DocumentToolCall
+                      //     type="request-suggestions"
+                      //     args={args}
+                      //     isReadonly={isReadonly}
+                      //   />
+                      // ) 
+                      : null}
                     </div>
                   );
                 }
@@ -199,13 +201,15 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolResult
-                          type="request-suggestions"
-                          result={result}
-                          isReadonly={isReadonly}
-                        />
-                      ) : (
+                      ) 
+                      // : toolName === 'requestSuggestions' ? (
+                      //   <DocumentToolResult
+                      //     type="request-suggestions"
+                      //     result={result}
+                      //     isReadonly={isReadonly}
+                      //   />
+                      // )
+                       : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
                     </div>

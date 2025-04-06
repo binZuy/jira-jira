@@ -3,6 +3,7 @@ import { ID } from "node-appwrite";
 import { twMerge } from "tailwind-merge";
 import type { UIMessage,  CoreAssistantMessage,
   CoreToolMessage, } from "ai";
+import { Document } from "@/features/chats/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,6 +27,14 @@ export function snakeCaseToTitleCase(str: string) {
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+export function getLocalStorage(key: string) {
+  if (typeof window !== 'undefined') {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  }
+  return [];
+}
+
 
 export const generateIDChat = () => {
   return ID.unique();
@@ -52,6 +61,16 @@ export const fetcher = async (url: string) => {
 
   return res.json();
 };
+
+export function getDocumentTimestampByIndex(
+  documents: Array<Document>,
+  index: number,
+) {
+  if (!documents) return new Date();
+  if (index > documents.length) return new Date();
+
+  return documents[index].createdAt;
+}
 
 export function getMostRecentUserMessage(messages: Array<UIMessage>) {
   const userMessages = messages.filter((message) => message.role === 'user');

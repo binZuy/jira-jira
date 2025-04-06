@@ -1,7 +1,7 @@
-import { Artifact } from '@/components/create-artifact';
-import { DiffView } from '@/components/diffview';
-import { DocumentSkeleton } from '@/components/document-skeleton';
-import { Editor } from '@/components/text-editor';
+import { Artifact } from '@/features/chats/components/create-artifact';
+import { DiffView } from '@/features/chats/components/diffview';
+import { DocumentSkeleton } from '@/features/chats/components/document-skeleton';
+import { Editor } from '@/features/chats/components/text-editor';
 import {
   ClockRewind,
   CopyIcon,
@@ -9,36 +9,43 @@ import {
   PenIcon,
   RedoIcon,
   UndoIcon,
-} from '@/components/icons';
-import { Suggestion } from '@/lib/db/schema';
+} from '@/features/chats/components/icons';
+// import { Suggestion } from '@/features/chats/lib/db/schema';
 import { toast } from 'sonner';
-import { getSuggestions } from '../actions';
+// import { getSuggestions } from '../actions';
 
-interface TextArtifactMetadata {
-  suggestions: Array<Suggestion>;
-}
+// interface TextArtifactMetadata {
+//   suggestions: Array<Suggestion>;
+// }
 
-export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
+export const textArtifact = new Artifact<'text'
+// , TextArtifactMetadata
+>({
   kind: 'text',
   description: 'Useful for text content, like drafting essays and emails.',
-  initialize: async ({ documentId, setMetadata }) => {
-    const suggestions = await getSuggestions({ documentId });
+  initialize: async ({ 
+    // documentId
+    // , setMetadata
+   }) => {
+    // const suggestions = await getSuggestions({ documentId });
 
-    setMetadata({
-      suggestions,
-    });
+    // setMetadata({
+      // suggestions,
+    // });
   },
-  onStreamPart: ({ streamPart, setMetadata, setArtifact }) => {
-    if (streamPart.type === 'suggestion') {
-      setMetadata((metadata) => {
-        return {
-          suggestions: [
-            ...metadata.suggestions,
-            streamPart.content as Suggestion,
-          ],
-        };
-      });
-    }
+  onStreamPart: ({ streamPart, setArtifact
+    // , setMetadata
+   }) => {
+    // if (streamPart.type === 'suggestion') {
+    //   setMetadata((metadata) => {
+    //     return {
+    //       suggestions: [
+    //         ...metadata.suggestions,
+    //         streamPart.content as Suggestion,
+    //       ],
+    //     };
+    //   });
+    // }
 
     if (streamPart.type === 'text-delta') {
       setArtifact((draftArtifact) => {
@@ -106,7 +113,9 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
       onClick: ({ handleVersionChange }) => {
         handleVersionChange('toggle');
       },
-      isDisabled: ({ currentVersionIndex, setMetadata }) => {
+      isDisabled: ({ currentVersionIndex
+        // , setMetadata 
+      }) => {
         if (currentVersionIndex === 0) {
           return true;
         }

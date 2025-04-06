@@ -3,7 +3,8 @@
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import { useSWRConfig } from 'swr';
+// useSWR,
 import { ChatHeader } from '@/features/chats/components/chat-header';
 import { generateIDChat } from '@/lib/utils';
 import { Artifact } from './artifact';
@@ -91,7 +92,7 @@ export function Chat({
         </form>
       </div>
 
-      {/* <Artifact
+      <Artifact
         chatId={id}
         input={input}
         setInput={setInput}
@@ -106,7 +107,7 @@ export function Chat({
         reload={reload}
         // votes={votes}
         isReadonly={isReadonly}
-      /> */}
+      />
     </>
   );
 }

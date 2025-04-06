@@ -1,32 +1,32 @@
 import { codeDocumentHandler } from '@/features/chats/artifacts/code/server';
-import { imageDocumentHandler } from '@/features/chats/artifacts/image/server';
+// import { imageDocumentHandler } from '@/features/chats/artifacts/image/server';
 import { sheetDocumentHandler } from '@/features/chats/artifacts/sheet/server';
 import { textDocumentHandler } from '@/features/chats/artifacts/text/server';
 import { ArtifactKind } from '@/features/chats/components/artifact';
 import { DataStreamWriter } from 'ai';
 import { Document } from '../../types';
-import { saveDocument } from '../db/queries';
+import { saveDocument } from '@/features/chats/queries';
 
 export interface SaveDocumentProps {
   id: string;
   title: string;
   kind: ArtifactKind;
   content: string;
-  userId: string;
+  // userId: string;
 }
 
 export interface CreateDocumentCallbackProps {
   id: string;
   title: string;
   dataStream: DataStreamWriter;
-  userId: string;
+  // userId: string;
 }
 
 export interface UpdateDocumentCallbackProps {
   document: Document;
   description: string;
   dataStream: DataStreamWriter;
-  userId: string;
+  // userId: string;
 }
 
 export interface DocumentHandler<T = ArtifactKind> {
@@ -47,7 +47,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         id: args.id,
         title: args.title,
         dataStream: args.dataStream,
-        userId: args.userId,
+        // userId: args.userId,
       });
 
         await saveDocument({
@@ -55,7 +55,6 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           title: args.title,
           content: draftContent,
           kind: config.kind,
-          userId: args.userId,
         });
 
       return;
@@ -65,7 +64,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         document: args.document,
         description: args.description,
         dataStream: args.dataStream,
-        userId: args.userId,
+        // userId: args.userId,
       });
 
         await saveDocument({
@@ -73,7 +72,6 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           title: args.document.title,
           content: draftContent,
           kind: config.kind,
-          userId: userId,
         });
 
       return;
@@ -87,8 +85,8 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
 export const documentHandlersByArtifactKind: Array<DocumentHandler> = [
   textDocumentHandler,
   codeDocumentHandler,
-  imageDocumentHandler,
+  // imageDocumentHandler,
   sheetDocumentHandler,
 ];
 
-export const artifactKinds = ['text', 'code', 'image', 'sheet'] as const;
+export const artifactKinds = ['text', 'code', 'sheet'] as const;

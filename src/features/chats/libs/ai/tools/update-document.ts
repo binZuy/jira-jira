@@ -1,7 +1,7 @@
 import { DataStreamWriter, tool } from 'ai';
-import { Session } from 'next-auth';
+// import { Session } from 'next-auth';
 import { z } from 'zod';
-import { getDocumentById, saveDocument } from '@/features/chats/libs';
+import { getDocumentById } from '@/features/chats/queries';
 import { documentHandlersByArtifactKind } from '@/features/chats/libs/artifacts/server';
 
 interface UpdateDocumentProps {
@@ -44,7 +44,7 @@ export const updateDocument = ({dataStream }: UpdateDocumentProps) =>
         document,
         description,
         dataStream,
-        session,
+        // session,
       });
 
       dataStream.writeData({ type: 'finish', content: '' });

@@ -6,22 +6,22 @@ import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import React, { memo, useEffect, useRef } from 'react';
 
-import type { Suggestion } from '@/lib/db/schema';
+import type { Suggestion } from '@/features/chats/types';
 import {
   documentSchema,
   handleTransaction,
   headingRule,
-} from '@/lib/editor/config';
+} from '@/features/chats/libs/editor/config';
 import {
   buildContentFromDocument,
   buildDocumentFromContent,
   createDecorations,
-} from '@/lib/editor/functions';
+} from '@/features/chats/libs/editor/functions';
 import {
   projectWithPositions,
   suggestionsPlugin,
   suggestionsPluginKey,
-} from '@/lib/editor/suggestions';
+} from '@/features/chats/libs/editor/suggestions';
 
 type EditorProps = {
   content: string;

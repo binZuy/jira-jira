@@ -9,7 +9,7 @@ export const useGetChat = ({ chatId }: UseGetChatProps) => {
   const query = useQuery({
     queryKey: ["chat", chatId],
     queryFn: async () => {
-      const response = await client.api.chats[":chatId"].$get({
+      const response = await client.api.chat[":chatId"].$get({
         param: { chatId },
       });
 
