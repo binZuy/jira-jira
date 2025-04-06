@@ -4,6 +4,10 @@ import { getCurrent } from "@/features/auth/queries";
 import { getWorkspaces } from "@/features/workspaces/queries";
 
 export default async function Home() {
+  
+
+  // Original code commented out for testing
+  
   const user = await getCurrent();
 
   if (!user) redirect("/sign-in");
@@ -14,5 +18,4 @@ export default async function Home() {
   } else {
     redirect(`/workspaces/${workspaces.documents[0].$id}`);
   }
-  // return <div className="bg-neutral-500 p-4 h-full">Home Page</div>;
 }
