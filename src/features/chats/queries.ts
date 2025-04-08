@@ -65,18 +65,28 @@ export async function saveChat({ id, title }: { id: string; title: string }) {
 
 export async function deleteChatById({ id }: { id: string }) {
   const { databases } = await getAuthInfo();
-  try {
-    await databases.deleteDocument(DATABASE_ID, CHATS_ID, id);
 
+  try {
+    // Delete the chat document
+    await databases.deleteDocument(DATABASE_ID, CHATS_ID, id);
+    console.log(`Chat with ID ${id} deleted successfully.`);
+
+    // Fetch all messages associated with the chat
     const messages = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
       Query.equal("chatId", id),
     ]);
-    await Promise.all(messages.documents.map(message =>
-      databases.deleteDocument(DATABASE_ID, MESSAGES_ID, message.$id)
-    ));
+
+    // Delete all messages associated with the chat
+    await Promise.all(
+      messages.documents.map((message) =>
+        databases.deleteDocument(DATABASE_ID, MESSAGES_ID, message.$id)
+      )
+    );
+    console.log(`All messages for chat ID ${id} deleted successfully.`);
+
     return true;
   } catch (error) {
-    console.error("Failed to delete chat from Appwrite database", error);
+    console.error("Failed to delete chat or its messages from Appwrite database", error);
     throw error;
   }
 }
@@ -100,9 +110,8 @@ export async function getChatById({ id }: { id: string }) {
   try {
     const response = await databases.getDocument(DATABASE_ID, CHATS_ID, id);
     return response;
-  } catch (error) {
-    console.error("Failed to get chat by id from Appwrite database", error);
-    throw error;
+  } catch {
+    return false;
   }
 }
 
@@ -130,7 +139,7 @@ export async function getMessagesByChatId({ id }: { id: string }) {
   try {
     const response = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
       Query.equal("chatId", id),
-      Query.orderAsc("createdAt"),
+      Query.orderAsc("$createdAt"),
     ]);
     return response.documents;
   } catch (error) {
@@ -170,7 +179,7 @@ export async function saveDocument({
 export async function getDocumentById({ id }: { id: string }) {
   const { databases } = await getAuthInfo();
   try {
-    return databases.getDocument<Document>(DATABASE_ID, DOCUMENTS_ID, id);
+    return databases.getDocument(DATABASE_ID, DOCUMENTS_ID, id);
   } catch (error) {
     console.error("Failed to get document by id from Appwrite database", error);
     throw error;
@@ -181,8 +190,8 @@ export async function getDocumentsById({ id }: { id: string }) {
   const { databases } = await getAuthInfo();
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
-      Query.equal("id", id),
-      Query.orderDesc("createdAt"),
+      Query.equal("$id", id),
+      Query.orderDesc("$createdAt"),
     ]);
     return response.documents;
   } catch (error) {
@@ -204,8 +213,8 @@ export async function deleteDocumentsByIdAfterTimestamp({
   const { databases } = await getAuthInfo();
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
-      Query.equal("id", id),
-      Query.orderDesc("createdAt"),
+      Query.equal("$id", id),
+      Query.orderDesc("$createdAt"),
     ]);
     return await Promise.all(
       response.documents.map((document) => {
@@ -259,3 +268,4 @@ export async function getSuggestionsByDocumentId ({
     throw error;
   }
 }
+

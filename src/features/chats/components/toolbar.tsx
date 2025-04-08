@@ -1,6 +1,5 @@
 'use client';
 
-import type { Message } from 'ai';
 import cx from 'classnames';
 import {
   AnimatePresence,

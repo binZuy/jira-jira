@@ -7,7 +7,7 @@ import { useSWRConfig } from 'swr';
 import { useWindowSize } from 'usehooks-ts';
 
 import type { Document } from '../types';
-// import { getDocumentTimestampByIndex } from '@/lib/utils';
+import { getDocumentTimestampByIndex } from '@/lib/utils';
 
 import { LoaderIcon } from './icons';
 import { Button } from '@/components/ui/button';
@@ -56,8 +56,8 @@ export const VersionFooter = ({
             setIsMutating(true);
 
             mutate(
-              `/api/document?id=${artifact.documentId}`,
-              await fetch(`/api/document?id=${artifact.documentId}`, {
+              `/api/document/${artifact.documentId}`,
+              await fetch(`/api/document/${artifact.documentId}`, {
                 method: 'PATCH',
                 body: JSON.stringify({
                   timestamp: getDocumentTimestampByIndex(

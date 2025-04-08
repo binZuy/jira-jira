@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Models } from "node-appwrite";
 
 export type Document = Models.Document & {
-  id: string;
+  // id: string;
   title: string;
   kind: string;
   content: string;
@@ -28,14 +29,17 @@ export type Chat = {
   // createdAt?: Date;
 };
 
+export type DBMessage = Models.Document & {
+  chatId: string;
+  role: "data" | "user" | "assistant" | "system";
+  content?: string;
+  parts: any;
+}
 
 export type Message = {
     id: string;
     chatId: string;
     role: "data" | "user" | "assistant" | "system";
     content?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parts: any;
-    // createdAt?: Date;
-    // updatedAt: Date;
 }

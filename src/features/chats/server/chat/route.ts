@@ -19,7 +19,7 @@ import {
   createDataStreamResponse,
   appendResponseMessages,
   streamText,
-  // UIMessage,
+  UIMessage,
   smoothStream,
 } from "ai";
 import {
@@ -51,7 +51,7 @@ const app = new Hono()
       console.log("POST / called");
 
       const user = c.get("user");
-      console.log("User retrieved from session:", user);
+      // console.log("User retrieved from session:", user);
 
       const {
         id,
@@ -71,7 +71,7 @@ const app = new Hono()
         console.error("No user message found in messages:", messages);
         return c.json({ message: "No user message found" }, 400);
       }
-      
+      console.log("user mess", userMessage);
       const chat = await getChatById({ id });
 
       if (!chat) {
@@ -205,12 +205,15 @@ const app = new Hono()
 
     const messages = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
       Query.equal("chatId", chatId),
-      Query.orderDesc("createdAt"),
+      Query.orderAsc("$createdAt"),
     ]);
 
     // Parse the `parts` field for each message
     const parsedMessages = messages.documents.map((message) => ({
       ...message,
+      id: message.$id,
+      role: message.role,
+      chatId: message.chatId,
       parts: JSON.parse(message.parts), // Parse `parts` back into an object
     }));
 

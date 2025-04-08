@@ -71,7 +71,7 @@ const app = new Hono()
     // const messages =
      await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
       Query.equal("chatId", chatId),
-      Query.orderDesc("createdAt"),
+      Query.orderDesc("$createdAt"),
     ]);
 
     return c.json({ data: chat });

@@ -79,12 +79,12 @@ const PureChatItem = ({
   //     initialVisibility: chat.visibility,
   //   });
   const workspaceId = useWorkspaceId();
-  console.log(chat);
+  // console.log(chat);
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
         <Link
-          href={`/workspaces/${workspaceId}/chats/${chat.id}`}
+          href={`/workspaces/${workspaceId}/chats/${chat.$id}`}
           onClick={() => setOpenMobile(false)}
         >
           <span>{chat.title}</span>
@@ -142,7 +142,7 @@ const PureChatItem = ({
 
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
-            onSelect={() => onDelete(chat.id)}
+            onSelect={() => onDelete(chat.$id)}
           >
             <TrashIcon />
             <span>Delete</span>
@@ -299,11 +299,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.today.map((chat) => (
                           <ChatItem
-                            key={chat.id}
+                            key={chat.$id}
                             chat={chat}
-                            isActive={chat.id === id}
+                            isActive={chat.$id === id}
                             onDelete={() => {
-                              onDelete(chat.id);
+                              onDelete(chat.$id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -318,11 +318,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.yesterday.map((chat) => (
                           <ChatItem
-                            key={chat.id}
+                            key={chat.$id}
                             chat={chat}
-                            isActive={chat.id === id}
+                            isActive={chat.$id === id}
                             onDelete={() => {
-                              onDelete(chat.id);
+                              onDelete(chat.$id);
                               // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
@@ -338,11 +338,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.lastWeek.map((chat) => (
                           <ChatItem
-                            key={chat.id}
+                            key={chat.$id}
                             chat={chat}
-                            isActive={chat.id === id}
+                            isActive={chat.$id === id}
                             onDelete={() => {
-                              onDelete(chat.id);
+                              onDelete(chat.$id);
                               // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
@@ -358,11 +358,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.lastMonth.map((chat) => (
                           <ChatItem
-                            key={chat.id}
+                            key={chat.$id}
                             chat={chat}
-                            isActive={chat.id === id}
+                            isActive={chat.$id === id}
                             onDelete={() => {
-                              onDelete(chat.id);
+                              onDelete(chat.$id);
                               // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
@@ -378,11 +378,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.older.map((chat) => (
                           <ChatItem
-                            key={chat.id}
+                            key={chat.$id}
                             chat={chat}
-                            isActive={chat.id === id}
-                            onDelete={(chatId) => {
-                              setDeleteId(chatId);
+                            isActive={chat.$id === id}
+                            onDelete={() => {
+                              onDelete(chat.$id);
                               // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}

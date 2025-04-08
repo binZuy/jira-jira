@@ -108,7 +108,7 @@ function PureMultimodalInput({
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
 
   const submitForm = useCallback(() => {
-    updateUrlWithChatId(chatId);
+    updateUrlWithChatId(workspaceId, chatId);
     console.log('submitForm', input);
     handleSubmit(undefined);
 
@@ -125,6 +125,7 @@ function PureMultimodalInput({
     setLocalStorageInput,
     width,
     chatId,
+    workspaceId,
   ]);
 
   const uploadFile = async (file: File) => {
@@ -359,15 +360,14 @@ const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
   return true;
 });
 
-const updateUrlWithChatId = (chatId: string) => {
+const updateUrlWithChatId = (workspaceId: string, chatId: string) => {
   try {
-    // Preserve existing URL structure
-    const currentUrl = new URL(window.location.href);
-    const newPath = `${currentUrl.pathname}/${chatId}`; // Append chatId to the existing path
+    // Construct the new URL path
+    const newPath = `/workspaces/${workspaceId}/chats/${chatId}`;
     window.history.replaceState({}, '', newPath);
   } catch (error) {
     console.warn('Failed to update URL:', error);
     // Fallback to simple replacement if URL parsing fails
-    window.history.replaceState({}, '', `/chats/${chatId}`); // Ensure workspaceId is defined
+    window.history.replaceState({}, '', `/workspaces/${workspaceId}/chats/${chatId}`);
   }
 };

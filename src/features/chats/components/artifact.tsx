@@ -68,7 +68,6 @@ function PureArtifact({
   messages,
   setMessages,
   reload,
-  // votes,
   isReadonly,
 }: {
   chatId: string;
@@ -80,7 +79,6 @@ function PureArtifact({
   setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
   messages: Array<UIMessage>;
   setMessages: UseChatHelpers['setMessages'];
-  // votes: Array<Vote> | undefined;
   append: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   reload: UseChatHelpers['reload'];
@@ -94,7 +92,7 @@ function PureArtifact({
     mutate: mutateDocuments,
   } = useSWR<Array<Document>>(
     artifact.documentId !== 'init' && artifact.status !== 'streaming'
-      ? `/api/document?id=${artifact.documentId}`
+      ? `/api/document/${artifact.documentId}`
       : null,
     fetcher,
   );
@@ -132,7 +130,7 @@ function PureArtifact({
       if (!artifact) return;
 
       mutate<Array<Document>>(
-        `/api/document?id=${artifact.documentId}`,
+        `/api/document/${artifact.documentId}`,
         async (currentDocuments) => {
           if (!currentDocuments) return undefined;
 
@@ -144,7 +142,7 @@ function PureArtifact({
           }
 
           if (currentDocument.content !== updatedContent) {
-            await fetch(`/api/document?id=${artifact.documentId}`, {
+            await fetch(`/api/document/${artifact.documentId}`, {
               method: 'POST',
               body: JSON.stringify({
                 title: artifact.title,
@@ -325,7 +323,8 @@ function PureArtifact({
                   artifactStatus={artifact.status}
                 />
 
-                <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4">
+                <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4"
+                  onSubmit={handleSubmit}>
                   <MultimodalInput
                     chatId={chatId}
                     input={input}

@@ -5,6 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 // useSWR,
+import { Models } from 'node-appwrite';
 import { ChatHeader } from '@/features/chats/components/chat-header';
 import { generateIDChat } from '@/lib/utils';
 import { Artifact } from './artifact';
@@ -20,7 +21,7 @@ export function Chat({
   isReadonly,
 }: {
   id: string;
-  initialMessages: Array<UIMessage>;
+  initialMessages: Array<UIMessage & Models.Document>;
   selectedChatModel: string;
   isReadonly: boolean;
 }) {
@@ -29,7 +30,7 @@ export function Chat({
   const {
     messages,
     setMessages,
-    handleSubmit,
+    handleSubmit, // Get the original handleSubmit
     input,
     setInput,
     append,
@@ -47,12 +48,32 @@ export function Chat({
       mutate('/api/history');
     },
     onError: () => {
-      toast.error('An error occured, please try again!');
+      toast.error('An error occurred, please try again!');
     },
   });
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+
+  // // Custom handleSubmit function
+  // const handleSubmit = async (event?: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+  //   if (event) {
+  //     event.preventDefault(); // Prevent default form submission behavior
+  //   }
+
+  //   // Custom logic before calling the original handleSubmit
+  //   console.log('Custom handleSubmit: Preparing to send message...');
+  //   if (!input.trim()) {
+  //     toast.error('Message cannot be empty!');
+  //     return;
+  //   }
+
+  //   // Call the original handleSubmit
+  //   await originalHandleSubmit(event);
+
+  //   // Custom logic after calling the original handleSubmit
+  //   console.log('Custom handleSubmit: Message sent successfully!');
+  // };
 
   return (
     <>
@@ -73,13 +94,16 @@ export function Chat({
           isArtifactVisible={isArtifactVisible}
         />
 
-        <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+        <form
+          className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl"
+          onSubmit={handleSubmit} // Use the custom handleSubmit
+        >
           {!isReadonly && (
             <MultimodalInput
               chatId={id}
               input={input}
               setInput={setInput}
-              handleSubmit={handleSubmit}
+              handleSubmit={handleSubmit} // Pass the custom handleSubmit
               status={status}
               stop={stop}
               attachments={attachments}
@@ -96,7 +120,7 @@ export function Chat({
         chatId={id}
         input={input}
         setInput={setInput}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleSubmit} // Pass the custom handleSubmit
         status={status}
         stop={stop}
         attachments={attachments}
@@ -105,7 +129,6 @@ export function Chat({
         messages={messages}
         setMessages={setMessages}
         reload={reload}
-        // votes={votes}
         isReadonly={isReadonly}
       />
     </>
