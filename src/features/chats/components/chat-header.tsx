@@ -18,15 +18,15 @@ import {
 } from "@/components/ui/tooltip";
 
 function PureChatHeader(
-  {
-  chatId,
-  selectedModelId,
-  isReadonly,
-}: {
-  chatId: string;
-  selectedModelId: string;
-  isReadonly: boolean;
-}
+//   {
+//   chatId,
+//   selectedModelId,
+//   isReadonly,
+// }: {
+//   chatId: string;
+//   selectedModelId: string;
+//   isReadonly: boolean;
+// }
 ) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -74,6 +74,8 @@ function PureChatHeader(
   );
 }
 
-export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
-  return prevProps.selectedModelId === nextProps.selectedModelId;
-});
+export const ChatHeader = memo(PureChatHeader
+//   , (prevProps, nextProps) => {
+//   return prevProps.selectedModelId === nextProps.selectedModelId;
+// }
+);

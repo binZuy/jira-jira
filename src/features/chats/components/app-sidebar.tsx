@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
 // import type { User } from 'next-auth';
-import { useRouter } from 'next/navigation';
-
-import { PlusIcon } from '@/features/chats/components/icons';
-import { SidebarHistory } from '@/features/chats/components/sidebar-history';
-import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
-import { Button } from '@/components/ui/button';
+import { useRouter } from "next/navigation";
+import { PlusIcon } from "@/features/chats/components/icons";
+import { SidebarHistory } from "@/features/chats/components/sidebar-history";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
-//   SidebarFooter,
+  //   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   useSidebar,
-} from '@/components/ui/sidebar';
-import Link from 'next/link';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+} from "@/components/ui/sidebar";
+import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AppSidebar() {
   const router = useRouter();

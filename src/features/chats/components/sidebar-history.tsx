@@ -4,11 +4,7 @@
 import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-// import type { User } from 'next-auth';
-import { memo, useState, useEffect } from "react";
-// import { toast } from "sonner";
-// import useSWR from "swr";
-// import { Models } from "node-appwrite";
+import { memo, useEffect } from "react";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useChatId } from "@/features/chats/hooks/use-chat-id";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -69,7 +65,7 @@ const PureChatItem = ({
   onDelete,
   setOpenMobile,
 }: {
-  chat: any;
+  chat: Chat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
   setOpenMobile: (open: boolean) => void;
@@ -103,43 +99,6 @@ const PureChatItem = ({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="bottom" align="end">
-          {/* <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <ShareIcon />
-              <span>Share</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem
-                  className="cursor-pointer flex-row justify-between"
-                  onClick={() => {
-                    setVisibilityType('private');
-                  }}
-                >
-                  <div className="flex flex-row gap-2 items-center">
-                    <LockIcon size={12} />
-                    <span>Private</span>
-                  </div>
-                  {visibilityType === 'private' ? (
-                    <CheckCircleFillIcon />
-                  ) : null}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer flex-row justify-between"
-                  onClick={() => {
-                    setVisibilityType('public');
-                  }}
-                >
-                  <div className="flex flex-row gap-2 items-center">
-                    <GlobeIcon />
-                    <span>Public</span>
-                  </div>
-                  {visibilityType === 'public' ? <CheckCircleFillIcon /> : null}
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub> */}
-
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
             onSelect={() => onDelete(chat.$id)}
@@ -160,20 +119,21 @@ export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
 
 export function SidebarHistory() {
   const { setOpenMobile } = useSidebar();
-  const id = useChatId();
+  const workspaceId = useWorkspaceId();
   const pathname = usePathname();
-  // const {
-  //   data: history,
-  //   isLoading,
-  //   mutate,
-  // } = useSWR<Array<Chat>>(false ? "/api/history" : null, fetcher, {
-  //   fallbackData: [],
-  // });
-
-  const { data: chats, isLoading } = useGetHistory();
-
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  // const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const id = useChatId();
+  const { data: rawChats, isLoading } = useGetHistory();
+  const chats: Chat[] = rawChats?.map((chat) => ({
+    $id: chat.$id,
+    title: chat.title || "Untitled", // Ensure title exists
+    userId: chat.userId || "unknown", // Ensure userId exists
+    content: chat.content, // Optional field
+    $createdAt: chat.$createdAt,
+    $updatedAt: chat.$updatedAt,
+    $collectionId: chat.$collectionId,
+    $databaseId: chat.$databaseId,
+    $permissions: chat.$permissions,
+  })) || [];
   const router = useRouter();
   const [ConfirmDialog, confirm] = useConfirm(
     "Delete task",
@@ -181,6 +141,8 @@ export function SidebarHistory() {
     "destructive"
   );
   const { mutate, isPending } = useDeleteChat();
+  useEffect(() => {
+  }, [pathname, mutate]);
 
   const onDelete = async (chatId: string) => {
     const ok = await confirm();
@@ -188,23 +150,11 @@ export function SidebarHistory() {
     mutate({
       param: { chatId: chatId },
     });
-    console.log(chatId);
-    if (deleteId === id) router.push("/");
+    if (chatId === id) {
+      router.push(`/workspaces/${workspaceId}/chats`);
+      router.refresh();
+    }
   };
-
-  useEffect(() => {
-  }, [pathname, mutate]);
-  //   if (!user) {
-  //     return (
-  //       <SidebarGroup>
-  //         <SidebarGroupContent>
-  //           <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
-  //             Login to save and revisit previous chats!
-  //           </div>
-  //         </SidebarGroupContent>
-  //       </SidebarGroup>
-  //     );
-  //   }
 
   if (isLoading || isPending) {
     return (
@@ -235,25 +185,25 @@ export function SidebarHistory() {
     );
   }
 
-  //   if (history?.length === 0) {
-  //     return (
-  //       <SidebarGroup>
-  //         <SidebarGroupContent>
-  //           <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
-  //             Your conversations will appear here once you start chatting!
-  //           </div>
-  //         </SidebarGroupContent>
-  //       </SidebarGroup>
-  //     );
-  //   }
+  if (chats?.length === 0) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
+            Your conversations will appear here once you start chatting!
+          </div>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    );
+  }
 
-  const groupChatsByDate = (chats: any): GroupedChats => {
+  const groupChatsByDate = (chats: Chat[]): GroupedChats => {
     const now = new Date();
     const oneWeekAgo = subWeeks(now, 1);
     const oneMonthAgo = subMonths(now, 1);
 
     return chats.reduce(
-      (groups, chat) => {
+      (groups: { today: any; yesterday: any; lastWeek: any; lastMonth: any; older: any; }, chat: Chat) => {
         const chatDate = new Date(chat.$createdAt); // Replace '$createdAt' with the correct property
 
         if (isToday(chatDate)) {
@@ -323,7 +273,6 @@ export function SidebarHistory() {
                             isActive={chat.$id === id}
                             onDelete={() => {
                               onDelete(chat.$id);
-                              // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -343,7 +292,6 @@ export function SidebarHistory() {
                             isActive={chat.$id === id}
                             onDelete={() => {
                               onDelete(chat.$id);
-                              // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -363,7 +311,6 @@ export function SidebarHistory() {
                             isActive={chat.$id === id}
                             onDelete={() => {
                               onDelete(chat.$id);
-                              // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -383,7 +330,6 @@ export function SidebarHistory() {
                             isActive={chat.$id === id}
                             onDelete={() => {
                               onDelete(chat.$id);
-                              // setShowDeleteDialog(true);
                             }}
                             setOpenMobile={setOpenMobile}
                           />

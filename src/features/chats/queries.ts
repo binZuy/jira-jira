@@ -7,7 +7,7 @@ import {
   DOCUMENTS_ID,
   SUGGESTIONS_ID,
 } from "@/config";
-import { Document, Message, Suggestion } from "@/features/chats/types";
+import { Message, Suggestion } from "@/features/chats/types";
 import { ID, Query } from "node-appwrite";
 import { ArtifactKind } from "./components/artifact";
 
@@ -164,7 +164,8 @@ export async function saveDocument({
 }) {
   try {
     const { databases, user } = await getAuthInfo();
-    return await databases.createDocument(DATABASE_ID, DOCUMENTS_ID, id, {
+    return await databases.createDocument(DATABASE_ID, DOCUMENTS_ID, ID.unique(), {
+      id,
       title,
       kind,
       content,
@@ -179,7 +180,12 @@ export async function saveDocument({
 export async function getDocumentById({ id }: { id: string }) {
   const { databases } = await getAuthInfo();
   try {
-    return databases.getDocument(DATABASE_ID, DOCUMENTS_ID, id);
+    const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
+      Query.equal("id", id),
+      Query.orderDesc("$createdAt"),
+    ]);
+    const selectedDocument = response.documents[0];
+    return selectedDocument;
   } catch (error) {
     console.error("Failed to get document by id from Appwrite database", error);
     throw error;
@@ -190,8 +196,8 @@ export async function getDocumentsById({ id }: { id: string }) {
   const { databases } = await getAuthInfo();
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
-      Query.equal("$id", id),
-      Query.orderDesc("$createdAt"),
+      Query.equal("id", id),
+      Query.orderAsc("$createdAt"),
     ]);
     return response.documents;
   } catch (error) {
@@ -218,7 +224,7 @@ export async function deleteDocumentsByIdAfterTimestamp({
     ]);
     return await Promise.all(
       response.documents.map((document) => {
-        if (new Date(document.createdAt) > timestamp) {
+        if (new Date(document.$createdAt) > timestamp) {
           return databases.deleteDocument(
             DATABASE_ID,
             DOCUMENTS_ID,
@@ -239,13 +245,24 @@ export async function deleteDocumentsByIdAfterTimestamp({
 export async function saveSuggestions({
   suggestions,
 }: {
-  suggestions: Array<Suggestion>;
+  suggestions: Array<Omit<Suggestion, 'userId'>>;
 }) {
   try {
     const { databases } = await getAuthInfo();
-    return await databases.createDocument(DATABASE_ID, SUGGESTIONS_ID, ID.unique(), {
-      suggestions,
-    });
+
+    // Lưu từng suggestion vào cơ sở dữ liệu
+    return await Promise.all(
+      suggestions.map((suggestion) =>
+        databases.createDocument(
+          DATABASE_ID,
+          SUGGESTIONS_ID,
+          ID.unique(),
+          {
+            ...suggestion, // Lưu toàn bộ dữ liệu của suggestion
+          }
+        )
+      )
+    );
   } catch (error) {
     console.error("Failed to save suggestions in database");
     throw error;

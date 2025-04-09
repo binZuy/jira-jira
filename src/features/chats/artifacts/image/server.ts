@@ -1,5 +1,5 @@
 // import { myProvider } from '@/features/chats/libs/ai/providers';
-// import { createDocumentHandler } from '@/lib/artifacts/server';
+// import { createDocumentHandler } from '@/features/chats/libs/artifacts/server';
 // import { experimental_generateImage } from 'ai';
 
 // export const imageDocumentHandler = createDocumentHandler<'image'>({

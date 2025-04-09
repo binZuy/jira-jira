@@ -15,7 +15,8 @@ const ChatPage = async () => {
   const user = await getCurrent();
   if (!user) redirect("/sign-in");
 
-    const id = generateIDChat();
+  const id = generateIDChat();
+  
   return (
     <div className="flex flex-col gap-y-4">
         <Chat

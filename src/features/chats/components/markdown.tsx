@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from 'next/link';
 import React, { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
@@ -5,7 +7,6 @@ import remarkGfm from 'remark-gfm';
 // import { CodeBlock } from './code-block';
 
 const components: Partial<Components> = {
-  // @ts-expect-error
 //   code: CodeBlock,
 //   pre: ({ children }) => <>{children}</>,
 //   ol: ({ node, children, ...props }) => {

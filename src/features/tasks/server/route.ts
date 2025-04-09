@@ -78,7 +78,7 @@ const app = new Hono()
       }
     );
 
-    return c.json({ data: { message: "Task deleted successfully" } });
+    return c.json({ data: { $id: task.$id}});
   })
   .get(
     "/",
@@ -403,7 +403,7 @@ const app = new Hono()
     const { taskId } = await c.req.param();
 
     // Fetch task details
-    const task = await databases.getDocument(
+    const task = await databases.getDocument<Task>(
       DATABASE_ID,
       TASKS_ID,
       taskId

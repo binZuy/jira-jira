@@ -92,7 +92,7 @@ function PureArtifact({
     mutate: mutateDocuments,
   } = useSWR<Array<Document>>(
     artifact.documentId !== 'init' && artifact.status !== 'streaming'
-      ? `/api/document/${artifact.documentId}`
+      ? `/api/document?id=${artifact.documentId}`
       : null,
     fetcher,
   );
@@ -130,7 +130,7 @@ function PureArtifact({
       if (!artifact) return;
 
       mutate<Array<Document>>(
-        `/api/document/${artifact.documentId}`,
+        `/api/document?id=${artifact.documentId}`,
         async (currentDocuments) => {
           if (!currentDocuments) return undefined;
 
@@ -142,7 +142,7 @@ function PureArtifact({
           }
 
           if (currentDocument.content !== updatedContent) {
-            await fetch(`/api/document/${artifact.documentId}`, {
+            await fetch(`/api/document?id=${artifact.documentId}`, {
               method: 'POST',
               body: JSON.stringify({
                 title: artifact.title,

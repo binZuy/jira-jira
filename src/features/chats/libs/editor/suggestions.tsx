@@ -91,7 +91,7 @@ export function createSuggestionWidget(
       const newDecorations = DecorationSet.create(
         state.doc,
         currentDecorations.find().filter((decoration: Decoration) => {
-          return decoration.spec.suggestionId !== suggestion.id;
+          return decoration.spec.suggestionId !== suggestion.$id;
         }),
       );
 

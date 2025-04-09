@@ -1,5 +1,5 @@
 import { sessionMiddleware } from "@/lib/session-middleware";
-import { zValidator } from "@hono/zod-validator";
+// import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 // import { getMember } from "@/features/members/utils";
 import {
@@ -19,7 +19,7 @@ import {
   createDataStreamResponse,
   appendResponseMessages,
   streamText,
-  UIMessage,
+  // UIMessage,
   smoothStream,
 } from "ai";
 import {
@@ -28,7 +28,7 @@ import {
   getTrailingMessageId,
 } from "@/lib/utils";
 // import { useGetChat } from "@/features/chats/api/use-get-chat";
-import { MessageSchema } from "../../schemas";
+// import { MessageSchema } from "../../schemas";
 // import { z } from "zod";
 // import { Chat } from "@/features/chats/types";
 import { generateTitleFromUserMessage } from "@/app/(standalone)/workspaces/[workspaceId]/chats/actions";
@@ -37,7 +37,7 @@ import { myProvider } from "../../libs/ai/providers";
 import { getWeather } from "../../libs/ai/tools/get-weather";
 import { createDocument } from "../../libs/ai/tools/create-document";
 import { updateDocument } from "../../libs/ai/tools/update-document";
-// import { requestSuggestions } from "../libs/ai/tools/request-suggestions";
+import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
 import { saveChat, saveMessages, getChatById } from "@/features/chats/queries";
 
 export const maxDuration = 30;
@@ -46,7 +46,7 @@ const app = new Hono()
   .post(
     "/",
     sessionMiddleware,
-    zValidator("json", MessageSchema),
+    // zValidator("json", MessageSchema),
     async (c) => {
       console.log("POST / called");
 
@@ -57,7 +57,7 @@ const app = new Hono()
         id,
         messages,
         selectedChatModel,
-      } = await c.req.valid("json");
+      } = await c.req.json();
 
       console.log("Request payload:", { id, messages, selectedChatModel });
 
@@ -118,13 +118,14 @@ const app = new Hono()
               experimental_activeTools:
                 selectedChatModel === "chat-model-reasoning"
                   ? []
-                  : ["getWeather", "createDocument", "updateDocument"],
+                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions"],
               experimental_transform: smoothStream({ chunking: "word" }),
               experimental_generateMessageId: generateIDChat,
               tools: {
                 getWeather,
                 createDocument: createDocument({ dataStream }),
                 updateDocument: updateDocument({ dataStream }),
+                requestSuggestions: requestSuggestions({ dataStream }),
               },
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);
@@ -192,7 +193,7 @@ const app = new Hono()
     const databases = c.get("databases");
     const user = c.get("user");
     const { chatId } = c.req.param();
-
+    console.log("GET /:chatId called with chatId:", chatId);
     const chat = await databases.getDocument(DATABASE_ID, CHATS_ID, chatId);
 
     if (!chat) {

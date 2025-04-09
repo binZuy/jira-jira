@@ -4,7 +4,6 @@ import type { UIMessage } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState } from 'react';
-// import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
 import { PencilEditIcon, SparklesIcon } from './icons';
 import { Markdown } from './markdown';
@@ -21,7 +20,7 @@ import { MessageReasoning } from './message-reasoning';
 import { UseChatHelpers } from '@ai-sdk/react';
 
 const PurePreviewMessage = ({
-  chatId,
+  // chatId,
   message,
   // vote,
   isLoading,
@@ -29,7 +28,7 @@ const PurePreviewMessage = ({
   reload,
   isReadonly,
 }: {
-  chatId: string;
+  // chatId: string;
   message: UIMessage;
   // vote: Vote | undefined;
   isLoading: boolean;
@@ -71,7 +70,7 @@ const PurePreviewMessage = ({
                 data-testid={`message-attachments`}
                 className="flex flex-row justify-end gap-2"
               >
-                {message.experimental_attachments.map((attachment) => (
+                {message.experimental_attachments.map((attachment: { url: string }) => (
                   <PreviewAttachment
                     key={attachment.url}
                     attachment={attachment}
@@ -221,7 +220,7 @@ const PurePreviewMessage = ({
             {!isReadonly && (
               <MessageActions
                 key={`action-${message.id}`}
-                chatId={chatId}
+                // chatId={chatId}
                 message={message}
                 // vote={vote}
                 isLoading={isLoading}

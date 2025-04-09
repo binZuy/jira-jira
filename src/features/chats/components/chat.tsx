@@ -5,6 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 // useSWR,
+import { useQueryClient } from '@tanstack/react-query';
 import { Models } from 'node-appwrite';
 import { ChatHeader } from '@/features/chats/components/chat-header';
 import { generateIDChat } from '@/lib/utils';
@@ -26,7 +27,7 @@ export function Chat({
   isReadonly: boolean;
 }) {
   const { mutate } = useSWRConfig();
-
+  const queryClient = useQueryClient();
   const {
     messages,
     setMessages,
@@ -46,6 +47,8 @@ export function Chat({
     generateId: generateIDChat,
     onFinish: () => {
       mutate('/api/history');
+      // console.log("on finish");
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
     onError: () => {
       toast.error('An error occurred, please try again!');
@@ -55,33 +58,13 @@ export function Chat({
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
-  // // Custom handleSubmit function
-  // const handleSubmit = async (event?: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
-  //   if (event) {
-  //     event.preventDefault(); // Prevent default form submission behavior
-  //   }
-
-  //   // Custom logic before calling the original handleSubmit
-  //   console.log('Custom handleSubmit: Preparing to send message...');
-  //   if (!input.trim()) {
-  //     toast.error('Message cannot be empty!');
-  //     return;
-  //   }
-
-  //   // Call the original handleSubmit
-  //   await originalHandleSubmit(event);
-
-  //   // Custom logic after calling the original handleSubmit
-  //   console.log('Custom handleSubmit: Message sent successfully!');
-  // };
-
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
         <ChatHeader
-          chatId={id}
-          selectedModelId={selectedChatModel}
-          isReadonly={isReadonly}
+          // chatId={id}
+          // selectedModelId={selectedChatModel}
+          // isReadonly={isReadonly}
         />
 
         <Messages

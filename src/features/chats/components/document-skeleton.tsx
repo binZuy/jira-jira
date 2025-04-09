@@ -5,7 +5,7 @@ import { ArtifactKind } from './artifact';
 export const DocumentSkeleton = ({
   artifactKind,
 }: {
-  artifactKind: ArtifactKind;
+  artifactKind: ArtifactKind | 'image';
 }) => {
   return artifactKind === 'image' ? (
     <div className="flex flex-col gap-4 w-full justify-center items-center h-[calc(100dvh-60px)]">

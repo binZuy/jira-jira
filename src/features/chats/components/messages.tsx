@@ -4,14 +4,14 @@ import { useScrollToBottom } from './use-scroll-to-bottom';
 import { Overview } from './overview';
 import { memo } from 'react';
 import equal from 'fast-deep-equal';
-import { Models } from "node-appwrite";
+// import { Models } from "node-appwrite";
 import { UseChatHelpers } from '@ai-sdk/react';
 
 interface MessagesProps {
   chatId: string;
   status: UseChatHelpers['status'];
   // votes: Array<Vote> | undefined;
-  messages: Array<UIMessage & Models.Document>;
+  messages: Array<UIMessage>;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
@@ -19,7 +19,7 @@ interface MessagesProps {
 }
 
 function PureMessages({
-  chatId,
+  // chatId,
   status,
   // votes,
   messages,
@@ -38,8 +38,8 @@ function PureMessages({
 
       {messages.map((message, index) => (
         <PreviewMessage
-          key={message.$id ?? message.id}
-          chatId={chatId}
+          key={message.id}
+          // chatId={chatId}
           message={message}
           isLoading={status === 'streaming' && messages.length - 1 === index}
           // vote={

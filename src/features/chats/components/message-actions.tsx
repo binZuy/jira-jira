@@ -1,10 +1,9 @@
 import type { Message } from 'ai';
-import { useSWRConfig } from 'swr';
+// import { useSWRConfig } from 'swr';
 import { useCopyToClipboard } from 'usehooks-ts';
-
+// import { Models } from 'node-appwrite';
 // import type { Vote } from '@/lib/db/schema';
-
-import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
+import { CopyIcon } from './icons';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -13,22 +12,22 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { memo } from 'react';
-import equal from 'fast-deep-equal';
+// import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
 
 export function PureMessageActions({
-  chatId,
+  // chatId,
   message,
   // vote,
   isLoading,
 }: {
-  chatId: string;
+  // chatId: string;
   message: Message;
   // vote: Vote | undefined;
   isLoading: boolean;
 }) {
-  const { mutate } = useSWRConfig();
-  const [_, copyToClipboard] = useCopyToClipboard();
+  // const { mutate } = useSWRConfig();
+  const [, copyToClipboard] = useCopyToClipboard();
 
   if (isLoading) return null;
   if (message.role === 'user') return null;
@@ -42,7 +41,7 @@ export function PureMessageActions({
               className="py-1 px-2 h-fit text-muted-foreground"
               variant="outline"
               onClick={async () => {
-                const textFromParts = message.parts
+                const textFromParts = (message.parts as Array<{ type: string; text: string }> | undefined)
                   ?.filter((part) => part.type === 'text')
                   .map((part) => part.text)
                   .join('\n')

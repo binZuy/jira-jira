@@ -8,16 +8,16 @@ import { getDocumentsById } from "@/features/chats/queries";
 export const maxDuration = 30;
 
 const app = new Hono()
-  .get("/:documentId", sessionMiddleware, async (c) => {
+  .get("/", sessionMiddleware, async (c) => {
     // const databases = c.get("databases");
     const user = c.get("user");
-    const { documentId } = c.req.param();
+    const { id } = c.req.param() as { id: string };
 
     if (!user) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const documents = await getDocumentsById({ id: documentId });
+    const documents = await getDocumentsById({ id: id });
 
     const [document] = documents;
     if (!document) {
@@ -30,9 +30,9 @@ const app = new Hono()
 
     return c.json({ data: documents });
   })
-  .post("/:documentId", sessionMiddleware, async (c) => {
+  .post("/", sessionMiddleware, async (c) => {
     const user = c.get("user");
-    const { documentId } = c.req.param();
+    const { id } = c.req.param() as { id: string };
     const { content, title, kind } = await c.req.json();
 
     if (!user) {
@@ -40,7 +40,7 @@ const app = new Hono()
     }
 
     const document = await saveDocument({
-      id: documentId,
+      id,
       content,
       title,
       kind,

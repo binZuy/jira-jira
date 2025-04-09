@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Models } from "node-appwrite";
-
+import { ArtifactKind } from "@/features/chats/components/artifact";
 export type Document = Models.Document & {
-  // id: string;
   title: string;
-  kind: string;
+  kind: ArtifactKind;
   content: string;
   userId: string;
+  id: string;
 };
 
-export type Suggestion = {
-  id: string;
+export type Suggestion = Models.Document &{
   documentId: string;
   originalText: string;
   suggestedText: string;
@@ -21,12 +20,10 @@ export type Suggestion = {
   // updatedAt: Date;
 };
 
-export type Chat = {
-  id: string;
+export type Chat = Models.Document & {
   title: string;
   userId: string;
   content?: string;
-  // createdAt?: Date;
 };
 
 export type DBMessage = Models.Document & {

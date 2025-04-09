@@ -19,7 +19,7 @@ interface ArtifactMessagesProps {
 }
 
 function PureArtifactMessages({
-  chatId,
+  // chatId,
   status,
   // votes,
   messages,
@@ -37,7 +37,7 @@ function PureArtifactMessages({
     >
       {messages.map((message, index) => (
         <PreviewMessage
-          chatId={chatId}
+          // chatId={chatId}
           key={message.id}
           message={message}
           isLoading={status === 'streaming' && index === messages.length - 1}
