@@ -1,46 +1,36 @@
 "use client";
 
-import { UserButton } from "@/features/auth/components/user-button";
-import { MobileSidebar } from "./mobile-sidebar";
-import {usePathname} from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { LayoutDashboard, Menu, Zap } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sidebar } from "./sidebar"
+import { useState } from "react"
 
-const pathnameMap = {
-  "tasks": {
-    title: "My Tasks",
-    description: "View all of yours tasks here"
-  },
-  "projects" : {
-    title: "My Projects",
-    description: "View tasks of your project here"
-  },
-  "chats" : {
-    title: "My Chats",
-    description: "Chat with your AI assistant here"
-  }
-}
-
-const defaultMap = {
-  title: "Home",
-  description:" Monitor all of your projects and task here",
-}
-
-export const Navbar = () => {
-  const pathname = usePathname();
-  const pathnameParts = pathname.split("/");
-  const pathnameKey = pathnameParts[3] as keyof typeof pathnameMap;
-
-  const { title, description} = pathnameMap[pathnameKey] || defaultMap;
+export function Navbar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [isAIMode, setIsAIMode] = useState(true)
 
   return (
-    <nav className="pt-4 px-6 flex items-center justify-between">
-      <div className="flex-col hidden lg:flex">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <p className="text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      <MobileSidebar />
-      <UserButton />
-    </nav>
-  );
-};
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-2 border-b bg-background px-3 md:px-6">
+      {/* Mobile menu */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="p-0 w-[280px]">
+          <Sidebar />
+        </SheetContent>
+      </Sheet>
+
+      {/* Left section - empty for balance */}
+      <div className="flex-1"></div>
+
+
+    </header>
+  )
+}

@@ -1,0 +1,700 @@
+{
+    "projectId": "67f67fd9ce73a6e77895",
+    "projectName": "jira-clone",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": 0,
+                "sessionsLimit": 10,
+                "passwordHistory": 0,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "databases": [
+        {
+            "$id": "67abfc98001f8084877f",
+            "name": "jira-clone",
+            "enabled": true
+        }
+    ],
+    "collections": [
+        {
+            "$id": "67abfcd0001dc1d524e3",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "workspaces",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 256,
+                    "default": null
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "imageUrl",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1400000,
+                    "default": null
+                },
+                {
+                    "key": "inviteCode",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67ac3972002b61c9a24f",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "members",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "workspaceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "role",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "ADMIN",
+                        "MEMBER"
+                    ],
+                    "format": "enum",
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67adbc51000b72a7241d",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "projects",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "workspaceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "imageUrl",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1400000,
+                    "default": null
+                },
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67aedb87001f9ba95cfc",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "tasks",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "workspaceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 256,
+                    "default": null
+                },
+                {
+                    "key": "projectId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2048,
+                    "default": null
+                },
+                {
+                    "key": "assigneeId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                },
+                {
+                    "key": "dueDate",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "format": "",
+                    "default": null
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "TODO",
+                        "IN_PROGRESS",
+                        "IN_REVIEW",
+                        "DONE",
+                        "OUT_OF_SERVICE",
+                        "OUT_OF_ORDER",
+                        "PICK_UP"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "position",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1000,
+                    "max": 1000000,
+                    "default": null
+                },
+                {
+                    "key": "attachments",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1400000,
+                    "default": null
+                },
+                {
+                    "key": "linen",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "room_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 12,
+                    "default": null
+                },
+                {
+                    "key": "pilow",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "taskType",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "elements": [
+                        "STAY_OVER",
+                        "DO_NOT_DISTURB",
+                        "DEPARTURE"
+                    ],
+                    "format": "enum",
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67d9a4fd002f90a57aac",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "taskLogs",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "action",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "taskId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "details",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67dfc3720034f8a3bee3",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "comments",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "taskId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "content",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67e2e4d8000df1c57cb0",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "taskAttachment",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "taskId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "fileId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "fileName",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "fileType",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20000,
+                    "default": null
+                },
+                {
+                    "key": "fileUrl",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 14000000,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67e9f6f3002561b96802",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "chats",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "visibility",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "elements": [
+                        "private",
+                        "public"
+                    ],
+                    "format": "enum",
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67e9fa510037b5bc7902",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "messages",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "chatId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "role",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "content",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null
+                },
+                {
+                    "key": "parts",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67eca0fa0039f1945e86",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "documents",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "content",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1000000,
+                    "default": null
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "kind",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "image",
+                        "sheet",
+                        "code",
+                        "text"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "67f1e59f000326c97631",
+            "$permissions": [],
+            "databaseId": "67abfc98001f8084877f",
+            "name": "suggestions",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "originalText",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null
+                },
+                {
+                    "key": "suggestedText",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null
+                },
+                {
+                    "key": "documentId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 48,
+                    "default": null
+                },
+                {
+                    "key": "isResolved",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "67ac27de0038fd3dbd1b",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "fileSecurity": false,
+            "name": "attachments",
+            "enabled": true,
+            "maximumFileSize": 1000000,
+            "allowedFileExtensions": [
+                "jpg",
+                "png",
+                "svg",
+                "jpeg",
+                ".csv",
+                ".xlsx",
+                "pdf",
+                "docx",
+                ".doc",
+                ".xls"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}

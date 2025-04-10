@@ -19,13 +19,15 @@ export const useUpdateTask = () => {
       }
       return await response.json();
     },
-    onSuccess: ({ data}) => {
+    onSuccess: ({ data }) => {
       toast.success("Task updated");
       queryClient.invalidateQueries({ queryKey: ["project-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] });
-      queryClient.invalidateQueries({ queryKey: ["task-logs", data.$id]});
+      queryClient.invalidateQueries({ queryKey: ["task-logs", data.$id] });
+      queryClient.invalidateQueries({ queryKey: ["member-tasks", data.workspaceId, data.assigneeId] });
+      queryClient.invalidateQueries({ queryKey: ["project-tasks", data.workspaceId, data.projectId] });
     },
     onError: ()=> {
       toast.error("Failed to update task");

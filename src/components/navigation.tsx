@@ -10,8 +10,8 @@ import { BotMessageSquare, SettingsIcon, UsersIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
-
 import Link from "next/link";
+
 const routes = [
   { label: "Home", href: "", icon: GoHome, activeIcon: GoHomeFill },
   {
@@ -45,27 +45,26 @@ export const Navigation = () => {
   const pathname = usePathname();
 
   return (
-    <ul className="flex flex-col">
+    <nav className="flex flex-col gap-1">
       {routes.map((item) => {
         const fullHref = `/workspaces/${workspaceId}${item.href}`;
         const isActive = pathname === fullHref;
-
         const Icon = isActive ? item.activeIcon : item.icon;
 
         return (
-          <Link key={item.href} href={fullHref}>
-            <div
-              className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-md font-medium hover:text-primary transition text-neutral-500",
-                isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
-              )}
-            >
-              <Icon className="size-5 text-neutral-500" />
-              {item.label}
-            </div>
+          <Link
+            key={item.href}
+            href={fullHref}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-all hover:text-primary",
+              isActive && "bg-muted text-primary"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            <span className="flex-1">{item.label}</span>
           </Link>
         );
       })}
-    </ul>
+    </nav>
   );
 };

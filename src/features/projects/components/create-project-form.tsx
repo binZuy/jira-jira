@@ -11,19 +11,10 @@ import { useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { DottedSeparator } from "@/components/dotted-separator";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui-vercel/dialog";
+import { Button } from "@/components/ui-vercel/button";
+import { Input } from "@/components/ui-vercel/input";
+import { Separator } from "@/components/ui-vercel/separator";
 import { ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
@@ -34,10 +25,8 @@ interface CreateProjectFormProps {
 
 export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const workspaceId = useWorkspaceId();
-
   const { mutate, isPending } = useCreateProject();
   const router = useRouter();
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof createProjectSchema>>({
@@ -59,8 +48,6 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
       {
         onSuccess: ({ data }) => {
           form.reset();
-          // Redirect to new projects
-          // onCancel?.();
           router.push(`/workspaces/${workspaceId}/projects/${data.$id}`);
         },
       }
@@ -75,120 +62,92 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   };
 
   return (
-    <Card className="w-full h-full border-none shadow-none">
-      <CardHeader className="flex p-7">
-        <CardTitle className="text-xl font-bold">
-          Create a new project
-        </CardTitle>
-      </CardHeader>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
-      <CardContent className="p-7">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter project name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <div className="flex flex-col gap-y-2">
-                    <div className="flex items-center gap-x-5">
-                      {field.value ? (
-                        <div className="size-[72px] relative rounded-md overflow-hidden">
-                          <Image
-                            src={
-                              field.value instanceof File
-                                ? URL.createObjectURL(field.value)
-                                : field.value
-                            }
-                            alt="Logo"
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <Avatar className="size-[72px]">
-                          <AvatarFallback>
-                            <ImageIcon className="size-[36px] text-neutral-400" />
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div className="flex flex-col">
-                        <p className="text-sm">Project Icon</p>
-                        <p className="text-sm">JPG, PNG, SVG, JPEG, max 1mb</p>
-                        <input
-                          className="hidden"
-                          type="file"
-                          accept=".jpg, .png, .jpeg, .svg"
-                          ref={inputRef}
-                          onChange={handleImageChange}
-                          disabled={isPending}
-                        />
-                        {field.value ? (
-                          <Button
-                            type="button"
-                            disabled={isPending}
-                            variant="teritary"
-                            size="xs"
-                            className="w-fit mt-2"
-                            onClick={() => {
-                              field.onChange(null);
-                              if (inputRef.current) inputRef.current.value = "";
-                            }}
-                          >
-                            Remove Image
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            disabled={isPending}
-                            variant="teritary"
-                            size="xs"
-                            className="w-fit mt-2"
-                            onClick={() => inputRef.current?.click()}
-                          >
-                            Upload Image
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Create a new project</h1>
+
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="name" className="text-base font-semibold">
+              Project Name
+            </label>
+            <Input
+              {...form.register("name")}
+              id="name"
+              placeholder="Enter project name"
+              className="mt-1.5"
+            />
+            {form.formState.errors.name && (
+              <p className="text-sm text-red-500 mt-1">{form.formState.errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 rounded-full bg-muted/20 flex items-center justify-center overflow-hidden border">
+                {form.watch("image") ? (
+                  <Image
+                    src={
+                      form.watch("image") instanceof File
+                        ? URL.createObjectURL(form.watch("image") as File)
+                        : form.watch("image") as string
+                    }
+                    alt="Project icon"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gray-200 flex items-center justify-center">
+                    <ImageIcon className="h-5 w-5 text-gray-500" />
                   </div>
                 )}
-              />
+              </div>
+
+              <div>
+                <p className="font-semibold">Project Icon</p>
+                <p className="text-sm text-gray-500">JPG, PNG, SVG, JPEG, max 1mb</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 text-sm h-8"
+                  onClick={() => inputRef.current?.click()}
+                >
+                  Upload Image
+                </Button>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".jpg, .png, .jpeg, .svg"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  disabled={isPending}
+                />
+              </div>
             </div>
-            <DottedSeparator className="py-7" />
-            <div className="flex items-center justify-between">
-              <Button
-                type="button"
-                size="lg"
-                variant="secondary"
-                onClick={onCancel}
-                disabled={isPending}
-                className={cn(!onCancel && "invisible")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" size="lg" disabled={isPending}>
-                Create Project
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onCancel} 
+            disabled={isPending}
+            className="text-gray-600"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={isPending || !form.watch("name").trim()}
+            className="bg-gray-500 text-white hover:bg-gray-600"
+          >
+            Create Project
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };

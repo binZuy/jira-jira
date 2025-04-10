@@ -1,22 +1,26 @@
-import Image from "next/image";
-import Link from "next/link";
-import { DottedSeparator } from "./dotted-separator";
 import { Navigation } from "./navigation";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import {Projects} from "./projects";
+import { Separator } from "@/components/ui-vercel/separator";
+import { User } from "./user";
+
 export const Sidebar = () => {
   return (
-    <aside className="h-full bg-neutral-100 p-4 w-full">
-      <Link href="/">
-        <Image src="/Logo-1.png" alt="Logo" width={156} height={48} />
-      </Link>
-      <DottedSeparator className="my-4" />
-      <WorkspaceSwitcher />
-      <DottedSeparator className="my-4 flex items" />
-      <Navigation />
-      <DottedSeparator className="my-4" />
-      <Projects />
+    <div className="flex h-full w-full flex-col border-r bg-muted/40">
+      <div className="flex-1 overflow-auto py-2">
+        <nav className="grid items-start px-2 text-sm font-medium">
+          <Navigation />
+          <Separator className="my-2 mx-2" />
+          <Projects />
+          <Separator />
+          <WorkspaceSwitcher />
+        </nav>
+      </div>
 
-    </aside>
+      {/* User section */}
+      <div className="mt-auto border-t p-4">
+        <User />
+      </div>
+    </div>
   );
 };
