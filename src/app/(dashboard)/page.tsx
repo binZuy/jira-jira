@@ -4,15 +4,14 @@ import { getCurrent } from "@/features/auth/queries";
 import { getWorkspaces } from "@/features/workspaces/queries";
 
 export default async function Home() {
-  const { data: {user} } = await getCurrent();
+  const user = await getCurrent();
 
   if (!user) redirect("/sign-in");
-  console.log(user);
   const workspaces = await getWorkspaces();
-  if (workspaces.total === 0) {
+  if (!workspaces || workspaces.length === 0) {
     redirect("/workspaces/create");
   } else {
-    redirect(`/workspaces/${workspaces.documents[0].$id}`);
+    redirect(`/workspaces/${workspaces[0].id}`);
   }
   // return <div className="bg-neutral-500 p-4 h-full">Home Page</div>;
         // "id": "c87cdbd6-dcea-4242-8fc2-5a8bc014fb57",

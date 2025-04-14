@@ -104,7 +104,7 @@ export type Database = {
           id: string
           role: number | null
           userId: string | null
-          workspaceId: string | null
+          workspaceId: string
         }
         Insert: {
           created_at?: string

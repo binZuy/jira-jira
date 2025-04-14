@@ -1,22 +1,16 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-// import { deleteCookie, setCookie } from "hono/cookie";
-
-// import { createAdminClient } from "@/lib/appwrite";
-// import { ID } from "node-appwrite";
-
 import { loginSchema, registerSchema } from "../schemas";
-// import { AUTH_COOKIE } from "../constants";
-// import { sessionMiddleware } from "@/lib/session-middleware";
 import { createClient } from "@/lib/supabase/server";
-// import { middleware } from "@/middleware";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 
 const app = new Hono()
   .get("/current", async (c) => {
-    // const user = c.get("user");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return c.json({ data: user });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return c.json({ user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
     const { email, password } = c.req.valid("json");
@@ -42,7 +36,6 @@ const app = new Hono()
 
     return c.json({ success: true });
   })
-
   .post("/register", zValidator("json", registerSchema), async (c) => {
     const { name, email, password } = c.req.valid("json");
 
@@ -53,8 +46,8 @@ const app = new Hono()
       options: {
         data: {
           name: name,
-        }
-      }
+        },
+      },
     });
     if (error) {
       return c.json({ error: error.message }, 401);

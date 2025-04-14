@@ -1,21 +1,30 @@
-import { Query, type Databases } from "node-appwrite";
 
-import { DATABASE_ID, MEMBERS_ID } from "@/config";
+// import { DATABASE_ID, MEMBERS_ID } from "@/config";
+
+import { Database } from "@/lib/types/supabase";
 
 interface GetMemberProps {
-  databases: Databases;
+  supabase: Database
   workspaceId: string;
   userId: string;
 }
 
 export const getMember = async ({
-  databases,
+  supabase,
   workspaceId,
   userId,
 }: GetMemberProps) => {
-  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-    Query.equal("workspaceId", workspaceId),
-    Query.equal("userId", userId),
-  ]);
-  return members.documents[0];
+  const { data: members, error } = await supabase
+  .from("members")
+  .select("*")
+  .eq("workspaceId", workspaceId)  // Filter by workspaceId
+  .eq("userId", userId);  // Filter by userId
+
+if (error) {
+  // Handle error (you can log the error or return an empty object)
+  console.error("Error fetching member:", error.message);
+  return null;  // Return null if there is an error
+}
+
+  return members;
 };

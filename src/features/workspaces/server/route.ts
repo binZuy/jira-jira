@@ -12,26 +12,23 @@ import { createWorkspaceSchema, updateWorkspaceSchema } from "../schemas";
 
 const app = new Hono()
   .use("*", supabaseMiddleware())
-  .get("/", async (c) => {
+  .get("/",
+     async (c) => {
     const user = c.get("user");
     const supabase = c.get("supabase");
-
     if (!user) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const { data: members, error: membersError } = await supabase
+    const {data: members, error: membersError} = await supabase
       .from("members")
       .select("*")
       .eq("userId", user.id);
 
-    if (membersError) {
+    if (!members) {
       return c.json({ error: membersError.message }, 500);
     }
-    if (members.length === 0) {
-      return c.json({ data: { documents: [], total: 0 } });
-    }
-
+    console.log("members", members);
     const { data: workspaces, error: workspacesError } = await supabase
       .from("workspaces")
       .select("*")
@@ -40,16 +37,14 @@ const app = new Hono()
     if (workspacesError) {
       return c.json({ error: workspacesError.message }, 500);
     }
-    if (workspaces.length === 0) {
-      return c.json({ data: { documents: [], total: 0 } });
-    }
-    return c.json({ data: workspaces });
+
+    return c.json({ workspaces });
   })
-  .get("/:workspaceId", async (c) => {
+  .get("/:workspaceId", 
+    async (c) => {
     const user = c.get("user");
     const supabase = c.get("supabase");
     const { workspaceId } = c.req.param();
-
     if (!user) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -80,10 +75,10 @@ const app = new Hono()
     // Return the workspace data
     return c.json({ data: workspace });
   })
-  .get("/:workspaceId/info", async (c) => {
+  .get("/:workspaceId/info", 
+    async (c) => {
     const supabase = c.get("supabase");
     const { workspaceId } = c.req.param();
-
     // Fetch the workspace info (name, imageUrl) from the workspaces table
     const { data: workspace, error: workspaceError } = await supabase
       .from("workspaces")
@@ -183,7 +178,6 @@ const app = new Hono()
     async (c) => {
       const supabase = c.get("supabase");
       const user = c.get("user");
-
       const { name, image } = c.req.valid("form");
 
       if (!user) {
@@ -217,7 +211,7 @@ const app = new Hono()
 
       const id = generateID();
       // Insert the new workspace into the 'workspaces' table
-      const { error: workspaceError } = await supabase
+      const { data: workspace, error: workspaceError } = await supabase
         .from("workspaces")
         .insert([
           {
@@ -227,8 +221,8 @@ const app = new Hono()
             imageUrl: uploadedImageUrl, // Direct URL from Supabase Storage
             inviteCode: generateInviteCode(6),
           },
-        ]).select();
-        // .single(); // Fetch the single workspace object that was inserted
+        ]).select()
+        .single(); // Fetch the single workspace object that was inserted
 
       if (workspaceError) {
         return c.json({ error: workspaceError.message }, 500);
@@ -241,7 +235,7 @@ const app = new Hono()
           {
             userId: user.id,
             workspaceId: id,
-            role: MemberRole.ADMIN,
+            role: 2,
           },
         ]);
 
@@ -249,15 +243,6 @@ const app = new Hono()
         return c.json({ error: memberError.message }, 500);
       }
 
-      const { data: workspace } = await supabase
-        .from("workspaces")
-        .select("*")
-        .eq("id", id)
-        .single(); // Fetch the single workspace object that was inserted
-
-      if (!workspace) {
-        return c.json({ error: "Workspace not found" }, 404);
-      }
       // Return the created workspace as a response
       return c.json({ data: workspace });
     }
@@ -319,7 +304,6 @@ const app = new Hono()
 // )
 .patch(
   "/:workspaceId",
-  supabaseMiddleware(),
   zValidator("form", updateWorkspaceSchema),
   async (c) => {
     const supabase = c.get("supabase");
@@ -402,7 +386,7 @@ const app = new Hono()
 
 //   return c.json({ data: { $id: workspaceId } });
 // })
-.delete("/:workspaceId", supabaseMiddleware(), async (c) => {
+.delete("/:workspaceId", async (c) => {
   const supabase = c.get("supabase");
   const user = c.get("user");
   const { workspaceId } = c.req.param();
@@ -467,7 +451,8 @@ const app = new Hono()
 
 //   return c.json({ data: workspace });
 // })
-.post("/:workspaceId/reset-invite-code", async (c) => {
+.post("/:workspaceId/reset-invite-code", 
+  async (c) => {
   const supabase = c.get("supabase");
   const user = c.get("user");
   const { workspaceId } = c.req.param();

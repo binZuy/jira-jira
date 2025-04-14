@@ -30,7 +30,7 @@ export const useJoinWorkspace = () => {
     onSuccess: ({ data }) => {
       toast.success("Joined workspace successfully");
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-      queryClient.invalidateQueries({ queryKey: ["workspace", data["$id"]] });
+      queryClient.invalidateQueries({ queryKey: ["workspace", data["id"]] });
     },
 
     onError: () => {

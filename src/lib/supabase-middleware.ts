@@ -1,8 +1,8 @@
 import { createServerClient, parseCookieHeader } from '@supabase/ssr'
 import { SupabaseClient, User } from '@supabase/supabase-js'
 import type { Context, MiddlewareHandler } from 'hono'
-import { env } from 'hono/adapter'
 import { setCookie } from 'hono/cookie'
+import { SUPABASE_KEY, SUPABASE_URL } from '@/config'
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -39,9 +39,8 @@ const sanitizeCookieOptions = (options: any) => {
 
 export const supabaseMiddleware = (): MiddlewareHandler => {
   return async (c, next) => {
-    const supabaseEnv = env<SupabaseEnv>(c)
-    const supabaseUrl = supabaseEnv.SUPABASE_URL
-    const supabaseAnonKey = supabaseEnv.SUPABASE_ANON_KEY
+    const supabaseUrl = SUPABASE_URL;
+    const supabaseAnonKey = SUPABASE_KEY;
 
     if (!supabaseUrl) {
       throw new Error('SUPABASE_URL missing!')

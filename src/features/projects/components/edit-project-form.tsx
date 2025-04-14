@@ -73,7 +73,7 @@ export const EditProjectForm = ({
       {
         form: finalValues,
         param: {
-          projectId: initialValues.$id,
+          projectId: initialValues.id,
         },
       }
     );
@@ -92,7 +92,7 @@ export const EditProjectForm = ({
     if (!ok) return;
     deleteProject(
       {
-        param: { projectId: initialValues.$id },
+        param: { projectId: initialValues.id },
       },
       {
         onSuccess: () => {

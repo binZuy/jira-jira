@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { UIMessage,  CoreAssistantMessage,
   CoreToolMessage, } from "ai";
-import { Document } from "@/features/chats/types";
+// import { Document } from "@/features/chats/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
