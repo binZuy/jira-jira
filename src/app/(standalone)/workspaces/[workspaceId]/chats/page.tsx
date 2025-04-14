@@ -1,7 +1,7 @@
 import { getCurrent } from "@/features/auth/queries";
 import { redirect } from "next/navigation";
 // import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { generateIDChat } from '@/lib/utils';
+import { generateID } from '@/lib/utils';
 // import { useGetProject } from "@/features/projects/api/use-get-project";
 // import { useProjectId } from "@/features/projects/hooks/use-project-id";
 // import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -15,7 +15,7 @@ const ChatPage = async () => {
   const user = await getCurrent();
   if (!user) redirect("/sign-in");
 
-  const id = generateIDChat();
+  const id = generateID();
   
   return (
     <div className="flex flex-col gap-y-4">

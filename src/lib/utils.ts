@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from "clsx";
-import { ID } from "node-appwrite";
 import { twMerge } from "tailwind-merge";
 import type { UIMessage,  CoreAssistantMessage,
   CoreToolMessage, } from "ai";
@@ -28,6 +27,19 @@ export function snakeCaseToTitleCase(str: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+export function getWorkspaceId() {
+  if (typeof window !== 'undefined') {
+    // Browser environment
+    const pathname = window.location.pathname; // Example: "/workspaces/abc123/tasks"
+    const match = pathname.match(/^\/workspaces\/([^/]+)/);
+    return match ? match[1] : "";
+  } else {
+    // Node.js environment
+    // Provide an alternative way to get the workspace ID, e.g., from environment variables
+    return "defaultWorkspaceId";
+  }
+}
+
 export function getLocalStorage(key: string) {
   if (typeof window !== 'undefined') {
     return JSON.parse(localStorage.getItem(key) || '[]');
@@ -36,8 +48,12 @@ export function getLocalStorage(key: string) {
 }
 
 
-export const generateIDChat = () => {
-  return ID.unique();
+export function generateID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 interface ApplicationError extends Error {

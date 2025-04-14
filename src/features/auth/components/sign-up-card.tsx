@@ -1,13 +1,14 @@
 "use client";
 
-import { FaGithub } from "react-icons/fa";
+// import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { signUpWithGithub, signUpWithGoogle } from "@/lib/oauth";
+// import { signUpWithGithub, signUpWithGoogle } from "@/lib/oauth";
+import { signInWithGoogle } from "@/lib/supabase/oauth";
 import {
   Card,
   CardContent,
@@ -134,12 +135,12 @@ export const SignUpCard = () => {
           variant="secondary"
           size="lg"
           className="w-full"
-          onClick={() => signUpWithGoogle()}
+          onClick={() => signInWithGoogle()}
         >
           <FcGoogle className="mr-2 size-5" />
           Login with Google
         </Button>
-        <Button
+        {/* <Button
           disabled={isPending}
           variant="secondary"
           size="lg"
@@ -148,7 +149,7 @@ export const SignUpCard = () => {
         >
           <FaGithub className="mr-2 size-5" />
           Login with Github
-        </Button>
+        </Button> */}
       </CardContent>
       <div className="px-7">
         <DottedSeparator />

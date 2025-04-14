@@ -1,9 +1,9 @@
-import { sessionMiddleware } from "@/lib/session-middleware";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTaskSchema } from "../schemas";
+// import {}
 import { getMember } from "@/features/members/utils";
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID, COMMENTS_ID, TASKLOGS_ID, ATTACHMENTS_BUCKET_ID, TASK_ATTACHMENT_ID} from "@/config";
 import { ID, Query } from "node-appwrite";
 import { Task, TaskStatus, TaskComment } from "../types";
 import { z } from "zod";
@@ -11,17 +11,12 @@ import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
 
 const app = new Hono()
-  .delete("/:taskId", sessionMiddleware, async (c) => {
+  .use("*", supabaseMiddleware())
+  .delete("/:taskId", async (c) => {
     const { taskId } = c.req.param();
-    const user = c.get("user");
-    const databases = c.get("databases");
-    const storage = c.get("storage");
 
-    const task = await databases.getDocument<Task>(
-      DATABASE_ID,
-      TASKS_ID,
-      taskId
-    );
+    const supabase = c.get("supabase");
+    const user = c.get("user");
 
     const member = await getMember({
       databases,

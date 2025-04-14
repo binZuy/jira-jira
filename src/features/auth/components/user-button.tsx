@@ -29,11 +29,11 @@ export const UserButton = () => {
     return null;
   }
   
-  const { name, email } = user;
+  const { user_metadata } = user;
 
-  const avatarFallback = name
-    ? name.charAt(0).toUpperCase()
-    : email.charAt(0).toUpperCase() ?? "U";
+  const avatarFallback = user_metadata.name
+    ? user_metadata.name.charAt(0).toUpperCase()
+    : user_metadata.email.charAt(0).toUpperCase() ?? "U";
 
   return (
     <DropdownMenu modal={false}>
@@ -58,9 +58,9 @@ export const UserButton = () => {
           </Avatar>
           <div className="flex flex-col items-center justify-center">
             <p className="text-sm font-medium text-neutral-900">
-              {name || "User"}
+              {user_metadata.name || "User"}
             </p>
-            <p className="text-xs text-neutral-500">{email}</p>
+            <p className="text-xs text-neutral-500">{user_metadata.email}</p>
           </div>
         </div>
         <DottedSeparator className="mb-1" />

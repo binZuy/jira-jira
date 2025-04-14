@@ -23,7 +23,7 @@ import {
   smoothStream,
 } from "ai";
 import {
-  generateIDChat,
+  generateID,
   getMostRecentUserMessage,
   getTrailingMessageId,
 } from "@/lib/utils";
@@ -38,6 +38,7 @@ import { getWeather } from "../../libs/ai/tools/get-weather";
 import { createDocument } from "../../libs/ai/tools/create-document";
 import { updateDocument } from "../../libs/ai/tools/update-document";
 import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
+import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
 import { saveChat, saveMessages, getChatById } from "@/features/chats/queries";
 
 export const maxDuration = 30;
@@ -118,14 +119,21 @@ const app = new Hono()
               experimental_activeTools:
                 selectedChatModel === "chat-model-reasoning"
                   ? []
-                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions"],
+                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions",
+                    "createTask", "updateTask", "deleteTask", "getTaskDetail", "listTasks"],
+                  // ],
               experimental_transform: smoothStream({ chunking: "word" }),
-              experimental_generateMessageId: generateIDChat,
+              experimental_generateMessageId: generateID,
               tools: {
                 getWeather,
                 createDocument: createDocument({ dataStream }),
                 updateDocument: updateDocument({ dataStream }),
                 requestSuggestions: requestSuggestions({ dataStream }),
+                createTask: createTask({ dataStream }),
+                updateTask: updateTask({ dataStream }),
+                deleteTask: deleteTask({ dataStream }),
+                getTaskDetail: getTaskDetail({ dataStream }),
+                listTasks: listTasks({ dataStream }),
               },
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);

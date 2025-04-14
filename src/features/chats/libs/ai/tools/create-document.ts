@@ -1,4 +1,4 @@
-import { generateIDChat } from '@/lib/utils';
+import { generateID } from '@/lib/utils';
 import { DataStreamWriter, tool } from 'ai';
 import { z } from 'zod';
 import {
@@ -19,7 +19,7 @@ export const createDocument = ({ dataStream }: CreateDocumentProps) =>
       kind: z.enum(artifactKinds),
     }),
     execute: async ({ title, kind }) => {
-      const id = generateIDChat();
+      const id = generateID();
 
       dataStream.writeData({
         type: 'kind',

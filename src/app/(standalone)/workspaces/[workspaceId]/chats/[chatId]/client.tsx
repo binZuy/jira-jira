@@ -1,6 +1,6 @@
 "use client";
 
-// import { generateIDChat } from "@/lib/utils";
+// import { generateID } from "@/lib/utils";
 // import { useGetProject } from "@/features/projects/api/use-get-project";
 // import { useProjectId } from "@/features/projects/hooks/use-project-id";
 // import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -20,7 +20,7 @@ import { Models } from "node-appwrite";
 export const ChatIdClient = () => {
  // const { messages, input, handleInputChange, handleSubmit } = useChat();
   const chatId = useChatId();
-  // const id = generateIDChat();
+  // const id = generateID();
   const { data, isLoading: isLoadingChat } = useGetChat({ chatId });
 
   if (isLoadingChat) {

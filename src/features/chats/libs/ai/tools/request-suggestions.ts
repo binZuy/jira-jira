@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { DataStreamWriter, streamObject, tool } from 'ai';
 import { getDocumentById, saveSuggestions } from '@/features/chats/queries';
 import { Suggestion } from '@/features/chats/types';
-// import { generateIDChat } from '@/lib/utils';
+// import { generateID } from '@/lib/utils';
 import { myProvider } from '../providers';
 
 interface RequestSuggestionsProps {
@@ -48,7 +48,7 @@ export const requestSuggestions = ({
           originalText: element.originalSentence,
           suggestedText: element.suggestedSentence,
           description: element.description,
-        //   id: generateIDChat(),
+        //   id: generateID(),
           documentId: documentId,
           isResolved: false,
         };

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-8">Hotel Management System</h1>
+            
+            <!-- Chat Container -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div id="chat-messages" class="h-96 overflow-y-auto mb-4 space-y-4">
+                    <!-- Messages will be inserted here -->
+                </div>
+                
+                <!-- SQL Review Modal -->
+                <div id="sql-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                        <h2 class="text-xl font-bold mb-4">Review SQL Query</h2>
+                        <pre id="sql-query" class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto"></pre>
+                        <div class="flex justify-end space-x-4">
+                            <button onclick="cancelSqlExecution()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                                Cancel
+                            </button>
+                            <button onclick="confirmSqlExecution()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Execute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Form -->
+                <form id="chat-form" class="flex space-x-4">
+                    <input type="text" id="user-input" 
+                           class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Type your message...">
+                    <button type="submit" 
+                            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Send
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Available Commands</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-semibold mb-2">Room Operations</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Create a new room</li>
+                            <li>Show room status</li>
+                            <li>Update room status</li>
+                            <li>List rooms by floor</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Ticket Operations</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Create a ticket</li>
+                            <li>Show ticket status</li>
+                            <li>Update ticket status</li>
+                            <li>List tickets by priority</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSqlQuery = null;
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sqlModal = document.getElementById('sql-modal');
+        const sqlQuery = document.getElementById('sql-query');
+
+        // Add message to chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `p-4 rounded-lg ${isUser ? 'bg-blue-100 ml-auto' : 'bg-gray-100'} max-w-[80%]`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle SQL query review
+        function showSqlReview(query) {
+            currentSqlQuery = query;
+            sqlQuery.textContent = query;
+            sqlModal.classList.remove('hidden');
+        }
+
+        // Cancel SQL execution
+        function cancelSqlExecution() {
+            sqlModal.classList.add('hidden');
+            currentSqlQuery = null;
+        }
+
+        // Confirm SQL execution
+        async function confirmSqlExecution() {
+            if (!currentSqlQuery) return;
+
+            try {
+                const response = await fetch('/api/execute-sql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: currentSqlQuery }),
+                });
+
+                const data = await response.json();
+                addMessage(data.message);
+            } catch (error) {
+                addMessage('Error executing SQL query: ' + error.message);
+            }
+
+            sqlModal.classList.add('hidden');
+            currentSqlQuery = null;
+        }
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, true);
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                const data = await response.json();
+
+                if (data.requires_confirmation) {
+                    // Extract SQL query from the message
+                    const sqlMatch = data.message.match(/```sql\n([\s\S]*?)```/);
+                    if (sqlMatch) {
+                        showSqlReview(sqlMatch[1].trim());
+                    }
+                } else {
+                    addMessage(data.message);
+                }
+            } catch (error) {
+                addMessage('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -8,7 +8,7 @@ import { useSWRConfig } from 'swr';
 import { useQueryClient } from '@tanstack/react-query';
 import { Models } from 'node-appwrite';
 import { ChatHeader } from '@/features/chats/components/chat-header';
-import { generateIDChat } from '@/lib/utils';
+import { generateID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -44,7 +44,7 @@ export function Chat({
     initialMessages,
     experimental_throttle: 100,
     sendExtraMessageFields: true,
-    generateId: generateIDChat,
+    generateId: generateID,
     onFinish: () => {
       mutate('/api/history');
       // console.log("on finish");

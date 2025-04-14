@@ -2,21 +2,20 @@ import { z } from "zod";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 
-import { sessionMiddleware } from "@/lib/session-middleware";
+
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
-import { DATABASE_ID, ATTACHMENTS_BUCKET_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 import { getMember } from "@/features/members/utils";
 
-import { Project } from "../types";
-import { ID, Query } from "node-appwrite";
+// import { Project } from "../types";
 import { createProjectSchema, updateProjectSchema } from "../schemas";
 import { TaskStatus } from "@/features/tasks/types";
 import { saveProject } from "@/features/chats/queries";
 
 const app = new Hono()
+  .use("*", supabaseMiddleware()) // Apply Supabase middleware to the app
   .get(
     "/",
-    sessionMiddleware,
     zValidator(
       "query",
       z.object({
@@ -24,32 +23,45 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const databases = c.get("databases");
+      const supabase = c.get("supabase");
       const user = c.get("user");
       const { workspaceId } = c.req.valid("query");
 
       if (!workspaceId) {
         return c.json({ error: "Missing workspaceId" }, 400);
       }
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
 
-      if (!member) {
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const projects = await databases.listDocuments<Project>(DATABASE_ID, PROJECTS_ID, [
-        Query.equal("workspaceId", workspaceId),
-        Query.orderDesc("$createdAt"),
-      ]);
+      // Check if user is a member of the workspace
+      const { data: member, error: memberError } = await supabase
+        .from("members")
+        .select("*")
+        .eq("workspaceId", workspaceId)
+        .eq("userId", user.id)
+        .single();
+
+      if (memberError || !member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Fetch projects for the given workspaceId
+      const { data: projects, error: projectsError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("workspaceId", workspaceId)
+        .order("createdAt", { ascending: false });
+
+      if (projectsError) {
+        return c.json({ error: projectsError.message }, 500);
+      }
 
       return c.json({ data: projects });
     }
   )
-  .get("/:projectId", sessionMiddleware, async (c) => {
+  .get("/:projectId", async (c) => {
     const databases = c.get("databases");
     const user = c.get("user");
     const { projectId } = c.req.param();
@@ -74,7 +86,6 @@ const app = new Hono()
   })
   .post(
     "/",
-    sessionMiddleware,
     zValidator("form", createProjectSchema),
     async (c) => {
       const databases = c.get("databases");
@@ -134,7 +145,6 @@ const app = new Hono()
   )
   .patch(
     "/:projectId",
-    sessionMiddleware,
     zValidator("form", updateProjectSchema),
     async (c) => {
       const databases = c.get("databases");
@@ -193,7 +203,7 @@ const app = new Hono()
       return c.json({ data: project });
     }
   )
-  .delete("/:projectId", sessionMiddleware, async (c) => {
+  .delete("/:projectId", async (c) => {
     const databases = c.get("databases");
     const user = c.get("user");
 

@@ -9,4 +9,4 @@ services:
       - .env.local
     volumes:
       - .:/app
-    command: npm run start
+    command: npm run dev

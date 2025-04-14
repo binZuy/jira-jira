@@ -16,8 +16,6 @@ export type Suggestion = Models.Document &{
   description: string;
   userId: string;
   isResolved: boolean;
-  // createdAt: Date;
-  // updatedAt: Date;
 };
 
 export type Chat = Models.Document & {

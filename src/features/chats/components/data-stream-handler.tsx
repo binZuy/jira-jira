@@ -17,7 +17,13 @@ export type DataStreamDelta = {
     | 'suggestion'
     | 'clear'
     | 'finish'
-    | 'kind';
+    | 'kind'
+    | 'task-create'
+    | 'task-update'
+    | 'task-delete'
+    | 'task-search'
+    | 'view-update'
+    | 'mode-update';
   content: string | Suggestion;
 };
 
