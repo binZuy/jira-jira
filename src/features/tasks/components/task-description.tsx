@@ -1,4 +1,4 @@
-import { Task } from "../types";
+import { Task } from "@/lib/types/enums";
 
 import { useState } from "react";
 import { PencilIcon, XIcon, FileIcon } from "lucide-react";
@@ -25,7 +25,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
     mutate(
       {
         form: { description: value },
-        param: { taskId: task.$id },
+        param: { taskId: task.id },
       },
       {
         onSuccess: () => {

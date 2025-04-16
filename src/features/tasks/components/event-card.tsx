@@ -1,11 +1,9 @@
-import { Project } from "@/features/projects/types";
-import { TaskStatus } from "../types";
+import { Project, TaskStatus, Member } from "@/lib/types/enums";
 import { cn } from "@/lib/utils";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useRouter } from "next/navigation";
-import { Member } from "@/features/members/types";
 
 interface EventCardProps {
   title: string;
@@ -16,11 +14,13 @@ interface EventCardProps {
 }
 
 const statusColorMap: Record<TaskStatus, string> = {
-  [TaskStatus.BACKLOG]: "border-l-pink-500",
   [TaskStatus.TODO]: "border-l-red-500",
   [TaskStatus.IN_PROGRESS]: "border-l-yellow-500",
-  [TaskStatus.IN_REVIEW]: "border-l-blue-500",
   [TaskStatus.DONE]: "border-l-emerald-500",
+  [TaskStatus.OUT_OF_ORDER]: "border-l-pink-500",
+  [TaskStatus.OUT_OF_SERVICE]: "border-l-blue-500",
+  [TaskStatus.PICK_UP]: "border-l-blue-500",
+  [TaskStatus.READY_FOR_INSPECTION]: "border-l-blue-500",
 };
 export const EventCard = ({
   title,

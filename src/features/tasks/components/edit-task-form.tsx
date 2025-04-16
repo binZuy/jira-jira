@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
-import { Task, TaskStatus } from "../types";
+import { Task, TaskStatus } from "@/lib/types/enums";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useUpdateTask } from "../api/use-update-task";
 import { useRef } from "react";
@@ -63,8 +63,8 @@ export const EditTaskForm = ({
     defaultValues: {
       ...initialValues,
       dueDate: initialValues.dueDate
-      ? new Date(initialValues.dueDate)
-      : undefined,
+        ? new Date(initialValues.dueDate)
+        : undefined,
       attachments: [],
     },
   });
@@ -106,7 +106,7 @@ export const EditTaskForm = ({
     };
 
     mutate(
-      { form: formData, param: { taskId: initialValues.$id } },
+      { form: formData, param: { taskId: initialValues.id } },
       {
         onSuccess: () => {
           form.reset();
@@ -208,17 +208,23 @@ export const EditTaskForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        <SelectItem value={TaskStatus.BACKLOG}>
-                          Backlog
-                        </SelectItem>
                         <SelectItem value={TaskStatus.TODO}>To do</SelectItem>
                         <SelectItem value={TaskStatus.IN_PROGRESS}>
                           In Progress
                         </SelectItem>
-                        <SelectItem value={TaskStatus.IN_REVIEW}>
-                          In Review
-                        </SelectItem>
                         <SelectItem value={TaskStatus.DONE}>Done</SelectItem>
+                        <SelectItem value={TaskStatus.OUT_OF_SERVICE}>
+                          Out Of Service
+                        </SelectItem>
+                        <SelectItem value={TaskStatus.OUT_OF_ORDER}>
+                          Out Of Order
+                        </SelectItem>
+                        <SelectItem value={TaskStatus.PICK_UP}>
+                          Pick Up
+                        </SelectItem>
+                        <SelectItem value={TaskStatus.READY_FOR_INSPECTION}>
+                          Inspection Ready
+                        </SelectItem>
                       </SelectContent>
                     </Select>
 

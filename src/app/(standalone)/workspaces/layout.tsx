@@ -24,7 +24,7 @@ const StandAloneLayout = ({ children }: StandAloneLayoutProps) => {
         </div> */}
         <SidebarProvider defaultOpen={false}>
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="flex flex-col items-center justify-center py-4">
             {children}
           </SidebarInset>
         </SidebarProvider>

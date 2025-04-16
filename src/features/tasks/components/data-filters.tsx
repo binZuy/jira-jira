@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 
 import { ListChecksIcon, UserIcon } from "lucide-react";
-import { TaskStatus } from "../types";
+import { TaskStatus } from "@/lib/types/enums";
 import { useTaskFilters } from "../hooks/use-task-filters";
 
 interface DataFilterProps {
@@ -32,13 +32,13 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
 
   const isLoading = isLoadingProjects || isLoadingMembers;
 
-  const projectOptions = projects?.documents.map((project) => ({
-    value: project.$id,
+  const projectOptions = projects?.map((project) => ({
+    value: project.id,
     label: project.name,
   }));
 
-  const memberOptions = members?.documents.map((member) => ({
-    value: member.$id,
+  const memberOptions = members?.map((member) => ({
+    value: member.id,
     label: member.name,
   }));
 
@@ -74,11 +74,17 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
         <SelectContent>
           <SelectItem value="all">All statuses</SelectItem>
           <SelectSeparator />
-          <SelectItem value={TaskStatus.BACKLOG}>Backlog</SelectItem>
           <SelectItem value={TaskStatus.TODO}>To do</SelectItem>
           <SelectItem value={TaskStatus.IN_PROGRESS}>In Progress</SelectItem>
-          <SelectItem value={TaskStatus.IN_REVIEW}>In Review</SelectItem>
           <SelectItem value={TaskStatus.DONE}>Done</SelectItem>
+          <SelectItem value={TaskStatus.OUT_OF_SERVICE}>
+            Out Of Service
+          </SelectItem>
+          <SelectItem value={TaskStatus.OUT_OF_ORDER}>Out Of Order</SelectItem>
+          <SelectItem value={TaskStatus.PICK_UP}>Pick Up</SelectItem>
+          <SelectItem value={TaskStatus.READY_FOR_INSPECTION}>
+            Inspection Ready
+          </SelectItem>
         </SelectContent>
       </Select>
       <Select
@@ -102,28 +108,26 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
         </SelectContent>
       </Select>
       {!hideProjectFilter && (
-        
-      
-      <Select
-        defaultValue={projectId ?? undefined}
-        onValueChange={(value) => onProjectChange(value)}
-      >
-        <SelectTrigger className="w-full lg:w-auto h-8">
-          <div className="flex items-center pr-2">
-            <UserIcon className="size-4 mr-2" />
-            <SelectValue placeholder="All projects" />
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All projects</SelectItem>
-          <SelectSeparator />
-          {projectOptions?.map((project) => (
-            <SelectItem key={project.value} value={project.value}>
-              {project.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          defaultValue={projectId ?? undefined}
+          onValueChange={(value) => onProjectChange(value)}
+        >
+          <SelectTrigger className="w-full lg:w-auto h-8">
+            <div className="flex items-center pr-2">
+              <UserIcon className="size-4 mr-2" />
+              <SelectValue placeholder="All projects" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All projects</SelectItem>
+            <SelectSeparator />
+            {projectOptions?.map((project) => (
+              <SelectItem key={project.value} value={project.value}>
+                {project.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
       <DatePicker
         placeholder="Due date"

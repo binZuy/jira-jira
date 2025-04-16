@@ -39,7 +39,7 @@ export const TaskComments = ({ taskId }: TaskCommentsProps) => {
     <div className="space-y-4">
       <div className="space-y-4">
         {comments?.map((comment) => (
-          <div key={comment.$id} className="flex gap-x-2">
+          <div key={comment.id} className="flex gap-x-2">
             <MemberAvatar 
               name={comment.user?.name}
               className="size-8"
@@ -48,7 +48,7 @@ export const TaskComments = ({ taskId }: TaskCommentsProps) => {
               <div className="flex items-center gap-x-2">
                 <p className="font-semibold">{comment.user?.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(comment.$createdAt), { 
+                  {formatDistanceToNow(new Date(comment.created_at), { 
                     addSuffix: true 
                   })}
                 </p>

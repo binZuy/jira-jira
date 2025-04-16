@@ -27,14 +27,14 @@ export const EditTaskFormWrapper = ({
     workspaceId,
   });
 
-  const projectOptions = projects?.documents.map((project) => ({
-    id: project.$id,
+  const projectOptions = projects?.map((project) => ({
+    id: project.id,
     name: project.name,
     imageUrl: project.imageUrl,
   }));
 
-  const memberOptions = members?.documents.map((member) => ({
-    id: member.$id,
+  const memberOptions = members?.map((member) => ({
+    id: member.id,
     name: member.name,
   }));
 

@@ -1,5 +1,5 @@
 import { PencilIcon } from "lucide-react";
-import { Task } from "../types";
+import { Task } from "@/lib/types/enums";
 import { Button } from "@/components/ui/button";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { OverviewProperty } from "./overview-property";
@@ -21,7 +21,7 @@ export const TaskOverview = ({ task }: TaskOverviewProps) => {
       <div className="bg-muted rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Overview</p>
-          <Button onClick={() => open(task.$id)} size="sm" variant="secondary">
+          <Button onClick={() => open(task.id)} size="sm" variant="secondary">
             <PencilIcon className="size-4 mr-2" />
             Edit
           </Button>

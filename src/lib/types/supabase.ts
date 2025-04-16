@@ -34,6 +34,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      attachments: {
+        Row: {
+          created_at: string
+          fileName: string | null
+          filePath: string | null
+          fileType: string | null
+          fileUrl: string | null
+          id: string
+          taskId: number | null
+        }
+        Insert: {
+          created_at?: string
+          fileName?: string | null
+          filePath?: string | null
+          fileType?: string | null
+          fileUrl?: string | null
+          id?: string
+          taskId?: number | null
+        }
+        Update: {
+          created_at?: string
+          fileName?: string | null
+          filePath?: string | null
+          fileType?: string | null
+          fileUrl?: string | null
+          id?: string
+          taskId?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_taskId_fkey"
+            columns: ["taskId"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chats: {
+        Row: {
+          created_at: string
+          id: string
+          title: string | null
+          userId: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          userId?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          userId?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string | null
@@ -65,6 +124,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      documents: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: number
+          title: string | null
+          userId: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          title?: string | null
+          userId?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          title?: string | null
+          userId?: string | null
+        }
+        Relationships: []
       }
       logs: {
         Row: {
@@ -100,23 +183,32 @@ export type Database = {
       }
       members: {
         Row: {
+          avatar_url: string | null
           created_at: string
-          id: string
-          role: number | null
+          email: string | null
+          id: number
+          name: string | null
+          role: Database["public"]["Enums"]["memberRole"] | null
           userId: string | null
-          workspaceId: string
+          workspaceId: string 
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
-          id?: string
-          role?: number | null
+          email?: string | null
+          id?: number
+          name?: string | null
+          role?: Database["public"]["Enums"]["memberRole"] | null
           userId?: string | null
           workspaceId?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
-          id?: string
-          role?: number | null
+          email?: string | null
+          id?: number
+          name?: string | null
+          role?: Database["public"]["Enums"]["memberRole"] | null
           userId?: string | null
           workspaceId?: string | null
         }
@@ -126,6 +218,41 @@ export type Database = {
             columns: ["workspaceId"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          chatId: string | null
+          created_at: string
+          id: number
+          parts: Json | null
+          role: Database["public"]["Enums"]["messageRole"] | null
+          userId: string | null
+        }
+        Insert: {
+          chatId?: string | null
+          created_at?: string
+          id?: number
+          parts?: Json | null
+          role?: Database["public"]["Enums"]["messageRole"] | null
+          userId?: string | null
+        }
+        Update: {
+          chatId?: string | null
+          created_at?: string
+          id?: number
+          parts?: Json | null
+          role?: Database["public"]["Enums"]["messageRole"] | null
+          userId?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chatId_fkey"
+            columns: ["chatId"]
+            isOneToOne: false
+            referencedRelation: "chats"
             referencedColumns: ["id"]
           },
         ]
@@ -280,7 +407,8 @@ export type Database = {
     Enums: {
       action: "CREATED" | "UPDATED" | "COMMENTED" | "ASSIGNED_TO"
       cleaningPriority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL"
-      role: "ADMIN" | "MEMBER"
+      memberRole: "ADMIN" | "MEMBER"
+      messageRole: "user" | "assistant" | "system" | "data"
       roomType: "STANDARD" | "SUITE" | "DELUXE" | "PRESIDENT"
       status:
         | "TODO"
@@ -411,7 +539,8 @@ export const Constants = {
     Enums: {
       action: ["CREATED", "UPDATED", "COMMENTED", "ASSIGNED_TO"],
       cleaningPriority: ["LOW", "HIGH", "MEDIUM", "CRITICAL"],
-      role: ["ADMIN", "MEMBER"],
+      memberRole: ["ADMIN", "MEMBER"],
+      messageRole: ["user", "assistant", "system", "data"],
       roomType: ["STANDARD", "SUITE", "DELUXE", "PRESIDENT"],
       status: [
         "TODO",

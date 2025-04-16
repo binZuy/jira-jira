@@ -30,11 +30,11 @@ export const TaskIdClient = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-4">
           <TaskOverview task={data} />
-          <TaskLogs taskId={data.$id} />
+          <TaskLogs taskId={data.id} />
         </div>
         <div className="space-y-4">
           <TaskDescription task={data} />
-          <TaskComments taskId={data.$id} />
+          <TaskComments taskId={data.id} />
         </div>
       </div>
     </div>

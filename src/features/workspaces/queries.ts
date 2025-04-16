@@ -1,9 +1,7 @@
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
-// Define the Member interface
 interface Member {
-  workspaceId: string; // Adjust the type if necessary
-  // Add other properties if needed
+  workspaceId: string;
 }
 
 export const getWorkspaces = async () => {
@@ -11,11 +9,10 @@ export const getWorkspaces = async () => {
 
   // Get the current logged-in user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  // console.log(user);
   if (userError || !user) {
     return [];
   }
-
+  
   // Fetch the members related to the user
   const { data: members, error: membersError } = await supabase
     .from('members')
@@ -28,14 +25,13 @@ export const getWorkspaces = async () => {
 
   // Get the workspace IDs of the current user
   const workspaceIds = members.map((member: Member) => member.workspaceId);
-
+console.log("id", workspaceIds);
   // Fetch the workspaces related to the user by the workspaceIds
-  const { data: workspaces, error: workspacesError, count } = await supabase
+  const { data: workspaces, error: workspacesError } = await supabase
     .from('workspaces')
-    .select('*', { count: 'exact' })
+    .select('*')
     .in('id', workspaceIds)
-    .order('createdAt', { ascending: false });
-
+    .order('created_at', { ascending: false });
   if (workspacesError) {
     return [];
   }

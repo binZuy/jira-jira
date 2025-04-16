@@ -12,9 +12,9 @@ export const useGetWorkspaces = () => {
         throw new Error("Failed to fetch workspaces");
       }
 
-      const { workspaces } = await response.json();
+      const { data } = await response.json();
 
-      return workspaces;
+      return data;
     },
   });
   return query;

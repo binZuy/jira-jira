@@ -96,7 +96,7 @@ export async function getChatsByUserId() {
   try {
     const response = await databases.listDocuments(DATABASE_ID, CHATS_ID, [
       Query.equal("userId", user.$id),
-      Query.orderDesc("$createdAt"),
+      Query.orderDesc("created_at"),
     ]);
     return response.documents;
   } catch (error) {
@@ -139,7 +139,7 @@ export async function getMessagesByChatId({ id }: { id: string }) {
   try {
     const response = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
       Query.equal("chatId", id),
-      Query.orderAsc("$createdAt"),
+      Query.orderAsc("$created_at"),
     ]);
     return response.documents;
   } catch (error) {
@@ -182,7 +182,7 @@ export async function getDocumentById({ id }: { id: string }) {
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
       Query.equal("id", id),
-      Query.orderDesc("$createdAt"),
+      Query.orderDesc("$created_at"),
     ]);
     const selectedDocument = response.documents[0];
     return selectedDocument;
@@ -197,7 +197,7 @@ export async function getDocumentsById({ id }: { id: string }) {
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
       Query.equal("id", id),
-      Query.orderAsc("$createdAt"),
+      Query.orderAsc("$created_at"),
     ]);
     return response.documents;
   } catch (error) {
@@ -220,11 +220,11 @@ export async function deleteDocumentsByIdAfterTimestamp({
   try {
     const response = await databases.listDocuments(DATABASE_ID, DOCUMENTS_ID, [
       Query.equal("$id", id),
-      Query.orderDesc("$createdAt"),
+      Query.orderDesc("$created_at"),
     ]);
     return await Promise.all(
       response.documents.map((document) => {
-        if (new Date(document.$createdAt) > timestamp) {
+        if (new Date(document.$created_at) > timestamp) {
           return databases.deleteDocument(
             DATABASE_ID,
             DOCUMENTS_ID,

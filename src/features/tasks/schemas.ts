@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TaskStatus } from "./types";
+import { TaskStatus } from "@/lib/types/enums";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
@@ -36,7 +36,7 @@ export const createTaskSchema = z.object({
 
 export const taskAttachmentSchema = z.object({
   taskId: z.string().min(1, "Task ID is required"),
-  fileId: z.string().min(1, "File ID is required"),
+  filePath: z.string().min(1, "File ID is required"),
   fileName: z.string(),
   fileType: z.string(),
   fileUrl: z.string().url(),

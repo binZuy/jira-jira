@@ -19,7 +19,7 @@ export const TaskLogs = ({ taskId }: TaskLogsProps) => {
       <div className="space-y-4">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {logs?.map((log: any) => (
-          <div key={log.$id} className="flex gap-x-2">
+          <div key={log.id} className="flex gap-x-2">
             <MemberAvatar
               name={log.user?.name}
               className="size-8"
@@ -28,7 +28,7 @@ export const TaskLogs = ({ taskId }: TaskLogsProps) => {
               <div className="flex items-center gap-x-2">
                 <p className="font-semibold">{log.user?.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(log.$createdAt), {
+                  {formatDistanceToNow(new Date(log.createdAt), {
                     addSuffix: true
                   })}
                 </p>

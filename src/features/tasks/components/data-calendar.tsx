@@ -1,4 +1,4 @@
-import { Task } from "../types";
+import { Task } from "@/lib/types/enums";
 
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
@@ -76,10 +76,10 @@ export function DataCalendar({ data }: DataCalendarProps) {
     start: new Date(task.dueDate),
     end: new Date(task.dueDate),
     title: task.name,
-    project: task.project,
+    project: task.projects,
     assignee: task.assignee,
     status: task.status,
-    id: task.$id,
+    id: task.id,
   }));
 
   const handleNavigate = (action: "PREV" | "NEXT" | "TODAY") => {

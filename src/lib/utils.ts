@@ -85,7 +85,7 @@ export function getDocumentTimestampByIndex(
   if (!documents) return new Date();
   if (index > documents.length) return new Date();
 
-  return documents[index].createdAt;
+  // return documents[index].createdAt;
 }
 
 export function getMostRecentUserMessage(messages: Array<UIMessage>) {

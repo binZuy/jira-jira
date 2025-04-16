@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { client } from "@/lib/rpc";
-import { TaskStatus } from "../types";
+import { TaskStatus } from "@/lib/types/enums";
 
 interface UseGetTasksProps {
   workspaceId: string;

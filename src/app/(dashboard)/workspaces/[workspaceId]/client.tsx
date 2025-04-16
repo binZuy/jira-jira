@@ -12,15 +12,14 @@ import { formatDistanceToNow } from "date-fns";
 import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { Analytics } from "@/components/analytics";
-import { Task } from "@/features/tasks/types";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, CalendarIcon, SettingsIcon } from "lucide-react";
+import { PlusIcon, CalendarIcon, SettingsIcon, ListChecksIcon } from "lucide-react";
 import { DottedSeparator } from "@/components/dotted-separator";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Project } from "@/features/projects/types";
+import { Project, Member, Task } from "@/lib/types/enums";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
-import { Member } from "@/features/members/types";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 
 export const WorkspaceIdClient = () => {
@@ -52,11 +51,9 @@ export const WorkspaceIdClient = () => {
   return (
     <div className="h-full flex flex-col space-y-4">
       <Analytics data={analytics} />
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <TasksList data={tasks.documents} total={tasks.total} />
-        <ProjectsList data={projects.documents} total={projects.total} />
-        <MembersList data={members.documents} total={members.total} />
-      </div>
+      <ProjectsList data={projects} total={projects.length} />
+      <MembersList data={members} total={members.length} />
+      <TasksList data={tasks} total={tasks.length} />
     </div>
   );
 };
@@ -69,26 +66,46 @@ export const TasksList = ({ data, total }: TasksListProps) => {
   const workspaceId = useWorkspaceId();
   const { open: createTask } = useCreateTaskModal();
   return (
-    <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-muted rounded-lg p-4">
+    <Card>
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <p className="text-lg font-semibold">Tasks ({total})</p>
-          <Button onClick={createTask} variant="muted" size="icon">
-            <PlusIcon className="size-4 text-neutral-400" />
+          <div className="flex items-center gap-2">
+            <CardTitle>Recent Tasks</CardTitle>
+            <Badge variant="outline" className="bg-muted">
+              {total}
+            </Badge>
+          </div>
+          <Button onClick={createTask} variant="outline" size="sm">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Create Task
           </Button>
         </div>
+      </CardHeader>
 
-        <DottedSeparator className="my-4" />
-        <ul className="flex flex-col gap-y-4">
-          {data.map((task) => (
-            <li key={task.$id}>
-              <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                <Card className=" shadow-none rounded-lg hover:opacity-75 transition">
+      <CardContent>
+        {data.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 gap-4">
+            <ListChecksIcon className="h-12 w-12 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              No tasks found. Create your first task to get started!
+            </p>
+            <Button onClick={createTask} variant="outline" size="sm">
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Create Task
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {data.slice(0, 4).map((task) => (
+              <Link
+                key={task.id}
+                href={`/workspaces/${workspaceId}/tasks/${task.id}`}
+              >
+                <Card className="shadow-none hover:bg-muted/50 transition">
                   <CardContent className="p-4">
-                    <p className="text-lg font-medium truncate">{task.name}</p>
-                    <div className="size-1 rounded0full bg-neutral-300" />
-                    <div className="text-sm text-muted-fore-ground flex items-center">
-                      <CalendarIcon className="size-3 mr-1" />
+                    <p className="text-sm font-medium truncate">{task.name}</p>
+                    <div className="text-xs text-muted-foreground flex items-center mt-2">
+                      <CalendarIcon className="h-3 w-3 mr-1" />
                       <span className="truncate">
                         {formatDistanceToNow(new Date(task.dueDate))}
                       </span>
@@ -96,17 +113,21 @@ export const TasksList = ({ data, total }: TasksListProps) => {
                   </CardContent>
                 </Card>
               </Link>
-            </li>
-          ))}
-          <li className="text-sm text-muted-foreground text-center hidden">
-            No tasks found{" "}
-          </li>
-        </ul>
+            ))}
+            <Button variant="outline" className="w-full" size="sm" asChild>
+              <Link href={`/workspaces/${workspaceId}/tasks`}>
+                View All Tasks
+              </Link>
+            </Button>
+          </div>
+        )}
+      </CardContent>
+      {/* <CardFooter>
         <Button variant="muted" className="mt-4 w-full" asChild>
           <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
         </Button>
-      </div>
-    </div>
+      </CardFooter> */}
+    </Card>
   );
 };
 
@@ -130,8 +151,8 @@ export const ProjectsList = ({ data, total }: ProjectsListProps) => {
         <DottedSeparator className="my-4" />
         <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {data.map((project) => (
-            <li key={project.$id}>
-              <Link href={`/workspaces/${workspaceId}/tasks/${project.$id}`}>
+            <li key={project.id}>
+              <Link href={`/workspaces/${workspaceId}/tasks/${project.id}`}>
                 <Card className=" shadow-none rounded-lg hover:opacity-75 transition">
                   <CardContent className="p-4 flex items-center gap-x-2.5">
                     <ProjectAvatar
@@ -163,7 +184,7 @@ interface MembersListProps {
 }
 export const MembersList = ({ data, total }: MembersListProps) => {
   const workspaceId = useWorkspaceId();
-  
+
   return (
     <div className="flex flex-col gap-y-4 col-span-1">
       <div className="bg-white border rounded-lg p-4">
@@ -179,21 +200,18 @@ export const MembersList = ({ data, total }: MembersListProps) => {
         <DottedSeparator className="my-4" />
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map((member) => (
-            <li key={member.$id}>
-              <Link href={`/workspaces/${workspaceId}/tasks/${member.$id}`}>
+            <li key={member.id}>
+              <Link href={`/workspaces/${workspaceId}/tasks/${member.id}`}>
                 <Card className=" shadow-none rounded-lg overflow-hidden">
                   <CardContent className="p-3 flex items-center gap-x-2">
-                    <MemberAvatar
-                      className="size-12"
-                      name={member.name}
-                    />
+                    <MemberAvatar className="size-12" name={member.name} />
                     <div className="flex flex-col items-center overflow-hidden">
-                    <p className="text-lg font-medium line-clamp-1">
-                      {member.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {member.email}
-                    </p>
+                      <p className="text-lg font-medium line-clamp-1">
+                        {member.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {member.email}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
