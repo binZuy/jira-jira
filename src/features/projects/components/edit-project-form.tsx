@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "../types";
+import { Project } from "@/lib/types/enums";
 import { updateProjectSchema } from "../schemas";
 import { useUpdateProject } from "@/features/projects/api/use-update-project";
 import { useDeleteProject } from "@/features/projects/api/use-delete-project";

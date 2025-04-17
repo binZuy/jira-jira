@@ -122,3 +122,9 @@ export type Suggestion = {
   userId: string;
   isResolved: boolean;
 };
+
+export type Room = {
+  id: number;
+  name: string;
+  roomType: RoomType;
+}

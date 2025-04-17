@@ -33,7 +33,7 @@ const app = new Hono()
       .select("id, workspaceId")
       .eq("id", task.projectId)
       .single();
-    
+
     if (projectError || !project) {
       return c.json({ error: "Project not found" }, 404);
     }
@@ -112,7 +112,7 @@ const app = new Hono()
     }
 
     // Create log for task deletion
-    const { error: logError } = await supabase.from("tasklogs").insert([
+    const { error: logError } = await supabase.from("logs").insert([
       {
         taskId,
         userId: user.id,
@@ -138,6 +138,7 @@ const app = new Hono()
         workspaceId: z.string(),
         projectId: z.string().nullish(),
         assigneeId: z.string().nullish(),
+        roomId: z.string().nullish(),
         status: z.nativeEnum(TaskStatus).nullish(),
         search: z.string().nullish(),
         dueDate: z.string().nullish(),
@@ -146,14 +147,21 @@ const app = new Hono()
     async (c) => {
       const supabase = c.get("supabase");
       const user = c.get("user");
-  
+
       if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-  
-      const { workspaceId, projectId, status, search, assigneeId, dueDate } =
-        c.req.valid("query");
-  
+
+      const {
+        workspaceId,
+        projectId,
+        status,
+        search,
+        assigneeId,
+        roomId,
+        dueDate,
+      } = c.req.valid("query");
+
       // Check if the user is a member of the workspace
       const { data: member, error: memberError } = await supabase
         .from("members")
@@ -161,18 +169,18 @@ const app = new Hono()
         .eq("workspaceId", workspaceId)
         .eq("userId", user.id)
         .single();
-  
+
       if (memberError || !member) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-  
+
       // Prepare the base query for tasks and include related project and assignee data
       let query = supabase
         .from("tasks")
         .select("*, projects(id, workspaceId, name)")
         .eq("projects.workspaceId", workspaceId)
         .order("created_at", { ascending: false });
-  
+
       if (projectId) {
         query = query.eq("projectId", projectId);
       }
@@ -182,27 +190,34 @@ const app = new Hono()
       if (assigneeId) {
         query = query.eq("assigneeId", assigneeId);
       }
+      if (roomId) {
+        query = query.eq("roomId", Number(roomId));
+      }
       if (dueDate) {
         query = query.eq("dueDate", dueDate);
       }
       if (search) {
         query = query.ilike("search", `%${search}%`); // Use `ilike` for case-insensitive search
       }
-  
+
       // Fetch tasks along with associated projects and members (assignees)
       const { data: tasks, error: tasksError } = await query;
-  
+
       if (tasksError) {
         return c.json({ error: tasksError.message }, 500);
       }
 
       const listtasks = await Promise.all(
         tasks.map(async (task) => {
-          const { data: assignee } = await supabase.from("members").select("id, userId, name, email,role").eq("userId", task.assigneeId).single();
+          const { data: assignee } = await supabase
+            .from("members")
+            .select("id, userId, name, email,role")
+            .eq("userId", task.assigneeId)
+            .single();
           return {
             ...task,
             assignee,
-          }
+          };
         })
       );
       // Return populated tasks (the projects and assignees are already embedded in the task objects)
@@ -225,6 +240,7 @@ const app = new Hono()
       const status = formData.get("status") as TaskStatus;
       const projectId = formData.get("projectId") as string;
       const dueDate = formData.get("dueDate") as string;
+      const roomId = formData.get("roomId") as string;
       const assigneeId = formData.get("assigneeId") as string;
       const description = formData.get("description") as string | null;
       const attachments = formData.getAll("attachments") as File[];
@@ -248,7 +264,7 @@ const app = new Hono()
         .eq("id", existingTask.projectId)
         .single();
 
-      if ( projectError || !project ) {
+      if (projectError || !project) {
         return c.json({ error: "Project not found" }, 404);
       }
       // Check if the user is a member of the workspace
@@ -267,7 +283,7 @@ const app = new Hono()
       if (attachments && attachments.length > 0) {
         for (const file of attachments) {
           if (file instanceof File) {
-              const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
+            const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
             const { error: uploadError } = await supabase.storage
               .from("storages") // Assuming 'attachments' is the storage bucket
               .upload(filePath, file);
@@ -288,8 +304,9 @@ const app = new Hono()
 
               fileUrl = previewData.publicUrl;
             } else {
-              const { error: downloadError } =
-                await supabase.storage.from("storages").download(filePath);
+              const { error: downloadError } = await supabase.storage
+                .from("storages")
+                .download(filePath);
 
               if (downloadError) {
                 console.error(
@@ -324,7 +341,7 @@ const app = new Hono()
           }
         }
       }
-
+      const room = Number(roomId);
       // Update the task details
       const { error: updateError } = await supabase
         .from("tasks")
@@ -333,6 +350,7 @@ const app = new Hono()
           status,
           projectId,
           dueDate,
+          roomId: room,
           assigneeId,
           description,
         })
@@ -343,7 +361,7 @@ const app = new Hono()
       }
 
       // Create a log for the task update
-      const { error: logError } = await supabase.from("tasklogs").insert([
+      const { error: logError } = await supabase.from("logs").insert([
         {
           taskId,
           userId: user.id,
@@ -352,6 +370,7 @@ const app = new Hono()
             name,
             status,
             assigneeId,
+            roomId,
             dueDate,
             projectId,
             description,
@@ -370,6 +389,7 @@ const app = new Hono()
           name,
           status,
           assigneeId,
+          roomId,
           dueDate,
           projectId,
           description,
@@ -383,6 +403,7 @@ const app = new Hono()
     const formData = await c.req.formData();
 
     if (!user) {
+      console.error("Unauthorized access attempt.");
       return c.json({ error: "Unauthorized" }, 401);
     }
 
@@ -392,10 +413,11 @@ const app = new Hono()
     const workspaceId = formData.get("workspaceId") as string;
     const projectId = formData.get("projectId") as string;
     const assigneeId = formData.get("assigneeId") as string;
+    const roomId = formData.get("roomId") as string;
     const dueDate = formData.get("dueDate") as string;
     const description = formData.get("description") as string;
 
-    // Process attachments (normalize to always be an array)
+    // Process attachments
     const files = formData.getAll("attachments");
     const normalizedFiles = Array.isArray(files) ? files : [files]; // Ensure it's always an array
     const attachments = [];
@@ -427,8 +449,9 @@ const app = new Hono()
 
           fileUrl = previewData.publicUrl;
         } else {
-          const { error: downloadError } =
-            await supabase.storage.from("storages").download(filePath);
+          const { error: downloadError } = await supabase.storage
+            .from("storages")
+            .download(filePath);
 
           if (downloadError) {
             console.error("Failed to download file:", downloadError.message);
@@ -453,15 +476,17 @@ const app = new Hono()
     const { data: highestPositionTask, error: highestPositionError } =
       await supabase
         .from("tasks")
-        .select("position, projectId, projects(id, workspaceId)")
-        .eq("projects.id", projectId)
-        .eq("status", status)
-        .eq("projects.workspaceId", workspaceId)
+        .select("position")
+        .eq("projectId", projectId)
         .order("position", { ascending: true })
         .limit(1);
 
     if (highestPositionError) {
-      return c.json({ error: highestPositionError.message }, 500);
+      console.error(
+        "Error fetching highest position task:",
+        highestPositionError.message
+      );
+      return c.json({ error: highestPositionError.message }, 400);
     }
 
     const newPosition =
@@ -478,6 +503,7 @@ const app = new Hono()
           status,
           projectId,
           assigneeId,
+          roomId: Number(roomId),
           dueDate,
           description,
           position: newPosition,
@@ -514,7 +540,7 @@ const app = new Hono()
     }
 
     // Log activity for task creation
-    const { error: logError } = await supabase.from("tasklogs").insert([
+    const { error: logError } = await supabase.from("logs").insert([
       {
         taskId: task.id,
         action: Action.CREATED,
@@ -525,6 +551,7 @@ const app = new Hono()
           workspaceId,
           projectId,
           assigneeId,
+          roomId,
           dueDate,
           description,
         },
@@ -532,6 +559,7 @@ const app = new Hono()
     ]);
 
     if (logError) {
+      console.error("Failed to log task creation:", logError.message);
       return c.json({ error: logError.message }, 500);
     }
 
@@ -579,7 +607,6 @@ const app = new Hono()
     if (memberError || !currentMember) {
       return c.json({ error: "Unauthorized" }, 401);
     }
-
 
     // Fetch assignee details
     const { data: assignee, error: memberFetchError } = await supabase
@@ -632,41 +659,55 @@ const app = new Hono()
       const { tasks } = await c.req.valid("json");
 
       if (!user) {
+        console.error("Unauthorized access attempt.");
         return c.json({ error: "Unauthorized" }, 401);
       }
-  
+
       // Fetch tasks from Supabase
       const { data: tasksToUpdate, error: tasksError } = await supabase
         .from("tasks")
         .select("*")
-        .in("id", tasks.map((task) => task.id));
-  
+        .in(
+          "id",
+          tasks.map((task) => task.id)
+        );
+
       if (tasksError) {
+        console.error("Error fetching tasks:", tasksError.message);
         return c.json({ error: tasksError.message }, 500);
       }
-  
-      const workspaceIds = Array.from(new Set(tasksToUpdate.map((task) => task.workspaceId)));
-      if (workspaceIds.length !== 1) {
-        return c.json({ error: "All tasks must belong to the same workspaceId" }, 400);
+
+      if (!tasksToUpdate || tasksToUpdate.length === 0) {
+        return c.json({ error: "No tasks found for the provided IDs." }, 404);
       }
-      
-      const workspaceId = workspaceIds[0];
-      if (!workspaceId) {
-        return c.json({ error: "No workspaceId found" }, 400);
+
+      const projectIds = Array.from(
+        new Set(tasksToUpdate.map((task) => task.projectId))
+      );
+      console.log("Project IDs found:", projectIds);
+      const { data: projects, error: projectsError } = await supabase
+        .from("projects")
+        .select("*")
+        .in("id", projectIds);
+      if (!projects || projectsError) {
+        return c.json({ error: "Projects not found"}, 404);
       }
-  
+
+      const workspaceIds = Array.from(
+        new Set(projects.map((project) => project.workspaceId)));
       // Check if the user is a member of the workspace
       const { data: member, error: memberError } = await supabase
         .from("members")
         .select("*")
-        .eq("workspaceId", workspaceId)
+        .eq("workspaceId", workspaceIds)
         .eq("userId", user.id)
         .single();
-  
+
       if (memberError || !member) {
+        console.error("User is not a member of the workspace.");
         return c.json({ error: "Unauthorized" }, 401);
       }
-  
+
       // Update tasks
       const updatedTasks = await Promise.all(
         tasks.map(async (task) => {
@@ -676,12 +717,13 @@ const app = new Hono()
             .update({ status, position })
             .eq("id", id);
           if (updateError) {
-            return { error: updateError.message };
+            console.error(`Failed to update task ${id}:`, updateError.message);
+            return { id, error: updateError.message };
           }
           return { id, status, position };
         })
       );
-  
+
       return c.json({ data: updatedTasks });
     }
   )
@@ -712,7 +754,8 @@ const app = new Hono()
             userId: user.id,
             content,
           },
-        ]).select()
+        ])
+        .select()
         .single(); // Use .single() to ensure a single row is returned
 
       if (commentError) {
@@ -720,7 +763,7 @@ const app = new Hono()
       }
 
       // Create a log for the comment
-      const { error: logError } = await supabase.from("tasklogs").insert([
+      const { error: logError } = await supabase.from("logs").insert([
         {
           taskId,
           userId: user.id,
@@ -760,7 +803,7 @@ const app = new Hono()
     }
 
     // Fetch user details for each comment's userId from the members table
-    const commentUserIds = comments.map(comment => comment.userId);
+    const commentUserIds = comments.map((comment) => comment.userId);
 
     // Fetch members (who are also users) related to the comments
     const { data: members, error: membersError } = await supabase
@@ -783,7 +826,10 @@ const app = new Hono()
 
     // Populate comments with user data (name and imageUrl)
     const populatedComments = comments.map((comment) => {
-      const user = memberMap[comment.userId] || { name: "Unknown", imageUrl: "" };
+      const user = memberMap[comment.userId] || {
+        name: "Unknown",
+        imageUrl: "",
+      };
       return {
         ...comment,
         user,
@@ -798,18 +844,18 @@ const app = new Hono()
     const user = c.get("user");
 
     if (!user) {
-        return c.json({ error: "Unauthorized" }, 401);
+      return c.json({ error: "Unauthorized" }, 401);
     }
 
     // Fetch task logs for the specified taskId and order by creation date
     const { data: logs, error: logsError } = await supabase
-      .from("tasklogs")
+      .from("logs")
       .select("*")
       .eq("taskId", taskId)
       .order("created_at", { ascending: false });
 
     if (logsError) {
-        return c.json({ error: logsError.message }, 500);
+      return c.json({ error: logsError.message }, 500);
     }
 
     // Fetch user details (from members table) for each log's userId
@@ -822,29 +868,28 @@ const app = new Hono()
       .in("userId", logUserIds);
 
     if (membersError) {
-        return c.json({ error: membersError.message }, 500);
+      return c.json({ error: membersError.message }, 500);
     }
 
     // Map member data to logs by userId
     const memberMap = members.reduce((acc: Record<string, any>, member) => {
-        acc[member.userId] = {
-            name: member.name,
-            imageUrl: member.avatar_url || "", // Handle potential nullish value for avatarUrl
-        };
-        return acc;
+      acc[member.userId] = {
+        name: member.name,
+        imageUrl: member.avatar_url || "", // Handle potential nullish value for avatarUrl
+      };
+      return acc;
     }, {});
 
     // Populate logs with user data (name and imageUrl)
     const populatedLogs = logs.map((log) => {
-        const user = memberMap[log.userId] || { name: "Unknown", imageUrl: "" };
-        return {
-            ...log,
-            user,
-        };
+      const user = memberMap[log.userId] || { name: "Unknown", imageUrl: "" };
+      return {
+        ...log,
+        user,
+      };
     });
 
     return c.json({ data: populatedLogs });
-});
-
+  });
 
 export default app;

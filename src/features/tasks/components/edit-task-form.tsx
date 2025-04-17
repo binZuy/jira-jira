@@ -20,7 +20,7 @@ import { DottedSeparator } from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
+import { RoomType } from "@/lib/types/enums";
 import { DatePicker } from "@/components/date-picker";
 import {
   Select,
@@ -44,6 +44,7 @@ interface EditTaskFormProps {
     imageUrl: string;
   }[];
   memberOptions: { id: string; name: string }[];
+  rooms: {id: number, name: string; roomType: RoomType }[];
   initialValues: Task;
 }
 
@@ -51,6 +52,7 @@ export const EditTaskForm = ({
   onCancel,
   projectOptions,
   memberOptions,
+  rooms,
   initialValues,
 }: EditTaskFormProps) => {
   const { mutate, isPending } = useUpdateTask();
@@ -186,6 +188,36 @@ export const EditTaskForm = ({
                       </SelectContent>
                     </Select>
 
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="roomId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Room</FormLabel>
+                    <Select
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select room" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        {rooms.map((room) => (
+                          <SelectItem key={room.id} value={String(room.id)}>
+                            <div className="flex items-center gap-x-2">
+                              {room.name} - {room.roomType}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

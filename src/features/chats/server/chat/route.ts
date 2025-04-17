@@ -22,7 +22,7 @@ import { getWeather } from "../../libs/ai/tools/get-weather";
 import { createDocument } from "../../libs/ai/tools/create-document";
 import { updateDocument } from "../../libs/ai/tools/update-document";
 import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
-import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
+// import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
 import { saveChat, saveMessages, getChatById, deleteChatById } from "@/features/chats/queries";
 import { supabaseMiddleware } from "@/lib/supabase-middleware";
 import { MessageRole } from "@/lib/types/enums";
@@ -104,7 +104,8 @@ const app = new Hono()
                 selectedChatModel === "chat-model-reasoning"
                   ? []
                   : ["getWeather", "createDocument", "updateDocument", "requestSuggestions",
-                    "createTask", "updateTask", "deleteTask", "getTaskDetail", "listTasks"],
+                    // "createTask", "updateTask", "deleteTask", "getTaskDetail", "listTasks"
+                  ],
                   // ],
               experimental_transform: smoothStream({ chunking: "word" }),
               experimental_generateMessageId: generateID,
@@ -113,11 +114,11 @@ const app = new Hono()
                 createDocument: createDocument({ dataStream }),
                 updateDocument: updateDocument({ dataStream }),
                 requestSuggestions: requestSuggestions({ dataStream }),
-                createTask: createTask({ dataStream }),
-                updateTask: updateTask({ dataStream }),
-                deleteTask: deleteTask({ dataStream }),
-                getTaskDetail: getTaskDetail({ dataStream }),
-                listTasks: listTasks({ dataStream }),
+                // createTask: createTask({ dataStream }),
+                // updateTask: updateTask({ dataStream }),
+                // deleteTask: deleteTask({ dataStream }),
+                // getTaskDetail: getTaskDetail({ dataStream }),
+                // listTasks: listTasks({ dataStream }),
               },
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);

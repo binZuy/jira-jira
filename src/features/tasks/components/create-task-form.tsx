@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
-import { TaskStatus } from "@/lib/types/enums";
+import { RoomType, TaskStatus } from "@/lib/types/enums";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { FileIcon, XIcon } from "lucide-react";
 
@@ -44,12 +44,14 @@ interface CreateTaskFormProps {
     imageUrl: string;
   }[];
   memberOptions: { id: string; name: string }[];
+  rooms: {id: number, name: string; roomType: RoomType }[];
 }
 
 export const CreateTaskForm = ({
   onCancel,
   projectOptions,
   memberOptions,
+  rooms
 }: CreateTaskFormProps) => {
   const workspaceId = useWorkspaceId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -164,6 +166,36 @@ export const CreateTaskForm = ({
                                 name={member.name}
                               />
                               {member.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="roomId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Room</FormLabel>
+                    <Select
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select room" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        {rooms.map((room) => (
+                          <SelectItem key={room.id} value={String(room.id)}>
+                            <div className="flex items-center gap-x-2">
+                              {room.name} - {room.roomType}
                             </div>
                           </SelectItem>
                         ))}

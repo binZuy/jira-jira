@@ -5,6 +5,7 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { Loader } from "lucide-react";
 import { useGetTask } from "../api/use-get-task";
 import { EditTaskForm } from "./edit-task-form";
+import { useGetRooms } from "@/features/rooms/api/use-get-rooms";
 
 interface EditTaskFormWrapperProps {
   onCancel: () => void;
@@ -27,6 +28,9 @@ export const EditTaskFormWrapper = ({
     workspaceId,
   });
 
+  const { data: rooms, isLoading: isLoadingRooms } = useGetRooms();
+
+  console.log(rooms);
   const projectOptions = projects?.map((project) => ({
     id: project.id,
     name: project.name,
@@ -38,7 +42,7 @@ export const EditTaskFormWrapper = ({
     name: member.name,
   }));
 
-  const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask;
+  const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask ||  isLoadingRooms;
 
   if (isLoading) {
     return (
@@ -59,6 +63,7 @@ export const EditTaskFormWrapper = ({
       onCancel={onCancel}
       projectOptions={projectOptions ?? []}
       memberOptions={memberOptions ?? []}
+      rooms={rooms ?? []}
       initialValues={initialValues}
     />
   );
