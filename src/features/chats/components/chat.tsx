@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 // useSWR,
 import { useQueryClient } from '@tanstack/react-query';
-import { Models } from 'node-appwrite';
 import { ChatHeader } from '@/features/chats/components/chat-header';
 import { generateID } from '@/lib/utils';
 import { Artifact } from './artifact';
@@ -22,7 +21,7 @@ export function Chat({
   isReadonly,
 }: {
   id: string;
-  initialMessages: Array<UIMessage & Models.Document>;
+  initialMessages: Array<UIMessage>;
   selectedChatModel: string;
   isReadonly: boolean;
 }) {

@@ -45,7 +45,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { Chat } from "../types";
+import type { Chat } from "@/lib/types/enums";
 // import { fetcher } from "@/lib/utils";
 import { useGetHistory } from "@/features/chats/api/use-get-history";
 import { useDeleteChat } from "@/features/chats/api/use-delete-chat";
@@ -80,7 +80,7 @@ const PureChatItem = ({
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
         <Link
-          href={`/workspaces/${workspaceId}/chats/${chat.$id}`}
+          href={`/workspaces/${workspaceId}/chats/${chat.id}`}
           onClick={() => setOpenMobile(false)}
         >
           <span>{chat.title}</span>
@@ -101,7 +101,7 @@ const PureChatItem = ({
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
-            onSelect={() => onDelete(chat.$id)}
+            onSelect={() => onDelete(chat.id)}
           >
             <TrashIcon />
             <span>Delete</span>
@@ -124,15 +124,10 @@ export function SidebarHistory() {
   const id = useChatId();
   const { data: rawChats, isLoading } = useGetHistory();
   const chats: Chat[] = rawChats?.map((chat) => ({
-    $id: chat.$id,
+    id: chat.id,
     title: chat.title || "Untitled", // Ensure title exists
     userId: chat.userId || "unknown", // Ensure userId exists
-    content: chat.content, // Optional field
-    $createdAt: chat.$createdAt,
-    $updatedAt: chat.$updatedAt,
-    $collectionId: chat.$collectionId,
-    $databaseId: chat.$databaseId,
-    $permissions: chat.$permissions,
+
   })) || [];
   const router = useRouter();
   const [ConfirmDialog, confirm] = useConfirm(
@@ -204,7 +199,7 @@ export function SidebarHistory() {
 
     return chats.reduce(
       (groups: { today: any; yesterday: any; lastWeek: any; lastMonth: any; older: any; }, chat: Chat) => {
-        const chatDate = new Date(chat.$createdAt); // Replace '$createdAt' with the correct property
+        const chatDate = new Date(chat.created_at); // Replace '$createdAt' with the correct property
 
         if (isToday(chatDate)) {
           groups.today.push(chat);
@@ -249,11 +244,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.today.map((chat) => (
                           <ChatItem
-                            key={chat.$id}
+                            key={chat.id}
                             chat={chat}
-                            isActive={chat.$id === id}
+                            isActive={chat.id === id}
                             onDelete={() => {
-                              onDelete(chat.$id);
+                              onDelete(chat.id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -268,11 +263,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.yesterday.map((chat) => (
                           <ChatItem
-                            key={chat.$id}
+                            key={chat.id}
                             chat={chat}
-                            isActive={chat.$id === id}
+                            isActive={chat.id === id}
                             onDelete={() => {
-                              onDelete(chat.$id);
+                              onDelete(chat.id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -287,11 +282,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.lastWeek.map((chat) => (
                           <ChatItem
-                            key={chat.$id}
+                            key={chat.id}
                             chat={chat}
-                            isActive={chat.$id === id}
+                            isActive={chat.id === id}
                             onDelete={() => {
-                              onDelete(chat.$id);
+                              onDelete(chat.id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -306,11 +301,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.lastMonth.map((chat) => (
                           <ChatItem
-                            key={chat.$id}
+                            key={chat.id}
                             chat={chat}
-                            isActive={chat.$id === id}
+                            isActive={chat.id === id}
                             onDelete={() => {
-                              onDelete(chat.$id);
+                              onDelete(chat.id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -325,11 +320,11 @@ export function SidebarHistory() {
                         </div>
                         {groupedChats.older.map((chat) => (
                           <ChatItem
-                            key={chat.$id}
+                            key={chat.id}
                             chat={chat}
-                            isActive={chat.$id === id}
+                            isActive={chat.id === id}
                             onDelete={() => {
-                              onDelete(chat.$id);
+                              onDelete(chat.id);
                             }}
                             setOpenMobile={setOpenMobile}
                           />
@@ -342,23 +337,6 @@ export function SidebarHistory() {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-      {/* <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              chat and remove it from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
     </>
   );
 }

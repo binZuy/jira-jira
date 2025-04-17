@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef } from 'react';
 import { artifactDefinitions, ArtifactKind } from './artifact';
-import { Suggestion } from '../types';
+import { Suggestion } from '@/lib/types/enums';
 import { initialArtifactData, useArtifact } from '@/features/chats/hooks/use-artifact';
 
 export type DataStreamDelta = {

@@ -1,6 +1,7 @@
 "use client";
  
  import { useRouter } from "next/navigation";
+ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
  import { Avatar, AvatarFallback } from "@/components/ui/avatar";
  import { Button } from "@/components/ui/button";
  import {
@@ -16,6 +17,7 @@
  
  export const User = () => {
    const router = useRouter();
+   const workspaceId = useWorkspaceId();
    const { mutate: logout } = useLogout();
    const { data: user, isLoading } = useCurrent();
  
@@ -56,10 +58,10 @@
            </Button>
          </DropdownMenuTrigger>
          <DropdownMenuContent align="end" className="w-[200px]">
-           <DropdownMenuItem onClick={() => router.push("/profile")}>
+           <DropdownMenuItem onClick={() => router.push(`/workspaces/${workspaceId}/profile`)}>
              Profile
            </DropdownMenuItem>
-           <DropdownMenuItem onClick={() => router.push("/settings")}>
+           <DropdownMenuItem onClick={() => router.push(`/workspaces/${workspaceId}/settings`)}>
              Settings
            </DropdownMenuItem>
            <Separator className="my-1" />

@@ -198,7 +198,7 @@ const app = new Hono()
 
       const listtasks = await Promise.all(
         tasks.map(async (task) => {
-          const { data: assignee } = await supabase.from("members").select("id, userId, name, email").eq("userId", task.assigneeId).single();
+          const { data: assignee } = await supabase.from("members").select("id, userId, name, email,role").eq("userId", task.assigneeId).single();
           return {
             ...task,
             assignee,

@@ -62,15 +62,7 @@ export type Database = {
           id?: string
           taskId?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "attachments_taskId_fkey"
-            columns: ["taskId"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chats: {
         Row: {
@@ -98,21 +90,21 @@ export type Database = {
           content: string | null
           created_at: string
           id: number
-          taskId: number | null
+          taskId: string | null
           userId: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: number
-          taskId?: number | null
+          taskId?: string | null
           userId?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: number
-          taskId?: number | null
+          taskId?: string | null
           userId?: string | null
         }
         Relationships: [
@@ -129,21 +121,24 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
-          id: number
+          id: string
+          kind: Database["public"]["Enums"]["kind"] | null
           title: string | null
           userId: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
-          id?: number
+          id?: string
+          kind?: Database["public"]["Enums"]["kind"] | null
           title?: string | null
           userId?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
-          id?: number
+          id?: string
+          kind?: Database["public"]["Enums"]["kind"] | null
           title?: string | null
           userId?: string | null
         }
@@ -155,21 +150,21 @@ export type Database = {
           created_at: string
           detail: Json | null
           id: number
-          taskId: number | null
+          taskId: string | null
         }
         Insert: {
           action?: "INSERT" | "UPDATE" | "DELETE" | "TRUNCATE" | "ERROR" | null
           created_at?: string
           detail?: Json | null
           id?: number
-          taskId?: number | null
+          taskId?: string | null
         }
         Update: {
           action?: "INSERT" | "UPDATE" | "DELETE" | "TRUNCATE" | "ERROR" | null
           created_at?: string
           detail?: Json | null
           id?: number
-          taskId?: number | null
+          taskId?: string | null
         }
         Relationships: [
           {
@@ -190,7 +185,7 @@ export type Database = {
           name: string | null
           role: Database["public"]["Enums"]["memberRole"] | null
           userId: string | null
-          workspaceId: string 
+          workspaceId: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -226,26 +221,23 @@ export type Database = {
         Row: {
           chatId: string | null
           created_at: string
-          id: number
+          id: string
           parts: Json | null
           role: Database["public"]["Enums"]["messageRole"] | null
-          userId: string | null
         }
         Insert: {
           chatId?: string | null
           created_at?: string
-          id?: number
+          id?: string
           parts?: Json | null
           role?: Database["public"]["Enums"]["messageRole"] | null
-          userId?: string | null
         }
         Update: {
           chatId?: string | null
           created_at?: string
-          id?: number
+          id?: string
           parts?: Json | null
           role?: Database["public"]["Enums"]["messageRole"] | null
-          userId?: string | null
         }
         Relationships: [
           {
@@ -310,6 +302,44 @@ export type Database = {
         }
         Relationships: []
       }
+      suggestions: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_create_at: string | null
+          documentId: string | null
+          id: string
+          originalText: string | null
+          suggestedText: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_create_at?: string | null
+          documentId?: string | null
+          id?: string
+          originalText?: string | null
+          suggestedText?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_create_at?: string | null
+          documentId?: string | null
+          id?: string
+          originalText?: string | null
+          suggestedText?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestions_documentId_document_create_at_fkey"
+            columns: ["documentId", "document_create_at"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id", "created_at"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assigneeId: string | null
@@ -317,7 +347,7 @@ export type Database = {
           credit: number | null
           description: string | null
           dueDate: string | null
-          id: number
+          id: string
           name: string | null
           position: number | null
           priority: Database["public"]["Enums"]["cleaningPriority"] | null
@@ -331,7 +361,7 @@ export type Database = {
           credit?: number | null
           description?: string | null
           dueDate?: string | null
-          id?: number
+          id?: string
           name?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["cleaningPriority"] | null
@@ -345,7 +375,7 @@ export type Database = {
           credit?: number | null
           description?: string | null
           dueDate?: string | null
-          id?: number
+          id?: string
           name?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["cleaningPriority"] | null
@@ -355,14 +385,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_projectId_fkey"
+            foreignKeyName: "tasks_projectId_fkey1"
             columns: ["projectId"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_roomId_fkey"
+            foreignKeyName: "tasks_roomId_fkey1"
             columns: ["roomId"]
             isOneToOne: false
             referencedRelation: "rooms"
@@ -407,6 +437,7 @@ export type Database = {
     Enums: {
       action: "CREATED" | "UPDATED" | "COMMENTED" | "ASSIGNED_TO"
       cleaningPriority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL"
+      kind: "text" | "code" | "sheet" | "image" | "task"
       memberRole: "ADMIN" | "MEMBER"
       messageRole: "user" | "assistant" | "system" | "data"
       roomType: "STANDARD" | "SUITE" | "DELUXE" | "PRESIDENT"
@@ -539,6 +570,7 @@ export const Constants = {
     Enums: {
       action: ["CREATED", "UPDATED", "COMMENTED", "ASSIGNED_TO"],
       cleaningPriority: ["LOW", "HIGH", "MEDIUM", "CRITICAL"],
+      kind: ["text", "code", "sheet", "image", "task"],
       memberRole: ["ADMIN", "MEMBER"],
       messageRole: ["user", "assistant", "system", "data"],
       roomType: ["STANDARD", "SUITE", "DELUXE", "PRESIDENT"],

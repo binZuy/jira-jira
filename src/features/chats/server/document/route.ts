@@ -1,14 +1,12 @@
-import { sessionMiddleware } from "@/lib/session-middleware";
-// import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { saveDocument } from "@/features/chats/queries";
-// import { Query } from "node-appwrite";
 import { getDocumentsById } from "@/features/chats/queries";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 
 export const maxDuration = 30;
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
+  .get("/", supabaseMiddleware(), async (c) => {
     // const databases = c.get("databases");
     const user = c.get("user");
     const { id } = c.req.param() as { id: string };
@@ -24,13 +22,13 @@ const app = new Hono()
       return c.json({ message: "Document not found" }, 404);
     }
 
-    if (document.userId !== user.$id) {
+    if (document.userId !== user.id) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
     return c.json({ data: documents });
   })
-  .post("/", sessionMiddleware, async (c) => {
+  .post("/", supabaseMiddleware(), async (c) => {
     const user = c.get("user");
     const { id } = c.req.param() as { id: string };
     const { content, title, kind } = await c.req.json();

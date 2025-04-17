@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DataStreamWriter, streamObject, tool } from 'ai';
 import { getDocumentById, saveSuggestions } from '@/features/chats/queries';
-import { Suggestion } from '@/features/chats/types';
+import { Suggestion } from '@/lib/types/enums';
 // import { generateID } from '@/lib/utils';
 import { myProvider } from '../providers';
 

@@ -22,7 +22,7 @@ export const useDeleteChat = () => {
     onSuccess: ({data}) => {
       toast.success("Chat deleted");
       queryClient.invalidateQueries({ queryKey: ["chats"] });
-      queryClient.invalidateQueries({ queryKey: ["chat", data["$id"]] });
+      queryClient.invalidateQueries({ queryKey: ["chat", data.id] });
     },
     onError: ()=> {
       toast.error("Failed to delete chat");

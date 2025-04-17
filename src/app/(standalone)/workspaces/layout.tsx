@@ -11,25 +11,22 @@ interface StandAloneLayoutProps {
 
 const StandAloneLayout = ({ children }: StandAloneLayoutProps) => {
   return (
-    <main className="bg-neutral-100 min-h-screen">
+    <div className="bg-neutral-100 min-h-screen">
       <div className="mx-auto max-w-screen-2xl p-4">
-        <nav className="flex justify-between items-center h-[73px]">
+        <nav className="flex justify-between items-center h-16">
           <Link href="/">
             <Image src="/logo.svg" alt="Logo" height={56} width={152} />
           </Link>
           <UserButton />
         </nav>
-        {/* <div className="flex flex-col items-center justify-center py-4">
-          {children}
-        </div> */}
         <SidebarProvider defaultOpen={false}>
           <AppSidebar />
-          <SidebarInset className="flex flex-col items-center justify-center py-4">
+          <SidebarInset>
             {children}
           </SidebarInset>
         </SidebarProvider>
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useWindowSize } from 'usehooks-ts';
 
-import type { Document } from '../types';
+import type { Document } from '@/lib/types/enums';
 import { getDocumentTimestampByIndex } from '@/lib/utils';
 
 import { LoaderIcon } from './icons';

@@ -4,13 +4,11 @@ import { useScrollToBottom } from './use-scroll-to-bottom';
 import { Overview } from './overview';
 import { memo } from 'react';
 import equal from 'fast-deep-equal';
-// import { Models } from "node-appwrite";
 import { UseChatHelpers } from '@ai-sdk/react';
 
 interface MessagesProps {
   chatId: string;
   status: UseChatHelpers['status'];
-  // votes: Array<Vote> | undefined;
   messages: Array<UIMessage>;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
@@ -21,7 +19,6 @@ interface MessagesProps {
 function PureMessages({
   // chatId,
   status,
-  // votes,
   messages,
   setMessages,
   reload,
@@ -42,11 +39,6 @@ function PureMessages({
           // chatId={chatId}
           message={message}
           isLoading={status === 'streaming' && messages.length - 1 === index}
-          // vote={
-          //   votes
-          //     ? votes.find((vote) => vote.messageId === message.id)
-          //     : undefined
-          // }
           setMessages={setMessages}
           reload={reload}
           isReadonly={isReadonly}
@@ -72,7 +64,6 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
   if (prevProps.status && nextProps.status) return false;
   if (prevProps.messages.length !== nextProps.messages.length) return false;
   if (!equal(prevProps.messages, nextProps.messages)) return false;
-  // if (!equal(prevProps.votes, nextProps.votes)) return false;
 
   return true;
 });

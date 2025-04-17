@@ -12,7 +12,7 @@ import {
 import { ArtifactKind, UIArtifact } from "./artifact";
 import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "./icons";
 import { cn, fetcher } from "@/lib/utils";
-import { Document } from "../types";
+import { Document } from "@/lib/types/enums";
 import { InlineDocumentSkeleton } from "./document-skeleton";
 import useSWR from "swr";
 import { Editor } from "./text-editor";
@@ -38,7 +38,7 @@ export function DocumentPreview({
 
   const { data: documents, isLoading: isDocumentsFetching } = useSWR<
     Array<Document>
-  >(result ? `/api/document?id=${result.$id}` : null, fetcher);
+  >(result ? `/api/document?id=${result.id}` : null, fetcher);
 
   const previewDocument = useMemo(() => documents?.[0], [documents]);
   const hitboxRef = useRef<HTMLDivElement>(null);
@@ -94,12 +94,6 @@ export function DocumentPreview({
         kind: artifact.kind,
         content: artifact.content,
         id: artifact.documentId,
-        $id: artifact.documentId,
-        $collectionId: "defaultCollection",
-        $databaseId: "defaultDatabase",
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
-        $permissions: [],
         userId: "noop",
       }
     : null;

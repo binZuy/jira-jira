@@ -8,7 +8,6 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 // import { deleteTrailingMessages } from '@/app/(chat)/actions';
 import { UseChatHelpers } from '@ai-sdk/react';
-// import { Models } from 'node-appwrite';
 
 export type MessageEditorProps = {
   message: Message;

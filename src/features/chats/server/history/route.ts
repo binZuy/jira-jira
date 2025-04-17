@@ -1,9 +1,9 @@
-import { sessionMiddleware } from "@/lib/session-middleware";
 import { Hono } from "hono";
 import { getChatsByUserId } from "../../queries";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
+  .get("/", supabaseMiddleware(), async (c) => {
     const user = c.get("user");
 
     if (!user) {
@@ -13,6 +13,6 @@ const app = new Hono()
     const chats = await getChatsByUserId();
 
     return c.json({ data: chats });
-  })
+  });
 
 export default app;

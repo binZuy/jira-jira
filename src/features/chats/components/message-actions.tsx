@@ -1,8 +1,5 @@
 import type { Message } from 'ai';
-// import { useSWRConfig } from 'swr';
 import { useCopyToClipboard } from 'usehooks-ts';
-// import { Models } from 'node-appwrite';
-// import type { Vote } from '@/lib/db/schema';
 import { CopyIcon } from './icons';
 import { Button } from '@/components/ui/button';
 import {

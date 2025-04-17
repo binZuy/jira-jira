@@ -1,20 +1,4 @@
-import { sessionMiddleware } from "@/lib/session-middleware";
-// import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-// import { getMember } from "@/features/members/utils";
-import {
-  DATABASE_ID,
-  CHATS_ID,
-  MESSAGES_ID,
-  // MEMBERS_ID,
-  // PROJECTS_ID,
-  // TASKS_ID,
-  // COMMENTS_ID,
-  // TASKLOGS_ID,
-  // ATTACHMENTS_BUCKET_ID,
-  // TASK_ATTACHMENT_ID,
-} from "@/config";
-import { Query } from "node-appwrite";
 import {
   createDataStreamResponse,
   appendResponseMessages,
@@ -39,18 +23,18 @@ import { createDocument } from "../../libs/ai/tools/create-document";
 import { updateDocument } from "../../libs/ai/tools/update-document";
 import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
 import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
-import { saveChat, saveMessages, getChatById } from "@/features/chats/queries";
+import { saveChat, saveMessages, getChatById, deleteChatById } from "@/features/chats/queries";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
+import { MessageRole } from "@/lib/types/enums";
 
 export const maxDuration = 30;
 
 const app = new Hono()
+.use("*", supabaseMiddleware())
   .post(
     "/",
-    sessionMiddleware,
-    // zValidator("json", MessageSchema),
     async (c) => {
       console.log("POST / called");
-
       const user = c.get("user");
       // console.log("User retrieved from session:", user);
 
@@ -83,7 +67,7 @@ const app = new Hono()
         await saveChat({ id, title });
         console.log("Chat saved successfully:", { id, title });
       } else {
-        if (chat.userId !== user.$id){
+        if (chat.userId !== user.id){
           return c.json({ message: "Unauthorized" }, 401);
         }
       }
@@ -94,9 +78,9 @@ const app = new Hono()
             {
               chatId: id,
               id: userMessage.id,
-              role: "user",
+              role: MessageRole.USER,
               content: userMessage.content,
-              parts: userMessage.parts,
+              parts: JSON.stringify(userMessage.parts),
             },
           ],
         });
@@ -138,11 +122,11 @@ const app = new Hono()
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);
 
-                if (user?.$id) {
+                if (user?.id) {
                   try {
                     const assistantId = getTrailingMessageId({
                       messages: response.messages.filter(
-                        (message) => message.role === "assistant"
+                        (message) => message.role === MessageRole.ASSISTANT
                       ),
                     });
 
@@ -160,9 +144,9 @@ const app = new Hono()
                         {
                           id: assistantId,
                           chatId: id,
-                          role: assistantMessage.role,
+                          role: assistantMessage.role as MessageRole,
                           content: assistantMessage.content,
-                          parts: assistantMessage.parts,
+                          parts: JSON.stringify(assistantMessage.parts),
                         },
                       ],
                     });
@@ -197,30 +181,31 @@ const app = new Hono()
       });
     }
   )
-  .get("/:chatId", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
+  .get("/:chatId", async (c) => {
+    const supabase = c.get("supabase");
     const user = c.get("user");
     const { chatId } = c.req.param();
     console.log("GET /:chatId called with chatId:", chatId);
-    const chat = await databases.getDocument(DATABASE_ID, CHATS_ID, chatId);
-
+    const chat = await getChatById({ id: chatId});
+    if (!user) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
     if (!chat) {
       return c.json({ message: "Chat not found" }, 404);
     }
 
-    if (chat.userId !== user.$id) {
+    if (chat.userId !== user.id) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const messages = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
-      Query.equal("chatId", chatId),
-      Query.orderAsc("$createdAt"),
-    ]);
-
+    const {data: messages} = await supabase.from("messages").select("*").eq("chatId", chatId).order("created_at", { ascending: true });
+    if (!messages) {
+      return c.json({ message: "No messages found" }, 404);
+    }
     // Parse the `parts` field for each message
-    const parsedMessages = messages.documents.map((message) => ({
+    const parsedMessages = messages?.map((message: { id: string; role: string; chatId: string; parts: string }) => ({
       ...message,
-      id: message.$id,
+      id: message.id,
       role: message.role,
       chatId: message.chatId,
       parts: JSON.parse(message.parts), // Parse `parts` back into an object
@@ -229,28 +214,21 @@ const app = new Hono()
     return c.json({ data: { chat, messages: parsedMessages } });
   })
   // Add delete chat endpoint
-  .delete("/:chatId", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
+  .delete("/:chatId", async (c) => {
     const user = c.get("user");
     const { chatId } = c.req.param();
 
-    const chat = await databases.getDocument(DATABASE_ID, CHATS_ID, chatId);
-    if (!chat || chat.userId !== user.$id) {
+    const chat = await getChatById({ id: chatId });
+    if (!user) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+    if (!chat || chat.userId !== user.id) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    await databases.deleteDocument(DATABASE_ID, CHATS_ID, chatId);
-    // Optional: Delete associated messages
-    const messages = await databases.listDocuments(DATABASE_ID, MESSAGES_ID, [
-      Query.equal("chatId", chatId),
-    ]);
-    await Promise.all(
-      messages.documents.map((message) =>
-        databases.deleteDocument(DATABASE_ID, MESSAGES_ID, message.$id)
-      )
-    );
-
-    return c.json({ data: { $id: chatId } });
+    await deleteChatById({ id: chatId });
+    console.log(`Chat with ID ${chatId} deleted successfully.`);
+    return c.json({ data: { id: chatId } });
   });
 
 export default app;

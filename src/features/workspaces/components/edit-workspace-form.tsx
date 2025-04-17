@@ -1,6 +1,6 @@
 "use client";
 
-import { Workspace } from "../types";
+import { Workspace } from "@/lib/types/enums";
 import { updateWorkspaceSchema } from "../schemas";
 import { useUpdateWorkspace } from "@/features/workspaces/api/use-update-workspace";
 
@@ -80,7 +80,7 @@ export const EditWorkspaceForm = ({
       {
         form: finalValues,
         param: {
-          workspaceId: initialValues.$id,
+          workspaceId: initialValues.id,
         },
       },
       
@@ -100,7 +100,7 @@ export const EditWorkspaceForm = ({
     if (!ok) return;
     deleteWorkspace(
       {
-        param: { workspaceId: initialValues.$id },
+        param: { workspaceId: initialValues.id },
       },
       {
         onSuccess: () => {
@@ -111,7 +111,7 @@ export const EditWorkspaceForm = ({
     );
   };
 
-  const fullInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/join/${initialValues.inviteCode}`;
+  const fullInviteLink = `${window.location.origin}/workspaces/${initialValues.id}/join/${initialValues.inviteCode}`;
 
   const handleCopyInviteLink = () => {
     navigator.clipboard
@@ -140,7 +140,7 @@ export const EditWorkspaceForm = ({
             onClick={
               onCancel
                 ? onCancel
-                : () => router.push(`/workspaces/${initialValues.$id}`)
+                : () => router.push(`/workspaces/${initialValues.id}`)
             }
           >
             <ArrowLeftIcon className="size-4" />

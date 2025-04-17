@@ -1,11 +1,11 @@
-import { sessionMiddleware } from "@/lib/session-middleware";
 import { Hono } from "hono";
 import { getSuggestionsByDocumentId } from "@/features/chats/queries";
+import { supabaseMiddleware } from "@/lib/supabase-middleware";
 
 export const maxDuration = 30;
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
+  .get("/", supabaseMiddleware(), async (c) => {
     const user = c.get("user");
     const { documentId } = c.req.param() as { documentId: string };
 

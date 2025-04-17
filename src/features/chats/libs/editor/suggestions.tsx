@@ -8,7 +8,7 @@ import {
 import { createRoot } from 'react-dom/client';
 
 import { Suggestion as PreviewSuggestion } from '@/features/chats/components/suggestion';
-import type { Suggestion } from '@/features/chats/types';
+import type { Suggestion } from '@/lib/types/enums';
 import { ArtifactKind } from '@/features/chats/components/artifact';
 
 export interface UISuggestion extends Suggestion {

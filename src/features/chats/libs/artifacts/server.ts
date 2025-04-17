@@ -5,7 +5,7 @@ import { sheetDocumentHandler } from '@/features/chats/artifacts/sheet/server';
 import { textDocumentHandler } from '@/features/chats/artifacts/text/server';
 import { ArtifactKind } from '@/features/chats/components/artifact';
 import { DataStreamWriter } from 'ai';
-import { Document } from '../../types';
+import { Document } from '@/lib/types/enums';
 import { saveDocument } from '@/features/chats/queries';
 
 export interface SaveDocumentProps {
