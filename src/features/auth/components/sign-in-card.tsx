@@ -1,18 +1,19 @@
 "use client";
 
 import { z } from "zod";
-
-import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
-
-import { signUpWithGithub, signUpWithGoogle } from "@/lib/oauth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { signInWithGoogle } from "@/lib/supabase/oauth";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,17 +39,18 @@ export const SignInCard = () => {
   });
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    mutate({json: values});
+    mutate({ json: values });
   };
 
   return (
-    <Card className="w-full h-full md:w-[487px] border-none shadow-none">
-      <CardHeader className="flex items-center justify-center text-center p-7">
-        <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Login</CardTitle>
+        <CardDescription>
+          Enter your credentials to access your account
+        </CardDescription>
       </CardHeader>
-      <div className="px-7 mb-2">
-        <DottedSeparator />
-      </div>
+
       <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -91,37 +93,29 @@ export const SignInCard = () => {
             </Button>
           </form>
         </Form>
-      </CardContent>
 
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
-      <CardContent className="p-7 flex flex-col gap-y-4">
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
         <Button
           disabled={isPending}
           variant="secondary"
           size="lg"
           className="w-full"
-          onClick={() => signUpWithGoogle()}
+          onClick={() => signInWithGoogle()}
         >
           <FcGoogle className="mr-2 size-5" />
           Login with Google
         </Button>
-        <Button
-          disabled={isPending}
-          variant="secondary"
-          size="lg"
-          className="w-full"
-          onClick={() => signUpWithGithub()}
-        >
-          <FaGithub className="mr-2 size-5" />
-          Login with Github
-        </Button>
-      </CardContent>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
-      <CardContent className="p-7 flex items-center justify-center">
+
         <p className="text-center">
           Don&apos;t have an account?
           <Link href="/sign-up" className="text-blue-500">

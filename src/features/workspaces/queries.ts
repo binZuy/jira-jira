@@ -1,26 +1,40 @@
-import { Query } from "node-appwrite";
+import { createClient } from "@/lib/supabase/server";
 
-import { DATABASE_ID, MEMBERS_ID, WORKSPACES_ID } from "@/config";
-import { createSessionClient } from "@/lib/appwrite";
+interface Member {
+  workspaceId: string | null;
+}
 
 export const getWorkspaces = async () => {
-  const { databases, account } = await createSessionClient();
-  const user = await account.get();
+  const supabase = await createClient();
 
-  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-    Query.equal("userId", user.$id),
-  ]);
+  // Get the current logged-in user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return [];
+  }
+  
+  // Fetch the members related to the user
+  const { data: members, error: membersError } = await supabase
+    .from('members')
+    .select('workspaceId')
+    .eq('userId', user.id);
 
-  if (members.total === 0) {
-    return { documents: [], total: 0 };
+  if (membersError || !members || members.length === 0) {
+    return [];
   }
 
-  const workspaceIds = members.documents.map((member) => member.workspaceId);
-
-  const workspaces = await databases.listDocuments(DATABASE_ID, WORKSPACES_ID, [
-    Query.orderDesc("$createdAt"),
-    Query.contains("$id", workspaceIds),
-  ]);
+  // Get the workspace IDs of the current user
+  const workspaceIds = members
+    .map((member: Member) => member.workspaceId)
+    .filter((id): id is string => id !== null);
+  // Fetch the workspaces related to the user by the workspaceIds
+  const { data: workspaces, error: workspacesError } = await supabase.from("workspaces")
+    .select('*')
+    .in('id', workspaceIds)
+    .order('created_at', { ascending: false });
+  if (workspacesError) {
+    return [];
+  }
 
   return workspaces;
 };

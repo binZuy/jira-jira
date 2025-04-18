@@ -12,9 +12,9 @@ export const useCurrent = () => {
         return null;
       }
 
-      const { data } = await response.json();
+      const { user } = await response.json();
 
-      return data;
+      return user;
     },
   });
   return query;

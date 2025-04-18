@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useState } from "react";
 import {
   DragDropContext,
@@ -5,16 +6,18 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { Task, TaskStatus } from "../types";
+import { TaskStatus, Task } from "@/lib/types/enums";
 import { KanbanColumnHeader } from "./kanban-column-header";
 import { KanbanCard } from "./kanban-card";
 
 const boards: TaskStatus[] = [
-  TaskStatus.BACKLOG,
   TaskStatus.TODO,
   TaskStatus.IN_PROGRESS,
-  TaskStatus.IN_REVIEW,
   TaskStatus.DONE,
+  TaskStatus.OUT_OF_SERVICE,
+  TaskStatus.OUT_OF_ORDER,
+  TaskStatus.PICK_UP,
+  TaskStatus.READY_FOR_INSPECTION,
 ];
 
 type TasksState = {
@@ -24,18 +27,20 @@ type TasksState = {
 interface DataKanbanProps {
   data: Task[];
   onChange: (
-    tasks: { $id: string; status: TaskStatus; position: number }[]
+    tasks: { id: string; status: TaskStatus; position: number }[]
   ) => void;
 }
 
 export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
   const [tasks, setTasks] = useState<TasksState>(() => {
     const initialTasks: TasksState = {
-      [TaskStatus.BACKLOG]: [],
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
-      [TaskStatus.IN_REVIEW]: [],
       [TaskStatus.DONE]: [],
+      [TaskStatus.OUT_OF_SERVICE]: [],
+      [TaskStatus.OUT_OF_ORDER]: [],
+      [TaskStatus.PICK_UP]: [],
+      [TaskStatus.READY_FOR_INSPECTION]: [],
     };
 
     data.forEach((task) => {
@@ -53,11 +58,13 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
 
   useEffect(() => {
     const newTasks: TasksState = {
-      [TaskStatus.BACKLOG]: [],
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
-      [TaskStatus.IN_REVIEW]: [],
       [TaskStatus.DONE]: [],
+      [TaskStatus.OUT_OF_SERVICE]: [],
+      [TaskStatus.OUT_OF_ORDER]: [],
+      [TaskStatus.PICK_UP]: [],
+      [TaskStatus.READY_FOR_INSPECTION]: [],
     };
     data.forEach((task) => {
       newTasks[task.status].push(task);
@@ -78,7 +85,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
       const destStatus = destination.droppableId as TaskStatus;
 
       let updatesPayload: {
-        $id: string;
+        id: string;
         status: TaskStatus;
         position: number;
       }[] = [];
@@ -114,18 +121,18 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
 
         //always update the moved task
         updatesPayload.push({
-          $id: updatedMovedTask.$id,
+          id: updatedMovedTask.id,
           status: destStatus,
           position: Math.min((destination.index + 1) * 1000, 1_000_000),
         });
 
         //Update positions for affeceted tasks in dest column
         newTasks[destStatus].forEach((task, index) => {
-          if (task && task.$id !== updatedMovedTask.$id) {
+          if (task && task.id !== updatedMovedTask.id) {
             const newPosition = Math.min((index + 1) * 1000, 1_000_000);
             if (task.position !== newPosition) {
               updatesPayload.push({
-                $id: task.$id,
+                id: task.id,
                 status: destStatus,
                 position: newPosition,
               });
@@ -140,7 +147,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
               const newPosition = Math.min((index + 1) * 1000, 1_000_000);
               if (task.position !== newPosition) {
                 updatesPayload.push({
-                  $id: task.$id,
+                  id: task.id,
                   status: sourceStatus,
                   position: newPosition,
                 });
@@ -178,8 +185,8 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
                   >
                     {tasks[board].map((task, index) => (
                       <Draggable
-                        key={task.$id}
-                        draggableId={task.$id}
+                        key={task.id}
+                        draggableId={task.id}
                         index={index}
                       >
                         {(provided) => (

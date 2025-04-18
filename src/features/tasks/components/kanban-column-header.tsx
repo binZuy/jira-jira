@@ -1,5 +1,5 @@
 import { snakeCaseToTitleCase } from "@/lib/utils";
-import { TaskStatus } from "../types";
+import { TaskStatus } from "@/lib/types/enums";
 
 import {
   CircleCheckIcon,
@@ -17,18 +17,24 @@ interface KanbanColumnHeaderProps {
 }
 
 const statusIconMap: Record<TaskStatus, React.ReactNode> = {
-  [TaskStatus.BACKLOG]: (
-    <CircleDashedIcon className="size-[18px] text-pink-400" />
-  ),
   [TaskStatus.TODO]: <CircleIcon className="size-[18px] text-red-400" />,
   [TaskStatus.IN_PROGRESS]: (
     <CircleDotDashedIcon className="size-[18px] text-yellow-400" />
   ),
-  [TaskStatus.IN_REVIEW]: (
-    <CircleDotIcon className="size-[18px] text-blue-400" />
-  ),
   [TaskStatus.DONE]: (
     <CircleCheckIcon className="size-[18px] text-emerald-400" />
+  ),
+  [TaskStatus.OUT_OF_SERVICE]: (
+    <CircleDashedIcon className="size-[18px] text-pink-400" />
+  ),
+  [TaskStatus.OUT_OF_ORDER]: (
+    <CircleDotIcon className="size-[18px] text-blue-400" />
+  ),
+  [TaskStatus.PICK_UP]: (
+    <CircleDotIcon className="size-[18px] text-blue-400" />
+  ),
+  [TaskStatus.READY_FOR_INSPECTION]: (
+    <CircleDotIcon className="size-[18px] text-blue-400" />
   ),
 };
 

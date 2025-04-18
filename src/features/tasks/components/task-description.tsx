@@ -1,13 +1,15 @@
-import { Task } from "../types";
+import { Task } from "@/lib/types/enums";
 
 import { useState } from "react";
-import { PencilIcon, XIcon } from "lucide-react";
+import { PencilIcon, XIcon, FileIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { DottedSeparator } from "@/components/dotted-separator";
 
 import { useUpdateTask } from "../api/use-update-task";
+import Image from "next/image";
+import Link from "next/link";
 
 interface TaskDescriptionProps {
   task: Task;
@@ -22,8 +24,8 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
   const handleSave = () => {
     mutate(
       {
-        json: { description: value },
-        param: { taskId: task.$id },
+        form: { description: value },
+        param: { taskId: task.id },
       },
       {
         onSuccess: () => {
@@ -70,9 +72,49 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
           </Button>
         </div>
       ) : (
-        <div>
-          {task.description || (
-            <span className="text-muted-foreground">No description set</span>
+        <div className="space-y-4">
+          <div>
+            {task.description || (
+              <span className="text-muted-foreground">No description set</span>
+            )}
+          </div>
+          
+          {task.attachments && task.attachments.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-2">Attachments</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {task.attachments.map((attachment, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-x-2 p-2 border rounded-md"
+                  >
+                    {attachment.fileType.startsWith("image/") ? (
+                      <div className="relative w-12 h-12 rounded-md overflow-hidden">
+                        <Image
+                          src={attachment.fileUrl}
+                          alt={attachment.fileName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
+                        <FileIcon className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Link 
+                        href={attachment.fileUrl}
+                        target="_blank"
+                        className="text-sm font-medium truncate hover:underline"
+                      >
+                        {attachment.fileName}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}

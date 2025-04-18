@@ -6,6 +6,10 @@ import workspaces from "@/features/workspaces/server/route";
 import members from "@/features/members/server/route";
 import projects from "@/features/projects/server/route";
 import tasks from "@/features/tasks/server/route";
+import chat from "@/features/chats/server/chat/route";
+import document from "@/features/chats/server/document/route";
+import history from "@/features/chats/server/history/route";
+import rooms from "@/features/rooms/server/route";
 
 const app = new Hono().basePath("/api");
 
@@ -15,7 +19,11 @@ const routes = app
   .route("/workspaces", workspaces)
   .route("/members", members)
   .route("/projects", projects)
-  .route("/tasks", tasks);
+  .route("/tasks", tasks)
+  .route("/chat", chat)
+  .route("/document", document)
+  .route("/history", history)
+  .route("/rooms", rooms);
 
 export const GET = handle(app);
 export const POST = handle(app);

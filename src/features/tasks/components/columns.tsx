@@ -4,7 +4,7 @@ import { ArrowUpDown, MoreVertical } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 
-import { Task } from "../types";
+import { Task } from "@/lib/types/enums";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { TaskDate } from "./task-date";
@@ -46,8 +46,9 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => {
-      const project = row.original.project;
-
+      const project = row.original.projects;
+      if (!project) 
+        return <p>No project found</p>
       return (
         <div className="flex items-center gap-x-2 text-sm font-medium">
           <ProjectAvatar
@@ -75,7 +76,8 @@ export const columns: ColumnDef<Task>[] = [
     },
     cell: ({ row }) => {
       const assignee = row.original.assignee;
-
+      if (!assignee) 
+        return <p>No assignee found</p>
       return (
         <div className="flex items-center gap-x-2 text-sm font-medium">
           <MemberAvatar
@@ -131,7 +133,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     id: "actions",
     cell:( {row}) => {
-      const id = row.original.$id;
+      const id = row.original.id;
       const projectId = row.original.projectId;
 
       return ( 

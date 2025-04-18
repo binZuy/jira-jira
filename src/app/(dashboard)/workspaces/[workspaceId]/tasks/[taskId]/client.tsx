@@ -8,6 +8,8 @@ import { TaskBreadcrumbs } from "@/features/tasks/components/task-breadcrumbs";
 import { TaskDescription } from "@/features/tasks/components/task-description";
 import { TaskOverview } from "@/features/tasks/components/task-overview";
 import { useTaskId } from "@/features/tasks/hooks/use-task-id";
+import { TaskComments } from "@/features/tasks/components/task-comments";
+import { TaskLogs } from "@/features/tasks/components/task-logs";
 
 export const TaskIdClient = () => {
   const taskId = useTaskId();
@@ -23,12 +25,18 @@ export const TaskIdClient = () => {
 
   return (
     <div className="flex flex-col">
-        <TaskBreadcrumbs project={data.project} task={data} />
-        <DottedSeparator className="m-6"/>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <TaskBreadcrumbs project={data.project} task={data} />
+      <DottedSeparator className="m-6"/>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <TaskOverview task={data} />
-          <TaskDescription task={data} />
+          <TaskLogs taskId={data.id} />
         </div>
+        <div className="space-y-4">
+          <TaskDescription task={data} />
+          <TaskComments taskId={data.id} />
+        </div>
+      </div>
     </div>
-);
+  );
 };

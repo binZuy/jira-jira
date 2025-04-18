@@ -4,6 +4,7 @@ import { useGetProjects } from "@/features/projects/api/use-get-projects";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { Loader } from "lucide-react";
 import { CreateTaskForm } from "./create-task-form";
+import { useGetRooms } from "@/features/rooms/api/use-get-rooms";
 
 interface CreateTaskFormWrapperProps {
   onCancel: () => void;
@@ -21,18 +22,20 @@ export const CreateTaskFormWrapper = ({
     workspaceId,
   });
 
-  const projectOptions = projects?.documents.map((project) => ({
-    id: project.$id,
+  const { data: rooms, isLoading: isLoadingRooms } = useGetRooms();
+
+  const projectOptions = projects?.map((project) => ({
+    id: project.id,
     name: project.name,
     imageUrl: project.imageUrl,
   }));
 
-  const memberOptions = members?.documents.map((member) => ({
-    id: member.$id,
+  const memberOptions = members?.map((member) => ({
+    id: member.userId,
     name: member.name,
   }));
 
-  const isLoading = isLoadingProjects || isLoadingMembers;
+  const isLoading = isLoadingProjects || isLoadingMembers || isLoadingRooms;
 
   if (isLoading) {
     return (
@@ -49,6 +52,7 @@ export const CreateTaskFormWrapper = ({
       onCancel={onCancel}
       projectOptions={projectOptions ?? []}
       memberOptions={memberOptions ?? []}
+      rooms={rooms ?? []}
     />
   );
 };

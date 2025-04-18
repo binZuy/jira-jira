@@ -1,10 +1,7 @@
-import { createSessionClient } from "@/lib/appwrite";
+import { createClient } from "@/lib/supabase/server";
 
 export const getCurrent = async () => {
-  try {
-    const { account } = await createSessionClient();
-    return await account.get();
-  } catch {
-    return null;
-  }
+    const supabase = await createClient();
+    const {data: {user}} = await supabase.auth.getUser();
+    return user;
 };

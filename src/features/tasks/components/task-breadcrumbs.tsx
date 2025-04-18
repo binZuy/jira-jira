@@ -1,5 +1,4 @@
-import { Project } from "@/features/projects/types";
-import { Task } from "../types";
+import { Task, Project } from "@/lib/types/enums";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import Link from "next/link";
@@ -32,7 +31,7 @@ export const TaskBreadcrumbs = ({ project, task }: TaskBreadcrumbsProps) => {
 
     mutate(
       {
-        param: { taskId: task.$id },
+        param: { taskId: task.id },
       },
       {
         onSuccess: () => {
@@ -49,7 +48,7 @@ export const TaskBreadcrumbs = ({ project, task }: TaskBreadcrumbsProps) => {
         image={project.imageUrl}
         className="size-6 lg:size-8"
       />
-      <Link href={`/workspaces/${workspaceId}/projects/${project.$id}`}>
+      <Link href={`/workspaces/${workspaceId}/projects/${project.id}`}>
         <p className="text-sm lg:text-lg font-semibold text-muted-foreground hover:opacity-75 transition">
           {project.name}
         </p>

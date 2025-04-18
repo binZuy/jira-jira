@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "../types";
+import { Project } from "@/lib/types/enums";
 import { updateProjectSchema } from "../schemas";
 import { useUpdateProject } from "@/features/projects/api/use-update-project";
 import { useDeleteProject } from "@/features/projects/api/use-delete-project";
@@ -73,7 +73,7 @@ export const EditProjectForm = ({
       {
         form: finalValues,
         param: {
-          projectId: initialValues.$id,
+          projectId: initialValues.id,
         },
       }
     );
@@ -92,7 +92,7 @@ export const EditProjectForm = ({
     if (!ok) return;
     deleteProject(
       {
-        param: { projectId: initialValues.$id },
+        param: { projectId: initialValues.id },
       },
       {
         onSuccess: () => {
@@ -114,7 +114,7 @@ export const EditProjectForm = ({
             onClick={
               onCancel
                 ? onCancel
-                : () => router.push(`/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`)
+                : () => router.push(`/workspaces/${initialValues.workspaceId}/projects/${initialValues.id}`)
             }
           >
             <ArrowLeftIcon className="size-4" />
