@@ -29,7 +29,7 @@ export const ChatIdClient = () => {
       id: message.id,
       parts: message.parts as UIMessage['parts'],
       role: message.role as UIMessage['role'],
-      content: message.content as UIMessage['content'],
+      content: message.content || "", // Ensure content is included
     }));
   }
 

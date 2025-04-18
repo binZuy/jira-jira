@@ -222,6 +222,7 @@ export type Database = {
           chatId: string | null
           created_at: string
           id: string
+          content: string | null
           parts: Json | null
           role: Database["public"]["Enums"]["messageRole"] | null
         }

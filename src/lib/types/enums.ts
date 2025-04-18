@@ -100,8 +100,8 @@ export type Chat = {
 export type Message = {
   id: string;
   chatId: string;
-  role: MessageRole;
-  content: string;
+  role: string;
+  content?: string;
   parts: Json;
 };
 
