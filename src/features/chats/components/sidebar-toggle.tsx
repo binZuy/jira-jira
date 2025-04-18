@@ -1,6 +1,8 @@
-import type { ComponentProps } from 'react';
+// import type { ComponentProps } from 'react';
 
-import { type SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { 
+  // type SidebarTrigger,
+   useSidebar } from '@/components/ui/sidebar';
 import {
   Tooltip,
   TooltipContent,
@@ -11,9 +13,9 @@ import { SidebarLeftIcon } from './icons';
 import { Button } from '@/components/ui/button';
 
 export function SidebarToggle(
-  {
-  className,
-}: ComponentProps<typeof SidebarTrigger>
+//   {
+//   className,
+// }: ComponentProps<typeof SidebarTrigger>
 ) {
   const { toggleSidebar } = useSidebar();
 

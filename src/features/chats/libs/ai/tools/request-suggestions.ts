@@ -4,6 +4,7 @@ import { getDocumentById, saveSuggestions } from '@/features/chats/queries';
 import { Suggestion } from '@/lib/types/enums';
 // import { generateID } from '@/lib/utils';
 import { myProvider } from '../providers';
+import { generateID } from '@/lib/utils';
 
 interface RequestSuggestionsProps {
   dataStream: DataStreamWriter;
@@ -45,10 +46,10 @@ export const requestSuggestions = ({
 
       for await (const element of elementStream) {
         const suggestion = {
+          id: generateID(), // Ensure the id is generated
           originalText: element.originalSentence,
           suggestedText: element.suggestedSentence,
           description: element.description,
-        //   id: generateID(),
           documentId: documentId,
           isResolved: false,
         };

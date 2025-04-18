@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import DataGrid, { textEditor } from 'react-data-grid';
+import DataGrid, { RenderCellProps, textEditor } from 'react-data-grid';
 import { parse, unparse } from 'papaparse';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
@@ -22,8 +23,8 @@ const MIN_COLS = 26;
 const PureSpreadsheetEditor = ({
   content,
   saveContent,
-  status,
-  isCurrentVersion,
+  // status,
+  // isCurrentVersion,
 }: SheetEditorProps) => {
   const { theme } = useTheme();
 
@@ -52,7 +53,7 @@ const PureSpreadsheetEditor = ({
       name: '',
       frozen: true,
       width: 50,
-      renderCell: ({ rowIdx }: { rowIdx: number }) => rowIdx + 1,
+      renderCell: ({ row }: RenderCellProps<any, unknown>) => row.rowNumber,
       cellClass: 'border-t border-r dark:bg-zinc-950 dark:text-zinc-50',
       headerCellClass: 'border-t border-r dark:bg-zinc-900 dark:text-zinc-50',
     };

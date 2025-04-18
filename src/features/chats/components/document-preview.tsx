@@ -95,6 +95,7 @@ export function DocumentPreview({
         content: artifact.content,
         id: artifact.documentId,
         userId: "noop",
+        created_at: new Date(), // Add a valid value for created_at
       }
     : null;
 
@@ -275,7 +276,7 @@ const DocumentContent = ({ document }: { document: Document }) => {
             <SpreadsheetEditor {...commonProps} />
           </div>
         </div>
-      ) : document.kind === "image" ? (
+      ) : document.kind === "image" as ArtifactKind ? (
         <ImageEditor
           title={document.title}
           content={document.content ?? ""}

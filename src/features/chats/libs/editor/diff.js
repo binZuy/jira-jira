@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Modified from https://github.com/hamflx/prosemirror-diff/blob/master/src/diff.js
 
 import { diff_match_patch } from 'diff-match-patch';

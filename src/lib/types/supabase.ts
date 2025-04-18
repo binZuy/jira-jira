@@ -185,7 +185,7 @@ export type Database = {
           name: string | null
           role: Database["public"]["Enums"]["memberRole"] | null
           userId: string | null
-          workspaceId: string | null
+          workspaceId: string
         }
         Insert: {
           avatar_url?: string | null

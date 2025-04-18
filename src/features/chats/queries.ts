@@ -89,7 +89,12 @@ export async function getChatById({ id }: { id: string }) {
 export async function saveMessages({ messages }: { messages: Array<Message> }) {
   const { supabase } = await getAuthInfo();
 
-  const { error } = await supabase.from("messages").insert(messages);
+  const { error } = await supabase.from("messages").insert(
+    messages.map((message) => ({
+      ...message,
+      role: message.role as "data" | "user" | "assistant" | "system" | null,
+    }))
+  );
   if (error) {
     console.error("Failed to save messages in database", error);
     throw error;

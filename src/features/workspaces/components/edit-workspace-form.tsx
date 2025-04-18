@@ -124,7 +124,7 @@ export const EditWorkspaceForm = ({
 
     if (!ok) return;
     resetInviteCode({
-      param: { workspaceId: initialValues.$id },
+      param: { workspaceId: initialValues.id },
     });
   };
 

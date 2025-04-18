@@ -57,6 +57,7 @@ export type Workspace = {
   name: string;
   imageUrl?: string;
   userId: string;
+  inviteCode: string;
 };
 
 export type Project = {
@@ -110,7 +111,8 @@ export type Document = {
   title: string;
   kind: ArtifactKind;
   content: string;
-  userId: string;
+  userId: string | null;
+  created_at: any;
 };
 
 export type Suggestion = {

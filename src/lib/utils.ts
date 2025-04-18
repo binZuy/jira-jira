@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { UIMessage,  CoreAssistantMessage,
@@ -79,7 +80,7 @@ export const fetcher = async (url: string) => {
 };
 
 export function getDocumentTimestampByIndex(
-  documents: Array<Document>,
+  documents: Array<any>,
   index: number,
 ) {
   if (!documents) return new Date();

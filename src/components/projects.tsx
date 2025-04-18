@@ -52,7 +52,7 @@ export const Projects = () => {
 
             return (
               <Link
-                key={project.$id}
+                key={project.id}
                 href={href}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-all hover:text-primary",

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { isAfter } from 'date-fns';
@@ -6,7 +7,7 @@ import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useWindowSize } from 'usehooks-ts';
 
-import type { Document } from '@/lib/types/enums';
+// import type { Document } from '@/lib/types/enums';
 import { getDocumentTimestampByIndex } from '@/lib/utils';
 
 import { LoaderIcon } from './icons';
@@ -15,7 +16,7 @@ import { useArtifact } from '@/features/chats/hooks/use-artifact';
 
 interface VersionFooterProps {
   handleVersionChange: (type: 'next' | 'prev' | 'toggle' | 'latest') => void;
-  documents: Array<Document> | undefined;
+  documents: Array<any> | undefined;
   currentVersionIndex: number;
 }
 
@@ -71,12 +72,12 @@ export const VersionFooter = ({
                   ? [
                       ...documents.filter((document) =>
                         isAfter(
-                          new Date(document.createdAt),
+                          new Date(document.created_at),
                           new Date(
                             getDocumentTimestampByIndex(
                               documents,
                               currentVersionIndex,
-                            ),
+                            ) ?? new Date().toISOString(),
                           ),
                         ),
                       ),

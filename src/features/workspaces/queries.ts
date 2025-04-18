@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 interface Member {
-  workspaceId: string;
+  workspaceId: string | null;
 }
 
 export const getWorkspaces = async () => {
@@ -24,11 +24,11 @@ export const getWorkspaces = async () => {
   }
 
   // Get the workspace IDs of the current user
-  const workspaceIds = members.map((member: Member) => member.workspaceId);
-console.log("id", workspaceIds);
+  const workspaceIds = members
+    .map((member: Member) => member.workspaceId)
+    .filter((id): id is string => id !== null);
   // Fetch the workspaces related to the user by the workspaceIds
-  const { data: workspaces, error: workspacesError } = await supabase
-    .from('workspaces')
+  const { data: workspaces, error: workspacesError } = await supabase.from("workspaces")
     .select('*')
     .in('id', workspaceIds)
     .order('created_at', { ascending: false });

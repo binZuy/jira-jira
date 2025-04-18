@@ -91,7 +91,7 @@ export const taskArtifact = new Artifact<'task', TaskArtifactMetadata>({
         <div className="flex flex-col gap-4 p-4">
           <TaskOverview task={task} />
           <TaskDescription task={task} />
-          <TaskComments taskId={task.$id} />
+          <TaskComments taskId={task.id} />
         </div>
       );
     }

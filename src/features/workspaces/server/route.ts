@@ -139,7 +139,7 @@ const app = new Hono()
           inviteCode: generateInviteCode(6),
         },
       ])
-      .select()
+      .select("id, name, imageUrl")
       .single();
 
     if (workspaceError) {
