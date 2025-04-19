@@ -7,7 +7,6 @@ import { useGetTasks } from "@/features/tasks/api/use-get-tasks";
 import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal";
 import { useGetWorkspaceAnalytics } from "@/features/workspaces/api/use-get-workspace-analytics";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { useGetProjectTasks } from "@/features/tasks/api/use-get-project-tasks";
 import { useGetMemberTasks } from "@/features/tasks/api/use-get-member-tasks";
 import { formatDistanceToNow } from "date-fns";
 import { PageLoader } from "@/components/page-loader";
@@ -19,7 +18,7 @@ import { PlusIcon, CalendarIcon, ArrowRight, ListChecksIcon, FolderKanban, UserI
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Project, Member, Task, MemberRole } from "@/lib/types/enums";
+import { Project, Member, Task, MemberRole, TaskStatus } from "@/lib/types/enums";
 
 export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
@@ -133,9 +132,11 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ id, name, workspaceId }: ProjectCardProps) {
-  const { data: tasksData } = useGetProjectTasks({ workspaceId, projectId: id });
+  const { data: tasksData } = useGetTasks({ workspaceId, projectId: id });
+  console.log("tasksData", tasksData);
   const taskCount = tasksData?.length || 0;
-  const completionRate = tasksData?.completionRate || 0;
+  const completedTasks = tasksData?.filter((task) => task.status === TaskStatus.DONE).length || 0;
+  const completionRate = taskCount > 0 ? Math.round((completedTasks / taskCount) * 100) : 0;
 
   return (
     <Link href={`/workspaces/${workspaceId}/projects/${id}`} className="block">

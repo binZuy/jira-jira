@@ -148,23 +148,26 @@ export type Database = {
         Row: {
           action: "INSERT" | "UPDATE" | "DELETE" | "TRUNCATE" | "ERROR" | null
           created_at: string
-          detail: Json | null
+          details: Json | null
           id: number
           taskId: string | null
+          userId: string | null
         }
         Insert: {
           action?: "INSERT" | "UPDATE" | "DELETE" | "TRUNCATE" | "ERROR" | null
           created_at?: string
-          detail?: Json | null
+          details?: Json | null
           id?: number
           taskId?: string | null
+          userId?: string | null
         }
         Update: {
           action?: "INSERT" | "UPDATE" | "DELETE" | "TRUNCATE" | "ERROR" | null
           created_at?: string
-          detail?: Json | null
+          details?: Json | null
           id?: number
           taskId?: string | null
+          userId?: string | null
         }
         Relationships: [
           {

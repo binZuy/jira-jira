@@ -245,17 +245,11 @@ const app = new Hono()
       .eq("workspaceId", workspaceId)
       .eq("userId", user.id)
       .single();
-
+    console.log("member", member);
+    console.log("memberError", memberError);
     if (memberError || !member || member.role !== MemberRole.ADMIN) {
-      return c.json({ error: "Unauthorized" }, 401);
+      return c.json({ error: "Unauthorized member" }, 401);
     }
-
-    // Optionally delete related members, projects, and tasks here
-    await supabase.from("members").delete().eq("workspaceId", workspaceId);
-    await supabase.from("projects").delete().eq("workspaceId", workspaceId);
-    await supabase.from("tasks").delete().eq("workspaceId", workspaceId);
-
-    // Delete the workspace itself
     const { error: deleteError } = await supabase
       .from("workspaces")
       .delete()
@@ -319,8 +313,7 @@ const app = new Hono()
         .eq("workspaceId", workspaceId)
         .eq("userId", user.id)
         .single();
-
-      if (memberError || existingMember) {
+      if (!memberError || existingMember) {
         return c.json({ error: "Already a member" }, 400);
       }
 

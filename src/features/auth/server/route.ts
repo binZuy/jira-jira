@@ -23,16 +23,6 @@ const app = new Hono()
     if (error) {
       return c.json({ error: error.message }, 401);
     }
-    // const { account } = await createAdminClient();
-    // const session = await account.createEmailPasswordSession(email, password);
-
-    // setCookie(c, AUTH_COOKIE, session.secret, {
-    //   path: "/",
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "strict",
-    //   maxAge: 60 * 60 * 24 * 30,
-    // });
 
     return c.json({ success: true });
   })
@@ -51,27 +41,20 @@ const app = new Hono()
     });
     if (error) {
       return c.json({ error: error.message }, 401);
+    } else if (data?.user?.identities?.length === 0) {
+      return c.json({ status: "User with this email already exists" }, 401);
     }
-    // const { account } = await createAdminClient();
-    // const user = await account.create(ID.unique(), email, password, name);
-
-    // const session = await account.createEmailPasswordSession(email, password);
-
-    // setCookie(c, AUTH_COOKIE, session.secret, {
-    //   path: "/",
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "strict",
-    //   maxAge: 60 * 60 * 24 * 30,
-    // });
+    
     return c.json({ data: data.user, success: true });
   })
 
   .post("/logout", async (c) => {
-    // // const account = c.get("account");
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      return c.json({ error: error.message }, 401);
+    } 
 
-    // deleteCookie(c, AUTH_COOKIE);
-    // await account.deleteSession("current");
     return c.json({ success: true });
   });
 export default app;
