@@ -8,6 +8,7 @@ const signInWith = (provider:  Provider) => async () => {
     const supabase = await createClient();
 
     const auth_callback_url = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+    console.log("auth_callback_url", auth_callback_url);
     const { data, error } =
     await supabase.auth.signInWithOAuth({
         provider,
@@ -15,8 +16,6 @@ const signInWith = (provider:  Provider) => async () => {
             redirectTo: auth_callback_url,
         },
     });
-
-    console.log("data:", data);
 
     if (error) {
         console.error("Error signing in with OAuth:", error);

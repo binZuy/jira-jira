@@ -319,8 +319,7 @@ const app = new Hono()
         .eq("workspaceId", workspaceId)
         .eq("userId", user.id)
         .single();
-
-      if (memberError || existingMember) {
+      if (!memberError || existingMember) {
         return c.json({ error: "Already a member" }, 400);
       }
 

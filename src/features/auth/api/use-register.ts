@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 import { useRouter } from "next/navigation";
 import { client } from "@/lib/rpc";
+import { revalidatePath } from "next/cache";
 
 type ResponseType = InferResponseType<
   (typeof client.api.auth.register)["$post"]
@@ -27,7 +28,8 @@ export const useRegister = () => {
     },
     onSuccess: () => {
       toast.success("Registered");
-      router.refresh();
+      revalidatePath("/", "layout");
+     router.push("/");
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },
     onError: () => {
