@@ -80,8 +80,8 @@ export async function getChatById({ id }: { id: string }) {
     .eq("id", id)
     .single();
   if (error) {
-    console.error("Failed to get chat by id from database", error);
-    throw error;
+    console.log(error);
+    return null;
   }
   return chat;
 }
