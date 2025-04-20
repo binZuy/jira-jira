@@ -24,10 +24,8 @@ const badgeVariants = cva(
           "border-transparent bg-blue-400 text-primary hover:bg-yellow-400/80",
         [TaskStatus.DONE]:
           "border-transparent bg-emerald-400 text-primary hover:bg-yellow-400/80",
-        [TaskStatus.PICK_UP]:
+        [TaskStatus.DO_NOT_DISTURB]:
           "border-transparent bg-pink-400 text-primary hover:bg-yellow-400/80",
-        [TaskStatus.OUT_OF_ORDER]:
-          "border-transparent bg-gray-400 text-primary hover:bg-yellow-400/80",
         [TaskStatus.READY_FOR_INSPECTION]:
           "border-transparent bg-green-400 text-primary hover:bg-yellow-400/80",
       },

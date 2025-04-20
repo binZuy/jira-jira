@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TaskStatus } from "@/lib/types/enums";
+import { Priority, TaskStatus } from "@/lib/types/enums";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
@@ -10,6 +10,7 @@ export const createTaskSchema = z.object({
   projectId: z.string().trim().min(1, "Required"),
   assigneeId: z.string().trim().min(1, "Required"),
   roomId: z.string().min(1, "required"),
+  priority: z.nativeEnum(Priority, { required_error: "Required" }),
   dueDate: z.coerce.date(),
   description: z.string().optional(),
   attachments: z

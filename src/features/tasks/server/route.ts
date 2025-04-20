@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { createTaskSchema } from "../schemas";
 import { z } from "zod";
-import { Action, TaskStatus } from "@/lib/types/enums";
+import { Action, TaskStatus, Priority } from "@/lib/types/enums";
 
 const app = new Hono()
   .use("*", supabaseMiddleware())
@@ -51,55 +51,55 @@ const app = new Hono()
     }
 
     // Fetch all attachments related to the task
-    const { data: attachments, error: attachmentsError } = await supabase
-      .from("attachments")
-      .delete()
-      .eq("taskId", taskId)
-      .select();
+    // const { data: attachments, error: attachmentsError } = await supabase
+    //   .from("attachments")
+    //   .delete()
+    //   .eq("taskId", taskId)
+    //   .select();
 
-    if (attachmentsError) {
-      return c.json({ error: "Error fetching attachments" }, 500);
-    }
+    // if (attachmentsError) {
+    //   return c.json({ error: "Error fetching attachments" }, 500);
+    // }
 
     // Delete all attachment files from Supabase Storage
-    for (const attachment of attachments) {
-      try {
-        const { error: deleteFileError } = await supabase.storage
-          .from("attachments")
-          .remove([attachment.fileId]);
+    // for (const attachment of attachments) {
+    //   try {
+    //     const { error: deleteFileError } = await supabase.storage
+    //       .from("attachments")
+    //       .remove([attachment.fileId]);
 
-        if (deleteFileError) {
-          console.error(
-            `Failed to delete file ${attachment.fileId}:`,
-            deleteFileError.message
-          );
-        }
-      } catch (error) {
-        console.error(`Failed to delete file ${attachment.fileId}:`, error);
-      }
-    }
+    //     if (deleteFileError) {
+    //       console.error(
+    //         `Failed to delete file ${attachment.fileId}:`,
+    //         deleteFileError.message
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.error(`Failed to delete file ${attachment.fileId}:`, error);
+    //   }
+    // }
 
-    // Delete all attachment records from the "task_attachments" table
-    for (const attachment of attachments) {
-      try {
-        const { error: deleteRecordError } = await supabase
-          .from("task_attachments")
-          .delete()
-          .eq("id", attachment.id);
+    // // Delete all attachment records from the "task_attachments" table
+    // for (const attachment of attachments) {
+    //   try {
+    //     const { error: deleteRecordError } = await supabase
+    //       .from("task_attachments")
+    //       .delete()
+    //       .eq("id", attachment.id);
 
-        if (deleteRecordError) {
-          console.error(
-            `Failed to delete attachment record ${attachment.id}:`,
-            deleteRecordError.message
-          );
-        }
-      } catch (error) {
-        console.error(
-          `Failed to delete attachment record ${attachment.id}:`,
-          error
-        );
-      }
-    }
+    //     if (deleteRecordError) {
+    //       console.error(
+    //         `Failed to delete attachment record ${attachment.id}:`,
+    //         deleteRecordError.message
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.error(
+    //       `Failed to delete attachment record ${attachment.id}:`,
+    //       error
+    //     );
+    //   }
+    // }
 
     // Delete the task from the "tasks" table
     const { error: deleteTaskError } = await supabase
@@ -141,6 +141,7 @@ const app = new Hono()
         roomId: z.string().nullish(),
         status: z.nativeEnum(TaskStatus).nullish(),
         search: z.string().nullish(),
+        priority: z.nativeEnum(Priority).nullish(),
         dueDate: z.string().nullish(),
       })
     ),
@@ -160,6 +161,7 @@ const app = new Hono()
         assigneeId,
         roomId,
         dueDate,
+        priority,
       } = c.req.valid("query");
 
       // Check if the user is a member of the workspace
@@ -186,6 +188,9 @@ const app = new Hono()
       }
       if (status) {
         query = query.eq("status", status);
+      }
+      if (priority) {
+        query = query.eq("priority", priority);
       }
       if (assigneeId) {
         query = query.eq("assigneeId", assigneeId);
@@ -243,8 +248,8 @@ const app = new Hono()
       const roomId = formData.get("roomId") as string;
       const assigneeId = formData.get("assigneeId") as string;
       const description = formData.get("description") as string | null;
-      const attachments = formData.getAll("attachments") as File[];
-
+      // const attachments = formData.getAll("attachments") as File[];
+      const priority = formData.get("priority") as Priority;
       const { taskId } = c.req.param();
 
       // Fetch the existing task
@@ -280,67 +285,67 @@ const app = new Hono()
       }
 
       // Handle new attachments if any
-      if (attachments && attachments.length > 0) {
-        for (const file of attachments) {
-          if (file instanceof File) {
-            const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
-            const { error: uploadError } = await supabase.storage
-              .from("storages") // Assuming 'attachments' is the storage bucket
-              .upload(filePath, file);
+      // if (attachments && attachments.length > 0) {
+      //   for (const file of attachments) {
+      //     if (file instanceof File) {
+      //       const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
+      //       const { error: uploadError } = await supabase.storage
+      //         .from("storages") // Assuming 'attachments' is the storage bucket
+      //         .upload(filePath, file);
 
-            if (uploadError) {
-              console.error(
-                `Failed to upload file ${file.name}:`,
-                uploadError.message
-              );
-              continue;
-            }
+      //       if (uploadError) {
+      //         console.error(
+      //           `Failed to upload file ${file.name}:`,
+      //           uploadError.message
+      //         );
+      //         continue;
+      //       }
 
-            let fileUrl: string;
-            if (file.type.startsWith("image/")) {
-              const { data: previewData } = await supabase.storage
-                .from("storages")
-                .getPublicUrl(filePath);
+      //       let fileUrl: string;
+      //       if (file.type.startsWith("image/")) {
+      //         const { data: previewData } = await supabase.storage
+      //           .from("storages")
+      //           .getPublicUrl(filePath);
 
-              fileUrl = previewData.publicUrl;
-            } else {
-              const { error: downloadError } = await supabase.storage
-                .from("storages")
-                .download(filePath);
+      //         fileUrl = previewData.publicUrl;
+      //       } else {
+      //         const { error: downloadError } = await supabase.storage
+      //           .from("storages")
+      //           .download(filePath);
 
-              if (downloadError) {
-                console.error(
-                  "Failed to download file:",
-                  downloadError.message
-                );
-                continue;
-              }
+      //         if (downloadError) {
+      //           console.error(
+      //             "Failed to download file:",
+      //             downloadError.message
+      //           );
+      //           continue;
+      //         }
 
-              fileUrl = "";
-            }
+      //         fileUrl = "";
+      //       }
 
-            // Create a record for the attachment in the "task_attachments" table
-            const { error: attachmentError } = await supabase
-              .from("attachments")
-              .insert([
-                {
-                  taskId,
-                  filePath,
-                  fileName: file.name,
-                  fileType: file.type,
-                  fileUrl,
-                },
-              ]);
+      //       // Create a record for the attachment in the "task_attachments" table
+      //       const { error: attachmentError } = await supabase
+      //         .from("attachments")
+      //         .insert([
+      //           {
+      //             taskId,
+      //             filePath,
+      //             fileName: file.name,
+      //             fileType: file.type,
+      //             fileUrl,
+      //           },
+      //         ]);
 
-            if (attachmentError) {
-              console.error(
-                "Failed to save attachment record:",
-                attachmentError.message
-              );
-            }
-          }
-        }
-      }
+      //       if (attachmentError) {
+      //         console.error(
+      //           "Failed to save attachment record:",
+      //           attachmentError.message
+      //         );
+      //       }
+      //     }
+      //   }
+      // }
       const room = Number(roomId);
       // Update the task details
       const { error: updateError } = await supabase
@@ -353,6 +358,7 @@ const app = new Hono()
           roomId: room,
           assigneeId,
           description,
+          priority,
         })
         .eq("id", taskId);
 
@@ -374,6 +380,7 @@ const app = new Hono()
             dueDate,
             projectId,
             description,
+            priority,
           },
         },
       ]);
@@ -393,6 +400,7 @@ const app = new Hono()
           dueDate,
           projectId,
           description,
+          priority,
         },
       });
     }
@@ -416,61 +424,62 @@ const app = new Hono()
     const roomId = formData.get("roomId") as string;
     const dueDate = formData.get("dueDate") as string;
     const description = formData.get("description") as string;
+    const priority = formData.get("priority") as Priority;
 
     // Process attachments
-    const files = formData.getAll("attachments");
-    const normalizedFiles = Array.isArray(files) ? files : [files]; // Ensure it's always an array
-    const attachments = [];
+    // const files = formData.getAll("attachments");
+    // const normalizedFiles = Array.isArray(files) ? files : [files]; // Ensure it's always an array
+    // const attachments = [];
 
     // Handle file uploads and create attachment records
-    for (const file of normalizedFiles) {
-      if (file instanceof File) {
-        const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
+    // for (const file of normalizedFiles) {
+    //   if (file instanceof File) {
+    //     const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
 
-        // Upload file to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from("attachments")
-          .upload(filePath, file);
+    //     // Upload file to Supabase Storage
+    //     const { error: uploadError } = await supabase.storage
+    //       .from("attachments")
+    //       .upload(filePath, file);
 
-        if (uploadError) {
-          console.error(
-            `Failed to upload file ${file.name}:`,
-            uploadError.message
-          );
-          continue;
-        }
+    //     if (uploadError) {
+    //       console.error(
+    //         `Failed to upload file ${file.name}:`,
+    //         uploadError.message
+    //       );
+    //       continue;
+    //     }
 
-        // Generate file URL
-        let fileUrl;
-        if (file.type.startsWith("image/")) {
-          const { data: previewData } = await supabase.storage
-            .from("storages")
-            .getPublicUrl(filePath);
+    //     // Generate file URL
+    //     let fileUrl;
+    //     if (file.type.startsWith("image/")) {
+    //       const { data: previewData } = await supabase.storage
+    //         .from("storages")
+    //         .getPublicUrl(filePath);
 
-          fileUrl = previewData.publicUrl;
-        } else {
-          const { error: downloadError } = await supabase.storage
-            .from("storages")
-            .download(filePath);
+    //       fileUrl = previewData.publicUrl;
+    //     } else {
+    //       const { error: downloadError } = await supabase.storage
+    //         .from("storages")
+    //         .download(filePath);
 
-          if (downloadError) {
-            console.error("Failed to download file:", downloadError.message);
-            continue;
-          }
+    //       if (downloadError) {
+    //         console.error("Failed to download file:", downloadError.message);
+    //         continue;
+    //       }
 
-          fileUrl = ``;
-        }
+    //       fileUrl = ``;
+    //     }
 
-        // Store the attachment details
-        attachments.push({
-          taskId: "", // Will be updated after task creation
-          filePath,
-          fileName: file.name,
-          fileType: file.type,
-          fileUrl,
-        });
-      }
-    }
+    //     // Store the attachment details
+    //     attachments.push({
+    //       taskId: "", // Will be updated after task creation
+    //       filePath,
+    //       fileName: file.name,
+    //       fileType: file.type,
+    //       fileUrl,
+    //     });
+    //   }
+    // }
 
     // Determine the new position for the task
     const { data: highestPositionTask, error: highestPositionError } =
@@ -506,6 +515,7 @@ const app = new Hono()
           roomId: Number(roomId),
           dueDate,
           description,
+          priority,
           position: newPosition,
         },
       ])
@@ -516,28 +526,82 @@ const app = new Hono()
       return c.json({ error: taskError.message }, 500);
     }
 
-    // Now create attachment records with the task ID
-    for (const attachment of attachments) {
-      attachment.taskId = task.id; // Assign the task ID to each attachment
-      const { error: attachmentError } = await supabase
-        .from("attachments")
-        .insert([
-          {
-            taskId: task.id,
-            filePath: attachment.filePath,
-            fileName: attachment.fileName,
-            fileType: attachment.fileType,
-            fileUrl: attachment.fileUrl,
-          },
-        ]);
+    // Create roomTask record if a roomId was provided
+    if (roomId) {
+      // First get the room details
+      console.log('roomId:', roomId, 'type:', typeof roomId);
+      const { data: room, error: roomError } = await supabase
+        .from("rooms")
+        .select("*")
+        .eq("id", Number(roomId))
+        .single();
 
-      if (attachmentError) {
-        console.error(
-          "Failed to save attachment record:",
-          attachmentError.message
-        );
+      if (roomError) {
+        console.error("Error fetching room details:", roomError.message);
+        // Continue with task creation even if room fetch fails
+      } else {
+        // Create or update the roomTask record
+        const roomTaskData = {
+          roomId: Number(roomId),
+          roomNumber: room.roomNumber,
+          roomType: room.roomType,
+          status: status,
+          taskId: task.id,
+          priority
+        };
+
+        // Check if roomTask already exists for this room
+        const { data: existingRoomTask } = await supabase
+          .from("roomTask")
+          .select("id")
+          .eq("roomId", Number(roomId))
+          .single();
+
+        if (existingRoomTask) {
+          // Update the existing roomTask with the new task reference
+          const { error: updateRoomTaskError } = await supabase
+            .from("roomTask")
+            .update(roomTaskData)
+            .eq("roomId", Number(roomId));
+
+          if (updateRoomTaskError) {
+            console.error("Error updating roomTask:", updateRoomTaskError.message);
+          }
+        } else {
+          // Create a new roomTask record
+          const { error: insertRoomTaskError } = await supabase
+            .from("roomTask")
+            .insert([roomTaskData]);
+
+          if (insertRoomTaskError) {
+            console.error("Error creating roomTask:", insertRoomTaskError.message);
+          }
+        }
       }
     }
+
+    // Now create attachment records with the task ID
+    // for (const attachment of attachments) {
+    //   attachment.taskId = task.id; // Assign the task ID to each attachment
+    //   const { error: attachmentError } = await supabase
+    //     .from("attachments")
+    //     .insert([
+    //       {
+    //         taskId: task.id,
+    //         filePath: attachment.filePath,
+    //         fileName: attachment.fileName,
+    //         fileType: attachment.fileType,
+    //         fileUrl: attachment.fileUrl,
+    //       },
+    //     ]);
+
+    //   if (attachmentError) {
+    //     console.error(
+    //       "Failed to save attachment record:",
+    //       attachmentError.message
+    //     );
+    //   }
+    // }
 
     // Log activity for task creation
     const { error: logError } = await supabase.from("logs").insert([
@@ -554,6 +618,7 @@ const app = new Hono()
           roomId,
           dueDate,
           description,
+          priority,
         },
       },
     ]);
@@ -620,14 +685,14 @@ const app = new Hono()
     }
 
     // Fetch attachments for the task
-    const { data: attachments, error: attachmentsError } = await supabase
-      .from("attachments")
-      .select("*")
-      .eq("taskId", taskId);
+    // const { data: attachments, error: attachmentsError } = await supabase
+    //   .from("attachments")
+    //   .select("*")
+    //   .eq("taskId", taskId);
 
-    if (attachmentsError) {
-      return c.json({ error: "Error fetching attachments" }, 500);
-    }
+    // if (attachmentsError) {
+    //   return c.json({ error: "Error fetching attachments" }, 500);
+    // }
 
     // Return task details along with project, assignee, and attachments
     return c.json({
@@ -635,7 +700,7 @@ const app = new Hono()
         ...task,
         project,
         assignee,
-        attachments,
+        // attachments,
       },
     });
   })
@@ -860,7 +925,6 @@ const app = new Hono()
 
     // Fetch user details (from members table) for each log's userId
     const logUserIds = logs.map((log) => log.userId);
-
     // Fetch members (who are also users) related to the logs
     const { data: members, error: membersError } = await supabase
       .from("members")

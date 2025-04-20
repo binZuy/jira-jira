@@ -29,14 +29,14 @@ import { sheetArtifact } from '@/features/chats/artifacts/sheet/client';
 import { textArtifact } from '@/features/chats/artifacts/text/client';
 import equal from 'fast-deep-equal';
 import { UseChatHelpers } from '@ai-sdk/react';
-import { taskArtifact } from '@/features/chats/artifacts/task/client';
+// import { taskArtifact } from '@/features/chats/artifacts/task/client';
 
 export const artifactDefinitions = [
   textArtifact,
   codeArtifact,
   // imageArtifact,
   sheetArtifact,
-  taskArtifact
+  // taskArtifact
 ];
 export type ArtifactKind = (typeof artifactDefinitions)[number]['kind'];
 
@@ -503,7 +503,6 @@ function PureArtifact({
 
 export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) return false;
-  // if (!equal(prevProps.votes, nextProps.votes)) return false;
   if (prevProps.input !== nextProps.input) return false;
   if (!equal(prevProps.messages, nextProps.messages.length)) return false;
 

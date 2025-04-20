@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArtifactKind } from "@/features/chats/components/artifact";
-import { Json } from "./supabase";
+import { Json } from "@/lib/types/supabase";
 
 export enum MemberRole {
   ADMIN = "ADMIN",
@@ -19,9 +19,8 @@ export enum TaskStatus {
   IN_PROGRESS = "IN_PROGRESS",
   DONE = "DONE",
   OUT_OF_SERVICE = "OUT_OF_SERVICE",
-  OUT_OF_ORDER = "OUT_OF_ORDER",
+  DO_NOT_DISTURB = "DO_NOT_DISTURB",
   READY_FOR_INSPECTION = "READY_FOR_INSPECTION",
-  PICK_UP = "PICK_UP",
 }
 
 export enum Action {
@@ -36,12 +35,10 @@ export enum Priority {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
   HIGH = "HIGH",
-  CRITICAL = "CRITICAL",
 }
 
-export enum TaskType {
+export enum roomType {
   STAY_OVER = "STAY_OVER",
-  DO_NOT_DISTURB = "DO_NOT_DISTURB",
   DEPARTURE = "DEPARTURE",
 }
 
@@ -80,6 +77,7 @@ export type Task = {
   id: string;
   name: string;
   status: TaskStatus;
+  priority: Priority;
   workspaceId: string;
   assigneeId: string;
   projectId: string;
@@ -129,4 +127,9 @@ export type Room = {
   id: number;
   name: string;
   roomType: RoomType;
+}
+
+export enum Linen {
+  YES = "YES",
+  NO = "NO",
 }

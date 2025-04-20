@@ -156,12 +156,12 @@ const app = new Hono()
           .single();
 
       if (currentUserMemberError || !currentUserMember) {
-        return c.json({ error: "Unauthorized" }, 401);
+        return c.json({ error: "You are not a member of this workspace" }, 401);
       }
 
       // Ensure the current user is an admin
       if (currentUserMember.role !== MemberRole.ADMIN) {
-        return c.json({ error: "Unauthorized" }, 401);
+        return c.json({ error: "You are not authorized to update this member" }, 401);
       }
 
       // Prevent downgrading the last admin member

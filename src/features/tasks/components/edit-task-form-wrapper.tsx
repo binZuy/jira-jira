@@ -42,6 +42,12 @@ export const EditTaskFormWrapper = ({
     name: member.name,
   }));
 
+  const roomOptions = rooms?.map((room) => ({
+    id: room.id,
+    roomNumber: String(room.roomNumber),
+    roomType: room.roomType,
+  }));
+
   const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask ||  isLoadingRooms;
 
   if (isLoading) {
@@ -63,7 +69,7 @@ export const EditTaskFormWrapper = ({
       onCancel={onCancel}
       projectOptions={projectOptions ?? []}
       memberOptions={memberOptions ?? []}
-      rooms={rooms ?? []}
+      rooms={roomOptions ?? []}
       initialValues={initialValues}
     />
   );

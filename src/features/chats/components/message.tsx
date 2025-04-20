@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import type { UIMessage } from 'ai';
@@ -202,13 +203,20 @@ const PurePreviewMessage = ({
                     ) : toolName === 'getRoomInfo' ? (
                       <RoomInfo
                         roomNumber={args.roomNumber || '101'}
-                        capacity={args.capacity || 30}
+                        roomType={args.roomType || ''}
+                        priority={args.priority || ''}
+                        status={args.status || ''}
+                        roomStatus={args.roomStatus || ''}
+                        linen={args.linen || ''}
+                        checkInTime={args.checkInTime}
+                        checkOutTime={args.checkOutTime}
+                        capacity={args.capacity || 0}
                         equipment={args.equipment || []}
                         features={args.features || []}
-                        status={args.status || 'Available'}
-                        lastMaintenance={args.lastMaintenance || '2024-03-15'}
-                        nextScheduledMaintenance={args.nextScheduledMaintenance || '2024-06-15'}
+                        lastMaintenance={args.lastMaintenance || ''}
+                        nextScheduledMaintenance={args.nextScheduledMaintenance || ''}
                         notes={args.notes || ''}
+                        tasks={args.tasks || []}
                       />
                     ) : toolName === 'updateRoomData' ? (
                       <RoomUpdatePreview
@@ -256,6 +264,7 @@ const PurePreviewMessage = ({
                           lastMaintenance={args?.lastMaintenance || '2024-03-15'}
                           nextScheduledMaintenance={args?.nextScheduledMaintenance || '2024-06-15'}
                           notes={args?.notes || ''}
+                          tasks={args?.tasks || []}
                         />
                       ) : null}
                     </div>
@@ -281,13 +290,20 @@ const PurePreviewMessage = ({
                       ) : toolName === 'getRoomInfo' ? (
                         <RoomInfo
                           roomNumber={result?.roomNumber || '101'}
-                          capacity={result?.capacity || 30}
+                          roomType={result?.roomType || ''}
+                          priority={result?.priority || ''}
+                          status={result?.status || ''}
+                          roomStatus={result?.roomStatus || ''}
+                          linen={result?.linen || ''}
+                          checkInTime={result?.checkInTime}
+                          checkOutTime={result?.checkOutTime}
+                          capacity={result?.capacity || 0}
                           equipment={result?.equipment || []}
                           features={result?.features || []}
-                          status={result?.status || 'Available'}
-                          lastMaintenance={result?.lastMaintenance || '2024-03-15'}
-                          nextScheduledMaintenance={result?.nextScheduledMaintenance || '2024-06-15'}
+                          lastMaintenance={result?.lastMaintenance || ''}
+                          nextScheduledMaintenance={result?.nextScheduledMaintenance || ''}
                           notes={result?.notes || ''}
+                          tasks={result?.tasks || []}
                         />
                       ) : toolName === 'updateRoomData' ? (
                         <RoomUpdatePreview

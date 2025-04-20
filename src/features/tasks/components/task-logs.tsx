@@ -28,12 +28,14 @@ export const TaskLogs = ({ taskId }: TaskLogsProps) => {
               <div className="flex items-center gap-x-2">
                 <p className="font-semibold">{log.user?.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(log.createdAt), {
+                  {formatDistanceToNow(new Date(log.created_at), {
                     addSuffix: true
                   })}
                 </p>
               </div>
-              <p className="text-sm">{log.details}</p>
+              <div className="text-sm">
+                {log.action}
+              </div>
             </div>
           </div>
         ))}

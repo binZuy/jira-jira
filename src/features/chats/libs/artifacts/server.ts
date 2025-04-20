@@ -1,6 +1,5 @@
 import { codeDocumentHandler } from '@/features/chats/artifacts/code/server';
 // import { imageDocumentHandler } from '@/features/chats/artifacts/image/server';
-import { taskDocumentHandler } from '@/features/chats/artifacts/task/server';
 import { sheetDocumentHandler } from '@/features/chats/artifacts/sheet/server';
 import { textDocumentHandler } from '@/features/chats/artifacts/text/server';
 import { ArtifactKind } from '@/features/chats/components/artifact';
@@ -88,7 +87,7 @@ export const documentHandlersByArtifactKind: Array<DocumentHandler> = [
   codeDocumentHandler,
   // imageDocumentHandler,
   sheetDocumentHandler,
-  taskDocumentHandler,
+  // taskDocumentHandler,
 ];
 
-export const artifactKinds = ['text', 'code', 'sheet', 'task'] as const;
+export const artifactKinds = ['text', 'code', 'sheet'] as const;

@@ -74,14 +74,13 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
         <SelectContent>
           <SelectItem value="all">All statuses</SelectItem>
           <SelectSeparator />
-          <SelectItem value={TaskStatus.TODO}>To do</SelectItem>
+          <SelectItem value={TaskStatus.TODO}>To Do</SelectItem>
           <SelectItem value={TaskStatus.IN_PROGRESS}>In Progress</SelectItem>
           <SelectItem value={TaskStatus.DONE}>Done</SelectItem>
           <SelectItem value={TaskStatus.OUT_OF_SERVICE}>
             Out Of Service
           </SelectItem>
-          <SelectItem value={TaskStatus.OUT_OF_ORDER}>Out Of Order</SelectItem>
-          <SelectItem value={TaskStatus.PICK_UP}>Pick Up</SelectItem>
+          <SelectItem value={TaskStatus.DO_NOT_DISTURB}>Do Not Disturb</SelectItem>
           <SelectItem value={TaskStatus.READY_FOR_INSPECTION}>
             Inspection Ready
           </SelectItem>

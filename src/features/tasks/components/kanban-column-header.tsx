@@ -27,11 +27,8 @@ const statusIconMap: Record<TaskStatus, React.ReactNode> = {
   [TaskStatus.OUT_OF_SERVICE]: (
     <CircleDashedIcon className="size-[18px] text-pink-400" />
   ),
-  [TaskStatus.OUT_OF_ORDER]: (
-    <CircleDotIcon className="size-[18px] text-blue-400" />
-  ),
-  [TaskStatus.PICK_UP]: (
-    <CircleDotIcon className="size-[18px] text-blue-400" />
+  [TaskStatus.DO_NOT_DISTURB]: (
+    <CircleDotIcon className="size-[18px] text-neutral-900" />
   ),
   [TaskStatus.READY_FOR_INSPECTION]: (
     <CircleDotIcon className="size-[18px] text-blue-400" />

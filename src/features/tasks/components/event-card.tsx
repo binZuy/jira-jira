@@ -17,9 +17,8 @@ const statusColorMap: Record<TaskStatus, string> = {
   [TaskStatus.TODO]: "border-l-red-500",
   [TaskStatus.IN_PROGRESS]: "border-l-yellow-500",
   [TaskStatus.DONE]: "border-l-emerald-500",
-  [TaskStatus.OUT_OF_ORDER]: "border-l-pink-500",
+  [TaskStatus.DO_NOT_DISTURB]: "border-l-pink-500",
   [TaskStatus.OUT_OF_SERVICE]: "border-l-blue-500",
-  [TaskStatus.PICK_UP]: "border-l-blue-500",
   [TaskStatus.READY_FOR_INSPECTION]: "border-l-blue-500",
 };
 export const EventCard = ({

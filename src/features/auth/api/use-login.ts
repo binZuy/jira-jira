@@ -17,8 +17,10 @@ export const useLogin = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
       const response = await client.api.auth.login["$post"]({ json });
-      if(!response.ok) {
-        throw new Error("Failed to log in");
+      if (!response.ok) {
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to log in");
       }
       return await response.json();
     },
@@ -27,8 +29,8 @@ export const useLogin = () => {
       router.refresh();
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },
-    onError: () => {
-      toast.error("Failed to log in");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

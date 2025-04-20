@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { loginSchema, registerSchema } from "../schemas";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseMiddleware } from "@/lib/supabase-middleware";
 
 const app = new Hono()
   .get("/current", async (c) => {
@@ -42,7 +41,7 @@ const app = new Hono()
     if (error) {
       return c.json({ error: error.message }, 401);
     } else if (data?.user?.identities?.length === 0) {
-      return c.json({ status: "User with this email already exists" }, 401);
+      return c.json({ error: "User with this email already exists" }, 422);
     }
     
     return c.json({ data: data.user, success: true });
