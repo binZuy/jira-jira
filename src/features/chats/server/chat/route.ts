@@ -22,6 +22,9 @@ import { getWeather } from "../../libs/ai/tools/get-weather";
 import { createDocument } from "../../libs/ai/tools/create-document";
 import { updateDocument } from "../../libs/ai/tools/update-document";
 import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
+import { getRoomInfo } from "../../libs/ai/tools/get-room-info";
+import { filterRooms } from "../../libs/ai/tools/filter-rooms";
+import { updateRoomData, confirmRoomUpdate } from "../../libs/ai/tools/update-room-data";
 // import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
 import { saveChat, saveMessages, getChatById, deleteChatById } from "@/features/chats/queries";
 import { supabaseMiddleware } from "@/lib/supabase-middleware";
@@ -42,9 +45,11 @@ const app = new Hono()
         id,
         messages,
         selectedChatModel,
+        functionName,
+        functionArgs,
       } = await c.req.json();
 
-      console.log("Request payload:", { id, messages, selectedChatModel });
+      console.log("Request payload:", { id, messages, selectedChatModel, functionName, functionArgs });
 
       if (!user) {
         console.error("Unauthorized: User not found in session");
@@ -57,6 +62,20 @@ const app = new Hono()
         return c.json({ message: "No user message found" }, 400);
       }
       console.log("user mess", userMessage);
+
+      // Handle function calls
+      if (functionName) {
+        if (functionName === 'confirmRoomUpdate') {
+          const result = await confirmRoomUpdate.execute(functionArgs);
+          return c.json(result);
+        } else if (functionName === 'declineRoomUpdate') {
+          return c.json({
+            success: false,
+            message: 'Update declined'
+          });
+        }
+      }
+
       const chat = await getChatById({ id });
 
       if (!chat) {
@@ -103,10 +122,7 @@ const app = new Hono()
               experimental_activeTools:
                 selectedChatModel === "chat-model-reasoning"
                   ? []
-                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions",
-                    // "createTask", "updateTask", "deleteTask", "getTaskDetail", "listTasks"
-                  ],
-                  // ],
+                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions", "getRoomInfo", "filterRooms", "updateRoomData"],
               experimental_transform: smoothStream({ chunking: "word" }),
               experimental_generateMessageId: generateID,
               tools: {
@@ -114,11 +130,10 @@ const app = new Hono()
                 createDocument: createDocument({ dataStream }),
                 updateDocument: updateDocument({ dataStream }),
                 requestSuggestions: requestSuggestions({ dataStream }),
-                // createTask: createTask({ dataStream }),
-                // updateTask: updateTask({ dataStream }),
-                // deleteTask: deleteTask({ dataStream }),
-                // getTaskDetail: getTaskDetail({ dataStream }),
-                // listTasks: listTasks({ dataStream }),
+                getRoomInfo,
+                filterRooms,
+                updateRoomData,
+                confirmRoomUpdate,
               },
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);
