@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, User, Clock, Bed, Tag } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { formatEnumValue } from '@/lib/utils';
 
 interface Task {
   id: string;
@@ -47,20 +48,6 @@ const priorityColorMap: Record<string, string> = {
   'LOW': 'bg-blue-100 text-blue-800 hover:bg-blue-100',
   'default': 'bg-slate-100 text-slate-800 hover:bg-slate-100',
 };
-
-function formatEnumValue(value: string): string {
-  if (!value) return '';
-  
-  // Handle special cases
-  if (value === 'TODO') return 'To Do';
-  
-  // Replace underscores with spaces and convert to title case
-  return value
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
 
 function PureRoomInfo({
   roomNumber,

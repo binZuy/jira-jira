@@ -51,7 +51,7 @@ export const CreateTaskForm = ({
   onCancel,
   projectOptions,
   memberOptions,
-  rooms
+  rooms,
 }: CreateTaskFormProps) => {
   const workspaceId = useWorkspaceId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -260,9 +260,7 @@ export const CreateTaskForm = ({
                       <FormMessage />
                       <SelectContent>
                         <SelectItem value={Priority.LOW}>Low</SelectItem>
-                        <SelectItem value={Priority.MEDIUM}>
-                          Medium
-                        </SelectItem>
+                        <SelectItem value={Priority.MEDIUM}>Medium</SelectItem>
                         <SelectItem value={Priority.HIGH}>High</SelectItem>
                       </SelectContent>
                     </Select>

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+    import { useQuery } from "@tanstack/react-query";
 //import { InferResponseType } from "hono";
 import { client } from "@/lib/rpc";
 
@@ -17,7 +17,9 @@ export const useGetComments = ({ taskId }: UseGetCommentsProps) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch comments");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);     
+        else throw new Error("Failed to fetch comments");
       }
 
       const { data } = await response.json();

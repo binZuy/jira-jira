@@ -47,8 +47,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     cell: ({ row }) => {
       const project = row.original.projects;
-      if (!project) 
-        return <p>No project found</p>
+      if (!project) return <p>No project found</p>;
       return (
         <div className="flex items-center gap-x-2 text-sm font-medium">
           <ProjectAvatar
@@ -76,8 +75,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     cell: ({ row }) => {
       const assignee = row.original.assignee;
-      if (!assignee) 
-        return <p>No assignee found</p>
+      if (!assignee) return <p>No assignee found</p>;
       return (
         <div className="flex items-center gap-x-2 text-sm font-medium">
           <MemberAvatar
@@ -124,7 +122,7 @@ export const columns: ColumnDef<Task>[] = [
     },
     cell: ({ row }) => {
       const priority = row.original.priority;
-      
+
       // Apply color based on priority level
       const getPriorityColor = (priority: Priority) => {
         switch (priority) {
@@ -140,7 +138,11 @@ export const columns: ColumnDef<Task>[] = [
       };
 
       return (
-        <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(priority)}`}>
+        <div
+          className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(
+            priority
+          )}`}
+        >
           {snakeCaseToTitleCase(priority)}
         </div>
       );
@@ -162,24 +164,22 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const status = row.original.status;
 
-      return (
-        <Badge variant={status}>{snakeCaseToTitleCase(status)}</Badge>
-      );
+      return <Badge variant={status}>{snakeCaseToTitleCase(status)}</Badge>;
     },
   },
   {
     id: "actions",
-    cell:( {row}) => {
+    cell: ({ row }) => {
       const id = row.original.id;
       const projectId = row.original.projectId;
 
-      return ( 
+      return (
         <TaskActions id={id} projectId={projectId}>
           <Button variant="ghost" className="size-8 p-0">
             <MoreVertical className="size-4" />
           </Button>
         </TaskActions>
-      )
-    }
-  }
+      );
+    },
+  },
 ];

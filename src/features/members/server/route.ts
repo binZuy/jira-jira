@@ -55,13 +55,13 @@ const app = new Hono()
     }
 
     // Fetch the member to delete
-    const { data: memberToDelete, error: memberToDeleteError } = await supabase
+    const { data: memberToDelete } = await supabase
       .from("members")
       .select("id, workspaceId")
       .eq("userId", memberId)
       .single();
 
-    if (memberToDeleteError || !memberToDelete) {
+    if (!memberToDelete) {
       return c.json({ error: "Member not found" }, 404);
     }
 
@@ -89,7 +89,7 @@ const app = new Hono()
       currentUserMember.id !== memberToDelete.id &&
       currentUserMember.role !== MemberRole.ADMIN
     ) {
-      return c.json({ error: "Unauthorized" }, 401);
+      return c.json({ error: "Unauthorized to action" }, 401);
     }
 
     // Prevent deleting the last member in the workspace
@@ -161,7 +161,10 @@ const app = new Hono()
 
       // Ensure the current user is an admin
       if (currentUserMember.role !== MemberRole.ADMIN) {
-        return c.json({ error: "You are not authorized to update this member" }, 401);
+        return c.json(
+          { error: "You are not authorized to update this member" },
+          401
+        );
       }
 
       // Prevent downgrading the last admin member

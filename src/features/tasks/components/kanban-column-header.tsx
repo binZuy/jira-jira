@@ -41,7 +41,7 @@ export const KanbanColumnHeader = ({
   board,
   taskCount,
 }: KanbanColumnHeaderProps) => {
-const {open} = useCreateTaskModal();
+  const { open } = useCreateTaskModal();
 
   const icon = statusIconMap[board];
 
@@ -50,10 +50,12 @@ const {open} = useCreateTaskModal();
       <div className="flex items-center gap-x-2">
         {icon}
         <h2 className="text-sm font-medium">{snakeCaseToTitleCase(board)}</h2>
-        <Badge variant={board} className="text-[10px]">{taskCount}</Badge>
+        <Badge variant={board} className="text-[10px]">
+          {taskCount}
+        </Badge>
       </div>
       <Button onClick={open} variant="ghost" size="icon" className="size-5">
-        <PlusIcon className="size-4 text-neutral-500"/>
+        <PlusIcon className="size-4 text-neutral-500" />
       </Button>
     </div>
   );

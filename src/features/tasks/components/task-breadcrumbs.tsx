@@ -36,13 +36,13 @@ export const TaskBreadcrumbs = ({ project, task }: TaskBreadcrumbsProps) => {
       {
         onSuccess: () => {
           router.push(`/workspaces/${workspaceId}/tasks`);
-        }
+        },
       }
     );
   };
   return (
     <div className="flex items-center gap-x-2">
-        <ConfirmDialog />
+      <ConfirmDialog />
       <ProjectAvatar
         name={project.name}
         image={project.imageUrl}

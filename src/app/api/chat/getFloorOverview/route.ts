@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getFloorOverview } from '@/features/chats/libs/ai/tools/get-floor-overview';
 
+// Make this route always dynamic since it uses request.url
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     // Get floor from query parameters

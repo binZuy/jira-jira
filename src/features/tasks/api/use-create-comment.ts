@@ -16,8 +16,10 @@ export const useCreateComment = () => {
         param 
       });
       
-      if(!response.ok) {
-        throw new Error("Failed to create comment");
+      if(!response.ok) {  
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to create comment");
       }
       return await response.json();
     },
@@ -31,8 +33,8 @@ export const useCreateComment = () => {
       });
 
     },
-    onError: () => {
-      toast.error("Failed to add comment");
+      onError: (error) => {
+      toast.error(error.message);
     }
   });
 

@@ -108,3 +108,19 @@ export function getTrailingMessageId({
 
   return trailingMessage.id;
 }
+
+export function formatEnumValue(value: string): string {
+  if (!value) return '';
+  
+  // Handle special cases
+  if (value === 'TODO') return 'To Do';
+
+  if (value === 'READY_FOR_INSPECTION') return 'Inspection Ready';
+  
+  // Replace underscores with spaces and convert to title case
+  return value
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}

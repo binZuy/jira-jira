@@ -20,22 +20,17 @@ export const TaskLogs = ({ taskId }: TaskLogsProps) => {
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {logs?.map((log: any) => (
           <div key={log.id} className="flex gap-x-2">
-            <MemberAvatar
-              name={log.user?.name}
-              className="size-8"
-            />
+            <MemberAvatar name={log.user?.name} className="size-8" />
             <div className="flex-1">
               <div className="flex items-center gap-x-2">
                 <p className="font-semibold">{log.user?.name}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatDistanceToNow(new Date(log.created_at), {
-                    addSuffix: true
+                    addSuffix: true,
                   })}
                 </p>
               </div>
-              <div className="text-sm">
-                {log.action}
-              </div>
+              <div className="text-sm">{log.action}</div>
             </div>
           </div>
         ))}

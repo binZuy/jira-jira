@@ -17,7 +17,9 @@ export const useGetWorkspaceAnalytics = ({workspaceId}: UseGetWorkspaceAnalytics
           });
     
           if (!response.ok) {
-            throw new Error("Failed to fetch workspace analytics");
+            const errorData = await response.json();
+            if ("error" in errorData) throw new Error(errorData.error);
+            else throw new Error("Failed to fetch workspace analytics");
           }
     
           const { data } = await response.json();

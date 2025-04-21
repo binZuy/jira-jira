@@ -21,7 +21,7 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
   const workspaceId = useWorkspaceId();
   const router = useRouter();
 
-  const{ open } = useEditTaskModal();
+  const { open } = useEditTaskModal();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Delete task",
@@ -52,15 +52,24 @@ export const TaskActions = ({ id, projectId, children }: TaskActionsProps) => {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={onOpenTask} className="font-medium p-[10px]">
+          <DropdownMenuItem
+            onClick={onOpenTask}
+            className="font-medium p-[10px]"
+          >
             <ExternalLinkIcon className="mr-2 size-4 stroke-2" />
             Task Details
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onOpenProject} className="font-medium p-[10px]">
+          <DropdownMenuItem
+            onClick={onOpenProject}
+            className="font-medium p-[10px]"
+          >
             <ExternalLinkIcon className="mr-2 size-4 stroke-2" />
             Open Project
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => open(id)} className="font-medium p-[10px]">
+          <DropdownMenuItem
+            onClick={() => open(id)}
+            className="font-medium p-[10px]"
+          >
             <PencilIcon className="mr-2 size-4 stroke-2" />
             Edit Task
           </DropdownMenuItem>

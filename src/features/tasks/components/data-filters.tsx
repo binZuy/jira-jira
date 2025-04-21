@@ -84,7 +84,9 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
           <SelectItem value={TaskStatus.OUT_OF_SERVICE}>
             Out Of Service
           </SelectItem>
-          <SelectItem value={TaskStatus.DO_NOT_DISTURB}>Do Not Disturb</SelectItem>
+          <SelectItem value={TaskStatus.DO_NOT_DISTURB}>
+            Do Not Disturb
+          </SelectItem>
           <SelectItem value={TaskStatus.READY_FOR_INSPECTION}>
             Inspection Ready
           </SelectItem>

@@ -26,7 +26,7 @@ const app = new Hono()
       }
 
       if (!user) {
-        return c.json({ error: "Unauthorized" }, 401);
+        return c.json({ error: "Unauthorized to action" }, 401);
       }
 
       // Check if user is a member of the workspace
@@ -38,7 +38,7 @@ const app = new Hono()
         .single();
 
       if (memberError || !member) {
-        return c.json({ error: "Not a member" }, 400);
+        return c.json({ error: "Not a member of this workspace" }, 400);
       }
 
       // Fetch projects for the given workspaceId
@@ -64,16 +64,16 @@ const app = new Hono()
     const { projectId } = c.req.param();
   
     if (!user) {
-      return c.json({ error: "Unauthorized" }, 401);
+      return c.json({ error: "Unauthorized to action" }, 401);
     }
     // Fetch the project using Supabase
-    const { data: project, error: projectError } = await supabase
+    const { data: project } = await supabase
       .from("projects")
       .select("*")
       .eq("id", projectId)
       .single(); // Using `.single()` to return a single row
   
-    if (projectError || !project) {
+    if (!project) {
       return c.json({ error: "Project not found" }, 404);
     }
   
@@ -167,6 +167,9 @@ const app = new Hono()
       const supabase = c.get("supabase");
       const user = c.get("user");
   
+      console.log(`[PATCH Project] Request for project: ${c.req.param().projectId}, user: ${user?.id}`);
+      console.log(`[PATCH Project] Form data:`, c.req.valid("form"));
+
       if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -189,7 +192,7 @@ const app = new Hono()
       const { data: member, error: memberError } = await supabase
         .from("members")
         .select("id")
-        .eq("worspaceId", existingProject.workspaceId)
+        .eq("workspaceId", existingProject.workspaceId)
         .eq("userId", user.id)
         .single(); // Use .single() to expect a single member record
   
@@ -220,8 +223,10 @@ const app = new Hono()
           .getPublicUrl(filePath);
   
         uploadedImageUrl = url.publicUrl;
+        console.log(`[PATCH Project] Uploaded image URL:`, uploadedImageUrl);
       } else {
         uploadedImageUrl = image; // If no new image is provided, keep the existing image URL
+        console.log(`[PATCH Project] Using existing image URL:`, uploadedImageUrl);
       }
   
       // Update the project with the new data
@@ -234,6 +239,9 @@ const app = new Hono()
         .eq("id", projectId).select()
         .single(); // Use .single() to return the updated project
   
+      console.log(`[PATCH Project] Update result:`, updatedProject);
+      console.log(`[PATCH Project] Update error:`, updateError);
+
       if (updateError) {
         return c.json({ error: updateError.message }, 500);
       }

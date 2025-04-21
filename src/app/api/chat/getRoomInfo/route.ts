@@ -1,7 +1,8 @@
-"use server";
-
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+
+// Make this route always dynamic since it uses request.url
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {

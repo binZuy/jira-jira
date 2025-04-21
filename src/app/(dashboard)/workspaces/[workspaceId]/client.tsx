@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Project, Member, Task, MemberRole, TaskStatus } from "@/lib/types/enums";
+import { formatEnumValue } from "@/lib/utils";
 
 export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
@@ -101,12 +102,29 @@ export const TasksList = ({ data, total }: TasksListProps) => {
               >
                 <Card className="shadow-none hover:bg-muted/50 transition">
                   <CardContent className="p-4">
-                    <p className="text-sm font-medium truncate">{task.name}</p>
-                    <div className="text-xs text-muted-foreground flex items-center mt-2">
-                      <CalendarIcon className="h-3 w-3 mr-1" />
-                      <span className="truncate">
-                        {formatDistanceToNow(new Date(task.dueDate))}
-                      </span>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium truncate">{task.name}</p>
+                      <Badge variant={task.status}>
+                        {formatEnumValue(task.status)}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="text-xs text-muted-foreground flex items-center">
+                        <CalendarIcon className="h-3 w-3 mr-1" />
+                        <span className="truncate">
+                          {formatDistanceToNow(new Date(task.dueDate))}
+                        </span>
+                      </div>
+                      {task.priority && (
+                        <Badge variant="outline" className="bg-muted">
+                          {formatEnumValue(task.priority)}
+                        </Badge>
+                      )}
+                      {task.roomId && (
+                        <Badge variant="outline" className="bg-muted">
+                          Room {task.roomNumber}
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -296,7 +314,7 @@ export const MembersList = ({ data, total }: MembersListProps) => {
         ) : (
           <div className="flex overflow-x-auto pb-2 -mx-2 px-2 gap-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-x-visible scrollbar-hide hover:scrollbar-default">
             {data.slice(0, 4).map((member) => (
-              <div key={member.id} className="min-w-[240px] md:min-w-0">
+              <div key={member.userId} className="min-w-[240px] md:min-w-0">
                 <MemberCard
                   userId={member.userId}
                   name={member.name}

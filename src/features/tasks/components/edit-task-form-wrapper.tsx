@@ -30,7 +30,6 @@ export const EditTaskFormWrapper = ({
 
   const { data: rooms, isLoading: isLoadingRooms } = useGetRooms();
 
-  console.log(rooms);
   const projectOptions = projects?.map((project) => ({
     id: project.id,
     name: project.name,

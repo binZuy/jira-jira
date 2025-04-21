@@ -245,8 +245,6 @@ const app = new Hono()
       .eq("workspaceId", workspaceId)
       .eq("userId", user.id)
       .single();
-    console.log("member", member);
-    console.log("memberError", memberError);
     if (memberError || !member || member.role !== MemberRole.ADMIN) {
       return c.json({ error: "Unauthorized member" }, 401);
     }
@@ -284,7 +282,7 @@ const app = new Hono()
     // Reset the invite code
     const newInviteCode = generateInviteCode(6);
 
-    const { data: updatedWorkspace} = await supabase
+    const { data: updatedWorkspace } = await supabase
       .from("workspaces")
       .update({ inviteCode: newInviteCode })
       .eq("id", workspaceId)
@@ -374,109 +372,126 @@ const app = new Hono()
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
+    let projectIds: string[] = [];
+    const { data: projects } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("workspaceId", workspaceId);
+    if (!projects) {
+      projectIds = [];
+    } else {
+      projectIds = projects.map((project) => project.id);
+    }
+
     // Fetch task data for this month and last month
-    const thisMonthTasks = await supabase
+    const { data: thisMonthTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .gte("created_at", thisMonthStart.toISOString())
       .lte("created_at", thisMonthEnd.toISOString());
 
-    const lastMonthTasks = await supabase
+    // Debug raw task data to check what's in the database
+    const { data: allTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds);
+
+    const { data: lastMonthTasks } = await supabase
+      .from("tasks")
+      .select("*")
+      .in("projectId", projectIds)
       .gte("created_at", lastMonthStart.toISOString())
       .lte("created_at", lastMonthEnd.toISOString());
-    const taskCount =
-      thisMonthTasks.data !== null ? thisMonthTasks.data.length : 0;
-    const taskDifference = taskCount - (lastMonthTasks.data?.length ?? 0);
+
+    const taskCount = thisMonthTasks !== null ? thisMonthTasks.length : 0;
+    const taskDifference = taskCount - (lastMonthTasks?.length ?? 0);
 
     // Fetch assigned tasks for this month and last month
-    const thisMonthAssignedTasks = await supabase
+    const { data: thisMonthAssignedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .eq("assigneeId", member.userId) // Assumes `userId` from the `members` table
       .gte("created_at", thisMonthStart.toISOString())
       .lte("created_at", thisMonthEnd.toISOString());
 
-    const lastMonthAssignedTasks = await supabase
+    const { data: lastMonthAssignedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .eq("assigneeId", member.userId)
       .gte("created_at", lastMonthStart.toISOString())
       .lte("created_at", lastMonthEnd.toISOString());
 
-    const assignedTaskCount = thisMonthAssignedTasks.data?.length ?? 0;
+    const assignedTaskCount = thisMonthAssignedTasks?.length ?? 0;
     const assignedTaskDifference =
-      assignedTaskCount - (lastMonthAssignedTasks.data?.length ?? 0);
+      assignedTaskCount - (lastMonthAssignedTasks?.length ?? 0);
     // Fetch incomplete tasks for this month and last month
-    const thisMonthIncompletedTasks = await supabase
+    const { data: thisMonthIncompletedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .neq("status", "DONE")
       .gte("created_at", thisMonthStart.toISOString())
       .lte("created_at", thisMonthEnd.toISOString());
 
-    const lastMonthIncompletedTasks = await supabase
+    const { data: lastMonthIncompletedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .neq("status", "DONE")
       .gte("created_at", lastMonthStart.toISOString())
       .lte("created_at", lastMonthEnd.toISOString());
 
-    const incompletedTaskCount = thisMonthIncompletedTasks.data?.length ?? 0;
+    const incompletedTaskCount = thisMonthIncompletedTasks?.length ?? 0;
     const incompletedTaskDifference =
-      incompletedTaskCount - (lastMonthIncompletedTasks.data?.length ?? 0);
+      incompletedTaskCount - (lastMonthIncompletedTasks?.length ?? 0);
     // Fetch completed tasks for this month and last month
-    const thisMonthCompletedTasks = await supabase
+    const { data: thisMonthCompletedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .eq("status", "DONE")
       .gte("created_at", thisMonthStart.toISOString())
       .lte("created_at", thisMonthEnd.toISOString());
 
-    const lastMonthCompletedTasks = await supabase
+    const { data: lastMonthCompletedTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .eq("status", "DONE")
       .gte("created_at", lastMonthStart.toISOString())
       .lte("created_at", lastMonthEnd.toISOString());
 
-    const completedTaskCount = thisMonthCompletedTasks.data?.length ?? 0;
+    const completedTaskCount = thisMonthCompletedTasks?.length ?? 0;
     const completedTaskDifference =
-      completedTaskCount - (lastMonthCompletedTasks.data?.length ?? 0);
+      completedTaskCount - (lastMonthCompletedTasks?.length ?? 0);
 
     // Fetch overdue tasks for this month and last month
-    const thisMonthOverdueTasks = await supabase
+    const { data: thisMonthOverdueTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .neq("status", "DONE")
       .lt("dueDate", now.toISOString())
       .gte("created_at", thisMonthStart.toISOString())
       .lte("created_at", thisMonthEnd.toISOString());
 
-    const lastMonthOverdueTasks = await supabase
+    const { data: lastMonthOverdueTasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("workspaceId", workspaceId)
+      .in("projectId", projectIds)
       .neq("status", "DONE")
       .lt("dueDate", now.toISOString())
       .gte("created_at", lastMonthStart.toISOString())
       .lte("created_at", lastMonthEnd.toISOString());
 
-    const overdueTaskCount = thisMonthOverdueTasks.data?.length ?? 0;
+    const overdueTaskCount = thisMonthOverdueTasks?.length ?? 0;
     const overdueTaskDifference =
-      overdueTaskCount - (lastMonthOverdueTasks.data?.length ?? 0);
+      overdueTaskCount - (lastMonthOverdueTasks?.length ?? 0);
 
-    return c.json({
+    const result = {
       data: {
         taskCount,
         taskDifference,
@@ -489,7 +504,9 @@ const app = new Hono()
         overdueTaskCount,
         overdueTaskDifference,
       },
-    });
+    };
+
+    return c.json(result);
   });
 
 export default app;

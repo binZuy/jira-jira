@@ -75,7 +75,7 @@ export const MembersList = () => {
       </div>
       <CardContent className="p-7">
         {data?.map((member, index) => (
-          <Fragment key={member.id}>
+          <Fragment key={member.userId}>
             <div className="flex items-center gap-2">
               <MemberAvatar
                 className="size-10"
@@ -96,7 +96,7 @@ export const MembersList = () => {
                   <DropdownMenuItem
                     className="font-medium"
                     onClick={() =>
-                      handleUpdateMember(member.id, MemberRole.ADMIN)
+                      handleUpdateMember(member.userId, MemberRole.ADMIN)
                     }
                     disabled={isUpdatingMember}
                   >
@@ -105,7 +105,7 @@ export const MembersList = () => {
                   <DropdownMenuItem
                     className="font-medium"
                     onClick={() =>
-                      handleUpdateMember(member.id, MemberRole.MEMBER)
+                      handleUpdateMember(member.userId, MemberRole.MEMBER)
                     }
                     disabled={isUpdatingMember}
                   >
@@ -113,7 +113,7 @@ export const MembersList = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="font-medium text-amber-700"
-                    onClick={() => handleDeleteMember(member.id)}
+                    onClick={() => handleDeleteMember(member.userId)}
                     disabled={isDeletingMember}
                   >
                     Remove {member.name}
