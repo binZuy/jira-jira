@@ -92,7 +92,9 @@ export type Task = {
   description?: string;
   projects: Project;
   assignee: Member;
+  assigneeName: string;
   roomNumber: number;
+  roomStatus: RoomStatus;
   attachments?: File[] | any[];
 };
 

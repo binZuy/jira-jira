@@ -136,12 +136,12 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                           accept=".jpg, .png, .jpeg, .svg"
                           ref={inputRef}
                           onChange={handleImageChange}
-                          disabled={isPending}
+                          disabled={true}
                         />
                         {field.value ? (
                           <Button
                             type="button"
-                            disabled={isPending}
+                            disabled={true}
                             variant="teritary"
                             size="xs"
                             className="w-fit mt-2"
@@ -155,7 +155,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                         ) : (
                           <Button
                             type="button"
-                            disabled={isPending}
+                            disabled={true}
                             variant="teritary"
                             size="xs"
                             className="w-fit mt-2"

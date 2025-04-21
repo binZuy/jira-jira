@@ -181,12 +181,12 @@ export const EditProjectForm = ({
                             accept=".jpg, .png, .jpeg, .svg"
                             ref={inputRef}
                             onChange={handleImageChange}
-                            disabled={isPending}
+                            disabled={true}
                           />
                           {field.value ? (
                             <Button
                               type="button"
-                              disabled={isPending}
+                              disabled={true}
                               variant="teritary"
                               size="xs"
                               className="w-fit mt-2"
@@ -201,7 +201,7 @@ export const EditProjectForm = ({
                           ) : (
                             <Button
                               type="button"
-                              disabled={isPending}
+                              disabled={true}
                               variant="teritary"
                               size="xs"
                               className="w-fit mt-2"

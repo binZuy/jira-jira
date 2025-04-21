@@ -103,7 +103,7 @@ export const TasksList = ({ data, total }: TasksListProps) => {
                 <Card className="shadow-none hover:bg-muted/50 transition">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium truncate">{task.name}</p>
+                      <p className="text-sm font-medium truncate">Room {task.roomNumber}</p>
                       <Badge variant={task.status}>
                         {formatEnumValue(task.status)}
                       </Badge>
@@ -120,9 +120,9 @@ export const TasksList = ({ data, total }: TasksListProps) => {
                           {formatEnumValue(task.priority)}
                         </Badge>
                       )}
-                      {task.roomId && (
+                      {task.roomStatus && (
                         <Badge variant="outline" className="bg-muted">
-                          Room {task.roomNumber}
+                          {formatEnumValue(task.roomStatus)}
                         </Badge>
                       )}
                     </div>

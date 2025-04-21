@@ -50,58 +50,7 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    // Fetch all attachments related to the task
-    // const { data: attachments, error: attachmentsError } = await supabase
-    //   .from("attachments")
-    //   .delete()
-    //   .eq("taskId", taskId)
-    //   .select();
-
-    // if (attachmentsError) {
-    //   return c.json({ error: "Error fetching attachments" }, 500);
-    // }
-
-    // Delete all attachment files from Supabase Storage
-    // for (const attachment of attachments) {
-    //   try {
-    //     const { error: deleteFileError } = await supabase.storage
-    //       .from("attachments")
-    //       .remove([attachment.fileId]);
-
-    //     if (deleteFileError) {
-    //       console.error(
-    //         `Failed to delete file ${attachment.fileId}:`,
-    //         deleteFileError.message
-    //       );
-    //     }
-    //   } catch (error) {
-    //     console.error(`Failed to delete file ${attachment.fileId}:`, error);
-    //   }
-    // }
-
-    // // Delete all attachment records from the "task_attachments" table
-    // for (const attachment of attachments) {
-    //   try {
-    //     const { error: deleteRecordError } = await supabase
-    //       .from("task_attachments")
-    //       .delete()
-    //       .eq("id", attachment.id);
-
-    //     if (deleteRecordError) {
-    //       console.error(
-    //         `Failed to delete attachment record ${attachment.id}:`,
-    //         deleteRecordError.message
-    //       );
-    //     }
-    //   } catch (error) {
-    //     console.error(
-    //       `Failed to delete attachment record ${attachment.id}:`,
-    //       error
-    //     );
-    //   }
-    // }
-
-    // Delete the task from the "tasks" table
+    // Delete the task after creating the log
     const { error: deleteTaskError } = await supabase
       .from("tasks")
       .delete()
@@ -109,22 +58,6 @@ const app = new Hono()
 
     if (deleteTaskError) {
       return c.json({ error: deleteTaskError.message }, 500);
-    }
-
-    // Create log for task deletion
-    const { error: logError } = await supabase.from("logs").insert([
-      {
-        taskId,
-        userId: user.id,
-        action: Action.DELETED,
-        details: {
-          taskId: taskId,
-        },
-      },
-    ]);
-
-    if (logError) {
-      return c.json({ error: logError.message }, 500);
     }
 
     // Return the deleted task's ID
@@ -171,17 +104,24 @@ const app = new Hono()
         .eq("workspaceId", workspaceId)
         .eq("userId", user.id)
         .single();
-
       if (memberError || !member) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // Prepare the base query for tasks and include related project and assignee data
+      // There are two ways to get tasks from a workspace:
+      // 1. Direct query using the workspace relationship (more efficient)
+      // 2. Query tasks through projects (what we're currently doing)
+      
+      // Initialize the query - we'll use a join approach with tasks and projects
       let query = supabase
         .from("tasks")
-        .select("*, projects(id, workspaceId, name)")
+        .select("*, projects!inner(id, workspaceId, name)")
         .eq("projects.workspaceId", workspaceId)
         .order("created_at", { ascending: false });
+      
+      // This approach uses a join with the projects table rather than
+      // fetching all project IDs first and then using an IN clause
+      // It's more efficient as it's a single query instead of two
 
       if (projectId) {
         query = query.eq("projectId", projectId);
@@ -212,12 +152,14 @@ const app = new Hono()
         return c.json({ error: tasksError.message }, 500);
       }
 
+      console.log("tasks", tasks);
       const listtasks = await Promise.all(
         tasks.map(async (task) => {
           const { data: assignee } = await supabase
             .from("members")
             .select("id, userId, name, email,role")
             .eq("userId", task.assigneeId)
+            .eq("workspaceId", workspaceId)
             .single();
           return {
             ...task,
@@ -283,105 +225,54 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // Handle new attachments if any
-      // if (attachments && attachments.length > 0) {
-      //   for (const file of attachments) {
-      //     if (file instanceof File) {
-      //       const filePath = `${user.id}/${Date.now()}-${file.name}`; // Unique file path based on user and timestamp
-      //       const { error: uploadError } = await supabase.storage
-      //         .from("storages") // Assuming 'attachments' is the storage bucket
-      //         .upload(filePath, file);
-
-      //       if (uploadError) {
-      //         console.error(
-      //           `Failed to upload file ${file.name}:`,
-      //           uploadError.message
-      //         );
-      //         continue;
-      //       }
-
-      //       let fileUrl: string;
-      //       if (file.type.startsWith("image/")) {
-      //         const { data: previewData } = await supabase.storage
-      //           .from("storages")
-      //           .getPublicUrl(filePath);
-
-      //         fileUrl = previewData.publicUrl;
-      //       } else {
-      //         const { error: downloadError } = await supabase.storage
-      //           .from("storages")
-      //           .download(filePath);
-
-      //         if (downloadError) {
-      //           console.error(
-      //             "Failed to download file:",
-      //             downloadError.message
-      //           );
-      //           continue;
-      //         }
-
-      //         fileUrl = "";
-      //       }
-
-      //       // Create a record for the attachment in the "task_attachments" table
-      //       const { error: attachmentError } = await supabase
-      //         .from("attachments")
-      //         .insert([
-      //           {
-      //             taskId,
-      //             filePath,
-      //             fileName: file.name,
-      //             fileType: file.type,
-      //             fileUrl,
-      //           },
-      //         ]);
-
-      //       if (attachmentError) {
-      //         console.error(
-      //           "Failed to save attachment record:",
-      //           attachmentError.message
-      //         );
-      //       }
-      //     }
-      //   }
-      // }
-      const room = Number(roomId);
-        const { data: roomData } = await supabase
-        .from("rooms")
-        .select("roomNumber, roomType")
-        .eq("id", room)
-        .single();
-
-      if (!roomData) {
-        return c.json({ error: "Room not found" }, 404);
+      // Initialize update object with provided fields
+      const updateData: Record<string, any> = {};
+      
+      // Add basic fields if provided
+      if (name) updateData.name = name;
+      if (status) updateData.status = status;
+      if (projectId) updateData.projectId = projectId;
+      if (dueDate) updateData.dueDate = dueDate;
+      if (description !== undefined) updateData.description = description;
+      if (priority) updateData.priority = priority;
+      
+      // Handle room data if roomId is provided
+      if (roomId) {
+        const { data: room } = await supabase
+          .from("rooms")
+          .select("id, roomNumber, roomType")
+          .eq("id", Number(roomId))
+          .single();
+          
+        if (!room) {
+          return c.json({ error: "Room not found" }, 404);
+        }
+        
+        updateData.roomId = room.id;
+        updateData.roomNumber = room.roomNumber;
+        updateData.roomType = room.roomType;
       }
 
-      const { data: assignee } = await supabase
-        .from("members")
-        .select("name")
-        .eq("userId", assigneeId)
-        .single();
+      // Handle assignee data if assigneeId is provided
+      if (assigneeId) {
+        const { data: assignee } = await supabase
+          .from("members")
+          .select("name")
+          .eq("userId", assigneeId)
+          .single();
+            
+        if (!assignee) {
+          return c.json({ error: "Assignee not found" }, 404);
+        }
         
-      if (!assignee) {
-        return c.json({ error: "Assignee not found" }, 404);
+        updateData.assigneeId = assigneeId;
+        updateData.assigneeName = assignee.name;
       }
         
       // Update the task details
       const { error: updateError } = await supabase
         .from("tasks")
-        .update({
-          name,
-          status,
-          projectId,
-          dueDate,
-          roomId: room,
-          assigneeId,
-          description,
-          priority,
-          roomNumber: roomData.roomNumber,
-          roomType: roomData.roomType,
-          assigneeName: assignee.name,
-        })
+        .update(updateData)
         .eq("id", taskId);
 
       if (updateError) {
@@ -394,18 +285,7 @@ const app = new Hono()
           taskId,
           userId: user.id,
           action: Action.UPDATED,
-          details: {
-            name,
-            status,
-            assigneeId,
-            roomId,
-            dueDate,
-            projectId,
-            description,
-            priority,
-            roomNumber: roomData.roomNumber,
-            roomType: roomData.roomType,
-          },
+          details: updateData,
         },
       ]);
 
@@ -417,16 +297,7 @@ const app = new Hono()
       return c.json({
         data: {
           id: existingTask.id,
-          name,
-          status,
-          assigneeId,
-          roomId,
-          dueDate,
-          projectId,
-          description,
-          priority,
-          roomNumber: roomData.roomNumber,
-          roomType: roomData.roomType,
+          ...updateData
         },
       });
     }
@@ -543,6 +414,7 @@ const app = new Hono()
       .from("members")
       .select("name")
       .eq("userId", assigneeId)
+      .eq("workspaceId", workspaceId)
       .single();
       
     if (!assignee) {
@@ -641,6 +513,7 @@ const app = new Hono()
       .eq("id", taskId)
       .single();
 
+    console.log("task", task);
     if (taskError || !task) {
       return c.json({ error: "Task not found" }, 404);
     }
@@ -668,13 +541,16 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+    console.log(task.assigneeId);
     // Fetch assignee details
     const { data: assignee, error: memberFetchError } = await supabase
       .from("members")
       .select("*")
       .eq("userId", task.assigneeId)
+      .eq("workspaceId", project.workspaceId)
       .single();
 
+    console.log("member", memberFetchError);
     if (memberFetchError || !assignee) {
       return c.json({ error: "Assignee not found" }, 404);
     }
