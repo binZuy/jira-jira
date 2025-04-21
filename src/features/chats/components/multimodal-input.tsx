@@ -195,6 +195,7 @@ function PureMultimodalInput({
         multiple
         onChange={handleFileChange}
         tabIndex={-1}
+        disabled={true}
       />
 
       {(attachments.length > 0 || uploadQueue.length > 0) && (
@@ -294,7 +295,7 @@ function PureAttachmentsButton({
         event.preventDefault();
         fileInputRef.current?.click();
       }}
-      disabled={status !== 'ready'}
+      disabled={true}
       variant="ghost"
     >
       <PaperclipIcon size={14} />

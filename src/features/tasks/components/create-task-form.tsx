@@ -320,13 +320,13 @@ export const CreateTaskForm = ({
                         accept=".jpg,.jpeg,.png,.svg,.pdf,.doc,.docx,.xls,.xlsx"
                         ref={inputRef}
                         onChange={handleFileChange}
-                        disabled={isPending}
+                        disabled={true}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => inputRef.current?.click()}
-                        disabled={isPending}
+                        disabled={true}
                       >
                         Upload Files
                       </Button>
