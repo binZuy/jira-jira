@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ListChecksIcon, UserIcon } from "lucide-react";
-import { TaskStatus } from "@/lib/types/enums";
+import { ListChecksIcon, UserIcon, FlagIcon, FolderIcon } from "lucide-react";
+import { TaskStatus, Priority } from "@/lib/types/enums";
 import { useTaskFilters } from "../hooks/use-task-filters";
 
 interface DataFilterProps {
@@ -38,11 +38,11 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
   }));
 
   const memberOptions = members?.map((member) => ({
-    value: member.id,
+    value: member.userId,
     label: member.name,
   }));
 
-  const [{ status, assigneeId, projectId, dueDate }, setFilters] =
+  const [{ status, assigneeId, projectId, dueDate, priority }, setFilters] =
     useTaskFilters();
 
   const onStatusChange = (value: string) => {
@@ -55,6 +55,10 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
 
   const onProjectChange = (value: string) => {
     setFilters({ projectId: value === "all" ? null : (value as string) });
+  };
+
+  const onPriorityChange = (value: string) => {
+    setFilters({ priority: value === "all" ? null : (value as Priority) });
   };
 
   if (isLoading) return null;
@@ -87,6 +91,24 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
         </SelectContent>
       </Select>
       <Select
+        defaultValue={priority ?? undefined}
+        onValueChange={(value) => onPriorityChange(value)}
+      >
+        <SelectTrigger className="w-full lg:w-auto h-8">
+          <div className="flex items-center pr-2">
+            <FlagIcon className="size-4 mr-2" />
+            <SelectValue placeholder="All Priorities" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All priorities</SelectItem>
+          <SelectSeparator />
+          <SelectItem value={Priority.HIGH}>High</SelectItem>
+          <SelectItem value={Priority.MEDIUM}>Medium</SelectItem>
+          <SelectItem value={Priority.LOW}>Low</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
         defaultValue={assigneeId ?? undefined}
         onValueChange={(value) => onAssigneeChange(value)}
       >
@@ -113,7 +135,7 @@ export const DataFilter = ({ hideProjectFilter }: DataFilterProps) => {
         >
           <SelectTrigger className="w-full lg:w-auto h-8">
             <div className="flex items-center pr-2">
-              <UserIcon className="size-4 mr-2" />
+              <FolderIcon className="size-4 mr-2" />
               <SelectValue placeholder="All projects" />
             </div>
           </SelectTrigger>

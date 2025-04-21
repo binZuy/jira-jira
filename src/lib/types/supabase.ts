@@ -308,66 +308,6 @@ export type Database = {
         }
         Relationships: []
       }
-      roomTask: {
-        Row: {
-          checkIn: string | null
-          checkOut: string | null
-          created_at: string
-          id: number
-          linen: Database["public"]["Enums"]["linen"] | null
-          priority: Database["public"]["Enums"]["priority"] | null
-          roomId: number | null
-          roomNumber: number | null
-          roomStatus: Database["public"]["Enums"]["roomStatus"] | null
-          roomType: Database["public"]["Enums"]["roomType"] | null
-          status: Database["public"]["Enums"]["status"] | null
-          taskId: string | null
-        }
-        Insert: {
-          checkIn?: string | null
-          checkOut?: string | null
-          created_at?: string
-          id?: number
-          linen?: Database["public"]["Enums"]["linen"] | null
-          priority?: Database["public"]["Enums"]["priority"] | null
-          roomId?: number | null
-          roomNumber?: number | null
-          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
-          roomType?: Database["public"]["Enums"]["roomType"] | null
-          status?: Database["public"]["Enums"]["status"] | null
-          taskId?: string | null
-        }
-        Update: {
-          checkIn?: string | null
-          checkOut?: string | null
-          created_at?: string
-          id?: number
-          linen?: Database["public"]["Enums"]["linen"] | null
-          priority?: Database["public"]["Enums"]["priority"] | null
-          roomId?: number | null
-          roomNumber?: number | null
-          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
-          roomType?: Database["public"]["Enums"]["roomType"] | null
-          status?: Database["public"]["Enums"]["status"] | null
-          taskId?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "roomTask_roomId_fkey"
-            columns: ["roomId"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roomTask_taskId_fkey"
-            columns: ["taskId"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       suggestions: {
         Row: {
           created_at: string
@@ -409,45 +349,66 @@ export type Database = {
       tasks: {
         Row: {
           assigneeId: string | null
+          checkIn: string | null
+          checkOut: string | null
           created_at: string
           credit: number | null
           description: string | null
           dueDate: string | null
           id: string
+          linen: Database["public"]["Enums"]["linen"] | null
           name: string | null
           position: number | null
           priority: Database["public"]["Enums"]["priority"] | null
           projectId: string | null
           roomId: number | null
+          roomNumber: number | null
+          roomStatus: Database["public"]["Enums"]["roomStatus"] | null
+          roomType: Database["public"]["Enums"]["roomType"] | null
           status: Database["public"]["Enums"]["status"] | null
+          assigneeName: string | null
         }
         Insert: {
           assigneeId?: string | null
+          checkIn?: string | null
+          checkOut?: string | null
           created_at?: string
           credit?: number | null
           description?: string | null
           dueDate?: string | null
           id?: string
+          linen?: Database["public"]["Enums"]["linen"] | null
           name?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["priority"] | null
           projectId?: string | null
           roomId?: number | null
+          roomNumber?: number | null
+          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
+          roomType?: Database["public"]["Enums"]["roomType"] | null
           status?: Database["public"]["Enums"]["status"] | null
+          assigneeName?: string | null
         }
         Update: {
           assigneeId?: string | null
+          checkIn?: string | null
+          checkOut?: string | null
           created_at?: string
           credit?: number | null
           description?: string | null
           dueDate?: string | null
           id?: string
+          linen?: Database["public"]["Enums"]["linen"] | null
           name?: string | null
           position?: number | null
           priority?: Database["public"]["Enums"]["priority"] | null
           projectId?: string | null
           roomId?: number | null
+          roomNumber?: number | null
+          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
+          roomType?: Database["public"]["Enums"]["roomType"] | null
           status?: Database["public"]["Enums"]["status"] | null
+          assigneeName?: string | null
         }
         Relationships: [
           {

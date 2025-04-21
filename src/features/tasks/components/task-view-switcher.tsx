@@ -29,7 +29,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
   });
   const workspaceId = useWorkspaceId();
   const paramProjectId = useProjectId();
-  const [{ status, assigneeId, projectId, dueDate }] = useTaskFilters();
+  const [{ status, assigneeId, projectId, dueDate, priority }] = useTaskFilters();
 
   const { open } = useCreateTaskModal();
 
@@ -41,6 +41,7 @@ export const TaskViewSwitcher = ({hideProjectFilter}: TaskViewSwitcherProps) => 
     assigneeId,
     status,
     dueDate,
+    priority,
   });
   console.log("tasks", tasks);
   const onKanbanChange = useCallback(

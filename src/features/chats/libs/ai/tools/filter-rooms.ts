@@ -25,85 +25,99 @@ export const filterRooms = tool({
       };
     }
     
-    // Get all roomTasks with full details
-    const { data: roomTasks, error: tasksError } = await supabase
-      .from('roomTask')
+    // Get all tasks with full details
+    const { data: tasks, error: tasksError } = await supabase
+      .from('tasks')
       .select('*');
     
     if (tasksError) {
       return {
-        error: `Error fetching room tasks: ${tasksError.message}`,
+        error: `Error fetching tasks: ${tasksError.message}`,
       };
     }
     
-    // Combine rooms with their task data
-    const combinedRooms = rooms.map(room => {
-      const roomTask = roomTasks.find(task => task.roomId === room.id);
+    // Process filters and apply them
+    let filteredRooms = rooms;
+    
+    // Create a map to associate rooms with their latest task info
+    const roomTaskMap = new Map();
+    
+    // Go through all tasks and keep only the latest one for each room
+    tasks?.forEach(task => {
+      if (!task.roomId) return;
       
-      // If no task data exists, return basic room data
-      if (!roomTask) {
-        return {
-          'Room Number': room.roomNumber?.toString() || '',
-          'Room Type': room.roomType || '',
-          'Priority': '',
-          'Status': '',
-          'Room Status': '',
-          'Linen': '',
-          'Check In Time': null,
-          'Check Out Time': null,
-        };
+      if (!roomTaskMap.has(task.roomId) || 
+          new Date(task.created_at) > new Date(roomTaskMap.get(task.roomId).created_at)) {
+        roomTaskMap.set(task.roomId, task);
       }
-      
-      // Return combined data
-      return {
-        'Room Number': room.roomNumber?.toString() || '',
-        'Room Type': roomTask.roomType || room.roomType || '',
-        'Priority': roomTask.priority || '',
-        'Status': roomTask.status || '',
-        'Room Status': roomTask.roomStatus || '',
-        'Linen': roomTask.linen ? roomTask.linen.charAt(0) + roomTask.linen.slice(1).toLowerCase() : '',
-        'Check In Time': roomTask.checkIn,
-        'Check Out Time': roomTask.checkOut,
-      };
     });
     
-    // Apply filters if any
-    let filteredRooms = [...combinedRooms];
-    
-    if (roomType) {
-      filteredRooms = filteredRooms.filter(
-        (room) => room['Room Type'].toLowerCase() === roomType.toLowerCase()
-      );
+    // Now apply the filters
+    if (roomType || priority || status || roomStatus || linen) {
+      filteredRooms = rooms.filter(room => {
+        // Get the latest task for this room
+        const latestTask = roomTaskMap.get(room.id);
+        
+        // If no task exists and we're filtering by task properties, exclude this room
+        if (!latestTask && (priority || status || roomStatus || linen)) {
+          return false;
+        }
+        
+        // Apply room type filter
+        if (roomType && 
+            (!latestTask?.roomType || 
+             !latestTask.roomType.toLowerCase().includes(roomType.toLowerCase())) && 
+            (!room.roomType || 
+             !room.roomType.toLowerCase().includes(roomType.toLowerCase()))) {
+          return false;
+        }
+        
+        // Apply priority filter
+        if (priority && 
+            (!latestTask?.priority || 
+             !latestTask.priority.toLowerCase().includes(priority.toLowerCase()))) {
+          return false;
+        }
+        
+        // Apply status filter
+        if (status && 
+            (!latestTask?.status || 
+             !latestTask.status.toLowerCase().includes(status.toLowerCase()))) {
+          return false;
+        }
+        
+        // Apply room status filter
+        if (roomStatus && 
+            (!latestTask?.roomStatus || 
+             !latestTask.roomStatus.toLowerCase().includes(roomStatus.toLowerCase()))) {
+          return false;
+        }
+        
+        // Apply linen filter
+        if (linen && 
+            (!latestTask?.linen || 
+             !latestTask.linen.toLowerCase().includes(linen.toLowerCase()))) {
+          return false;
+        }
+        
+        return true;
+      });
     }
     
-    if (priority) {
-      filteredRooms = filteredRooms.filter(
-        (room) => room['Priority'].toLowerCase() === priority.toLowerCase()
-      );
-    }
-    
-    if (status) {
-      filteredRooms = filteredRooms.filter(
-        (room) => room['Status'].toLowerCase() === status.toLowerCase()
-      );
-    }
-    
-    if (roomStatus) {
-      filteredRooms = filteredRooms.filter(
-        (room) => room['Room Status'].toLowerCase() === roomStatus.toLowerCase()
-      );
-    }
-    
-    if (linen) {
-      const linenValue = linen.toUpperCase();
-      filteredRooms = filteredRooms.filter(
-        (room) => room['Linen'].toUpperCase() === linenValue
-      );
-    }
-    
+    // Return formatted data
     return {
       count: filteredRooms.length,
-      rooms: filteredRooms,
+      rooms: filteredRooms.map(room => {
+        const latestTask = roomTaskMap.get(room.id);
+        return {
+          roomNumber: room.roomNumber,
+          roomType: latestTask?.roomType || room.roomType,
+          priority: latestTask?.priority || null,
+          status: latestTask?.status || null,
+          roomStatus: latestTask?.roomStatus || null,
+          linen: latestTask?.linen || null,
+        };
+      }),
     };
   },
 }); 

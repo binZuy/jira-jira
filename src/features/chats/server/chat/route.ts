@@ -66,7 +66,10 @@ const app = new Hono()
       // Handle function calls
       if (functionName) {
         if (functionName === 'confirmRoomUpdate') {
-          const result = await confirmRoomUpdate.execute(functionArgs);
+          const result = await confirmRoomUpdate.execute(functionArgs, {
+            toolCallId: `confirm-update-${Date.now()}`,
+            messages: messages || []
+          });
           return c.json(result);
         } else if (functionName === 'declineRoomUpdate') {
           return c.json({

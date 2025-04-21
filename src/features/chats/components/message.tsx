@@ -12,14 +12,14 @@ import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
 import equal from 'fast-deep-equal';
-import { cn } from '@/lib/utils';
+import { cn, generateID } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import { UseChatHelpers } from '@ai-sdk/react';
-import { RoomInfo } from './room-info';
+import RoomInfo from './room-info';
 import { RoomUpdatePreview } from './room-update-preview';
 
 interface ToolCallPart {
@@ -202,29 +202,36 @@ const PurePreviewMessage = ({
                       />
                     ) : toolName === 'getRoomInfo' ? (
                       <RoomInfo
-                        roomNumber={args.roomNumber || '101'}
-                        roomType={args.roomType || ''}
-                        priority={args.priority || ''}
-                        status={args.status || ''}
-                        roomStatus={args.roomStatus || ''}
-                        linen={args.linen || ''}
-                        checkInTime={args.checkInTime}
-                        checkOutTime={args.checkOutTime}
-                        capacity={args.capacity || 0}
-                        equipment={args.equipment || []}
-                        features={args.features || []}
-                        lastMaintenance={args.lastMaintenance || ''}
-                        nextScheduledMaintenance={args.nextScheduledMaintenance || ''}
-                        notes={args.notes || ''}
-                        tasks={args.tasks || []}
+                        roomNumber={(args || {}).roomNumber || '101'}
+                        roomType={(args || {}).roomType || ''}
+                        priority={(args || {}).priority || ''}
+                        status={(args || {}).status || ''}
+                        roomStatus={(args || {}).roomStatus || ''}
+                        linen={(args || {}).linen || ''}
+                        checkInTime={(args || {}).checkInTime}
+                        checkOutTime={(args || {}).checkOutTime}
+                        tasks={(args || {}).tasks || []}
+                        assigneeName={(args || {}).assigneeName || ''}
+                        dueDate={(args || {}).dueDate || ''}
                       />
                     ) : toolName === 'updateRoomData' ? (
                       <RoomUpdatePreview
-                        roomNumber={args.roomNumber}
-                        field={args.field}
-                        currentValue={args.currentValue}
-                        newValue={args.newValue}
+                        roomNumber={(args || {}).roomNumber || 'undefined'}
+                        field={(args || {}).field || 'undefined'}
+                        currentValue={(args || {}).currentValue || 'Not set'}
+                        newValue={(args || {}).newValue || 'Not set'}
                       />
+                    ) : toolName === 'confirmRoomUpdate' ? (
+                      <div className="p-4 border rounded-lg bg-green-50">
+                        <div className="flex items-center gap-2 text-green-700">
+                          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <p className="font-medium">
+                            Confirming update: Room {(args || {}).roomNumber} {(args || {}).field} will be changed to &quot;{(args || {}).newValue}&quot;
+                          </p>
+                        </div>
+                      </div>
                     ) : null}
                   </div>
                 );
@@ -256,15 +263,17 @@ const PurePreviewMessage = ({
                         />
                       ) : toolName === 'getRoomInfo' ? (
                         <RoomInfo
-                          roomNumber={args?.roomNumber || '101'}
-                          capacity={args?.capacity || 30}
-                          equipment={args?.equipment || []}
-                          features={args?.features || []}
-                          status={args?.status || 'Available'}
-                          lastMaintenance={args?.lastMaintenance || '2024-03-15'}
-                          nextScheduledMaintenance={args?.nextScheduledMaintenance || '2024-06-15'}
-                          notes={args?.notes || ''}
-                          tasks={args?.tasks || []}
+                          roomNumber={(args || {}).roomNumber || '101'}
+                          roomType={(args || {}).roomType || ''}
+                          priority={(args || {}).priority || ''}
+                          status={(args || {}).status || ''}
+                          roomStatus={(args || {}).roomStatus || ''}
+                          linen={(args || {}).linen || ''}
+                          checkInTime={(args || {}).checkInTime}
+                          checkOutTime={(args || {}).checkOutTime}
+                          tasks={(args || {}).tasks || []}
+                          assigneeName={(args || {}).assigneeName || ''}
+                          dueDate={(args || {}).dueDate || ''}
                         />
                       ) : null}
                     </div>
@@ -289,51 +298,180 @@ const PurePreviewMessage = ({
                         />
                       ) : toolName === 'getRoomInfo' ? (
                         <RoomInfo
-                          roomNumber={result?.roomNumber || '101'}
-                          roomType={result?.roomType || ''}
-                          priority={result?.priority || ''}
-                          status={result?.status || ''}
-                          roomStatus={result?.roomStatus || ''}
-                          linen={result?.linen || ''}
-                          checkInTime={result?.checkInTime}
-                          checkOutTime={result?.checkOutTime}
-                          capacity={result?.capacity || 0}
-                          equipment={result?.equipment || []}
-                          features={result?.features || []}
-                          lastMaintenance={result?.lastMaintenance || ''}
-                          nextScheduledMaintenance={result?.nextScheduledMaintenance || ''}
-                          notes={result?.notes || ''}
-                          tasks={result?.tasks || []}
+                          roomNumber={(result || {}).roomNumber || '101'}
+                          roomType={(result || {}).roomType || ''}
+                          priority={(result || {}).priority || ''}
+                          status={(result || {}).status || ''}
+                          roomStatus={(result || {}).roomStatus || ''}
+                          linen={(result || {}).linen || ''}
+                          checkInTime={(result || {}).checkInTime}
+                          checkOutTime={(result || {}).checkOutTime}
+                          tasks={(result || {}).tasks || []}
+                          assigneeName={(result || {}).assigneeName || ''}
+                          dueDate={(result || {}).dueDate || ''}
                         />
                       ) : toolName === 'updateRoomData' ? (
                         <RoomUpdatePreview
-                          roomNumber={result?.data?.roomNumber}
-                          field={result?.data?.field}
-                          currentValue={result?.data?.currentValue}
-                          newValue={result?.data?.newValue}
+                          roomNumber={(result || {}).details?.room || (result || {}).data?.roomNumber || 'undefined'}
+                          field={(result || {}).details?.field || (result || {}).data?.field || 'undefined'}
+                          currentValue={(result || {}).details?.currentValue || (result || {}).data?.currentValue || 'Not set'}
+                          newValue={(result || {}).details?.newValue || (result || {}).data?.newValue || 'Not set'}
                           onConfirm={() => {
-                            // Add a message indicating the update was accepted
-                            setMessages(prev => [
-                              ...prev,
-                              {
-                                id: Date.now().toString(),
-                                role: 'assistant',
-                                content: `Room ${result?.data?.roomNumber} ${result?.data?.field} has been updated to "${result?.data?.newValue}"`,
-                              }
-                            ]);
+                            // Only proceed if we have a valid roomId to update
+                            if ((result || {}).details?.roomId) {
+                              const roomNumber = (result || {}).details?.room;
+                              const fieldName = (result || {}).details?.field;
+                              const newValue = (result || {}).details?.newValue;
+                              const roomId = (result || {}).details?.roomId;
+
+                              console.log(`Calling confirmRoomUpdate with roomId: ${roomId}, field: ${fieldName}, value: ${newValue}`);
+                              
+                              // Create a loading message
+                              setMessages(prev => [
+                                ...prev,
+                                {
+                                  id: Date.now().toString(),
+                                  role: 'assistant',
+                                  content: `Updating room ${roomNumber}...`,
+                                }
+                              ]);
+
+                              // Make the actual API call to update the room
+                              fetch('/api/chat/confirmRoomUpdate', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  roomNumber,
+                                  field: fieldName,
+                                  newValue,
+                                  roomId,
+                                }),
+                              })
+                              .then(response => response.json())
+                              .then(data => {
+                                console.log('Update response:', data);
+                                
+                                // Add success/error message
+                                setMessages(prev => [
+                                  ...prev,
+                                  {
+                                    id: generateID(),
+                                    role: 'assistant',
+                                    content: data.error 
+                                      ? `Failed to update: ${data.error}` 
+                                      : `Room ${roomNumber} ${fieldName} has been updated to "${newValue}"`,
+                                  }
+                                ]);
+
+                                // If update was successful, fetch and show updated room info
+                                if (!data.error) {
+                                  // First, add a message saying we're getting room info
+                                  setMessages(prev => [
+                                    ...prev,
+                                    {
+                                      id: generateID(),
+                                      role: 'assistant',
+                                      content: `Fetching updated information for Room ${roomNumber}...`,
+                                    }
+                                  ]);
+
+                                  // Call the getRoomInfo API
+                                  fetch(`/api/chat/getRoomInfo?roomNumber=${roomNumber}`, {
+                                    method: 'GET',
+                                    headers: {
+                                      'Content-Type': 'application/json'
+                                    }
+                                  })
+                                  .then(response => response.json())
+                                  .then(roomData => {
+                                    // Create a message with the tool result
+                                    setMessages(prev => [
+                                      ...prev,
+                                      {
+                                        id: generateID(),
+                                        role: 'assistant',
+                                        content: '',
+                                        parts: [
+                                          {
+                                            type: 'tool-invocation',
+                                            toolInvocation: {
+                                              toolName: 'getRoomInfo',
+                                              toolCallId: `room-info-${Date.now()}`,
+                                              state: 'result',
+                                              args: { roomNumber },
+                                              result: roomData
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]);
+                                  })
+                                  .catch(error => {
+                                    console.error('Error fetching room info:', error);
+                                    setMessages(prev => [
+                                      ...prev,
+                                      {
+                                        id: generateID(),
+                                        role: 'assistant',
+                                        content: `Failed to fetch room information: ${error.message || 'Unknown error'}`
+                                      }
+                                    ]);
+                                  });
+                                }
+                              })
+                              .catch(error => {
+                                console.error('Error updating room:', error);
+                                
+                                // Add error message
+                                setMessages(prev => [
+                                  ...prev,
+                                  {
+                                    id: generateID(),
+                                    role: 'assistant',
+                                    content: `Failed to update: ${error.message || 'Unknown error'}`,
+                                  }
+                                ]);
+                              });
+                            } else {
+                              // Add an error message if roomId is missing
+                              setMessages(prev => [
+                                ...prev,
+                                {
+                                  id: generateID(),
+                                  role: 'assistant',
+                                  content: 'Could not process update. Room ID is missing.',
+                                }
+                              ]);
+                            }
                           }}
                           onDecline={() => {
                             // Add a message indicating the update was declined
                             setMessages(prev => [
                               ...prev,
                               {
-                                id: Date.now().toString(),
+                                id: generateID(),
                                 role: 'assistant',
                                 content: 'Update declined. No changes were made.',
                               }
                             ]);
                           }}
                         />
+                      ) : toolName === 'confirmRoomUpdate' ? (
+                        <div className="p-4 border rounded-lg bg-green-50">
+                          <div className="flex items-center gap-2 text-green-700">
+                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <p className="font-medium">
+                              {(result || {}).error 
+                                ? `Update failed: ${(result || {}).error}` 
+                                : `Update successful: Room ${(result || {}).data?.roomNumber || (result || {}).details?.roomNumber} ${(result || {}).data?.field || (result || {}).details?.field} has been changed to "${(result || {}).data?.newValue || (result || {}).details?.newValue}"`
+                              }
+                            </p>
+                          </div>
+                        </div>
                       ) : null}
                     </div>
                   );

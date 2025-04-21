@@ -1,6 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
+import { TaskStatus, Priority } from '@/lib/types/enums';
 
 export const updateRoomData = tool({
   description: 'Update room information with a confirmation step. This tool will show a preview of the changes and require confirmation before applying them.',
@@ -10,73 +11,99 @@ export const updateRoomData = tool({
     newValue: z.string().nullable().describe('The new value to set'),
   }),
   execute: async ({ roomNumber, field, newValue }) => {
-    const supabase = await createClient();
-    
-    // First, get the room ID
-    const { data: room, error: roomError } = await supabase
-      .from('rooms')
-      .select('id')
-      .eq('roomNumber', Number(roomNumber))
-      .single();
-    
-    if (roomError || !room) {
-      return {
-        error: `Room ${roomNumber} not found`,
-      };
-    }
-    
-    // Then get the room task data
-    const { data: roomTask, error: taskError } = await supabase
-      .from('roomTask')
-      .select('*')
-      .eq('roomId', room.id)
-      .single();
-    
-    if (taskError && taskError.code !== 'PGRST116') {
-      return {
-        error: `Error fetching room task: ${taskError.message}`,
-      };
-    }
-
-    // Map UI field names to database column names
-    const fieldMapping = {
-      'Room Type': 'roomType',
-      'Priority': 'priority',
-      'Status': 'status',
-      'Room Status': 'roomStatus',
-      'Linen': 'linen',
-      'Check In Time': 'checkIn',
-      'Check Out Time': 'checkOut',
-    };
-    
-    const dbField = fieldMapping[field];
-    
-    // Get current value
-    let currentValue = null;
-    if (roomTask) {
-      currentValue = roomTask[dbField];
-    }
-
-    // Return the update preview data
-    return {
-      type: 'update-preview',
-      data: {
-        roomNumber,
-        field,
-        currentValue,
-        newValue,
-      },
-      onConfirm: {
-        type: 'function',
-        name: 'confirmRoomUpdate',
-        args: {
-          roomNumber,
-          field,
-          newValue,
-          roomId: room.id
-        }
+    try {
+      console.log(`UpdateRoomData called for room ${roomNumber}, field ${field}, new value: ${newValue}`);
+      
+      const supabase = await createClient();
+      
+      // First, get the room ID
+      const { data: room, error: roomError } = await supabase
+        .from('rooms')
+        .select('id')
+        .eq('roomNumber', Number(roomNumber))
+        .single();
+      
+      if (roomError || !room) {
+        console.error(`Room not found error: ${roomError?.message || 'No room data'}`);
+        return {
+          error: `Room ${roomNumber} not found`,
+        };
       }
-    };
+
+      console.log(`Found room with ID: ${room.id}`);
+
+      // Get the most recent task for this room to get current values
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('roomId', room.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (tasksError) {
+        console.error(`Error fetching room tasks: ${tasksError.message}`);
+        return {
+          error: `Error fetching room tasks: ${tasksError.message}`,
+        };
+      }
+
+      // Map UI field names to database column names
+      const fieldMapping = {
+        'Room Type': 'roomType',
+        'Priority': 'priority',
+        'Status': 'status',
+        'Room Status': 'roomStatus',
+        'Linen': 'linen',
+        'Check In Time': 'checkIn',
+        'Check Out Time': 'checkOut',
+      };
+      
+      const dbField = fieldMapping[field];
+      
+      // Get current value from the most recent task
+      let currentValue = null;
+      const latestTask = tasks && tasks.length > 0 ? tasks[0] : null;
+      if (latestTask) {
+        currentValue = latestTask[dbField as keyof typeof latestTask];
+        console.log(`Current value for ${field}: ${currentValue}`);
+      } else {
+        console.log(`No tasks found for room ${roomNumber}`);
+      }
+      
+      // Get all tasks related to this room to inform the confirmation
+      const { data: allTasks, error: allTasksError } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('roomId', room.id);
+      
+      if (allTasksError) {
+        console.error(`Error fetching all room tasks: ${allTasksError.message}`);
+        return {
+          error: `Error fetching all room tasks: ${allTasksError.message}`,
+        };
+      }
+      
+      const result = {
+        type: 'confirmation-required',
+        message: `You're about to update the ${field} for Room ${roomNumber}`,
+        details: {
+          room: roomNumber,
+          field,
+          currentValue: currentValue || 'Not set',
+          newValue: newValue || 'Not set',
+          tasksAffected: (allTasks || []).length,
+          roomId: room.id
+        },
+      };
+      
+      console.log('UpdateRoomData response:', JSON.stringify(result));
+      return result;
+    } catch (error) {
+      console.error('Unexpected error in updateRoomData:', error);
+      return {
+        error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
   },
 });
 
@@ -90,64 +117,124 @@ export const confirmRoomUpdate = tool({
     roomId: z.number(),
   }),
   execute: async ({ roomNumber, field, newValue, roomId }) => {
-    const supabase = await createClient();
-    
-    // Map UI field names to database column names
-    const fieldMapping = {
-      'Room Type': 'roomType',
-      'Priority': 'priority',
-      'Status': 'status',
-      'Room Status': 'roomStatus',
-      'Linen': 'linen',
-      'Check In Time': 'checkIn',
-      'Check Out Time': 'checkOut',
-    };
-    
-    const dbField = fieldMapping[field];
-    
-    // Check if roomTask exists
-    const { data: existingTask } = await supabase
-      .from('roomTask')
-      .select('id')
-      .eq('roomId', roomId)
-      .single();
-    
-    let updateResult;
-    
-    if (existingTask) {
-      // Update existing roomTask
-      const valueToUpdate = dbField === 'linen' && newValue 
-        ? newValue.toUpperCase() 
-        : newValue;
-        
-      updateResult = await supabase
-        .from('roomTask')
-        .update({ [dbField]: valueToUpdate })
+    try {
+      console.log(`Confirming room update for room ${roomNumber} (ID: ${roomId}), field: ${field}, new value: ${newValue}`);
+      
+      const supabase = await createClient();
+      
+      // Map UI field names to database column names
+      const fieldMapping = {
+        'Room Type': 'roomType',
+        'Priority': 'priority',
+        'Status': 'status',
+        'Room Status': 'roomStatus',
+        'Linen': 'linen',
+        'Check In Time': 'checkIn',
+        'Check Out Time': 'checkOut',
+      };
+      
+      const dbField = fieldMapping[field];
+      
+      // Get all tasks for this room
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('id')
         .eq('roomId', roomId);
-    } else {
-      // Create new roomTask for this room
-      const valueToInsert = dbField === 'linen' && newValue 
-        ? newValue.toUpperCase() 
-        : newValue;
+      
+      if (tasksError) {
+        console.error(`Error fetching tasks: ${tasksError.message}`);
+        return {
+          error: `Error fetching tasks: ${tasksError.message}`,
+        };
+      }
+      
+      console.log(`Found ${tasks?.length || 0} tasks for room ${roomNumber}`);
+      
+      let updateError = null;
+      
+      // If there are existing tasks, update all of them with the new value
+      if (tasks && tasks.length > 0) {
+        const valueToUpdate = dbField === 'linen' && newValue 
+          ? newValue.toUpperCase() 
+          : newValue;
         
-      updateResult = await supabase
-        .from('roomTask')
-        .insert({ 
-          roomId,
+        console.log(`Updating ${tasks.length} tasks with ${dbField}=${valueToUpdate}`);
+        
+        // Update all tasks associated with this room
+        console.log(`Executing update query for roomId: ${roomId}, field: ${dbField}, value: ${valueToUpdate}`);
+        const { error, data } = await supabase
+          .from('tasks')
+          .update({ [dbField]: valueToUpdate })
+          .eq('roomId', roomId)
+          .select();
+        
+        console.log(`Update result: ${error ? 'Error' : 'Success'}, affected rows: ${data?.length || 0}`);
+        updateError = error;
+      } else {
+        // Create a new task entry for this room with the minimal required fields
+        const valueToInsert = dbField === 'linen' && newValue 
+          ? newValue.toUpperCase() 
+          : newValue;
+        
+        // Get the room number from the rooms table
+        const { data: room, error: roomError } = await supabase
+          .from('rooms')
+          .select('roomNumber, roomType')
+          .eq('id', roomId)
+          .single();
+        
+        if (roomError || !room) {
+          console.error(`Room not found with ID ${roomId}: ${roomError?.message || 'No data'}`);
+          return {
+            error: `Room not found with ID ${roomId}`,
+          };
+        }
+        
+        console.log(`Creating new task for room ${roomNumber} with ${dbField}=${valueToInsert}`);
+        
+        // Create a basic task for this room
+        const { error } = await supabase
+          .from('tasks')
+          .insert({
+            roomId,
+            name: `Room ${roomNumber} maintenance`,
+            status: TaskStatus.TODO,
+            priority: Priority.MEDIUM,
+            roomNumber: room.roomNumber,
+            roomType: room.roomType,
+            [dbField]: valueToInsert,
+          });
+        
+        updateError = error;
+        if (error) {
+          console.error(`Error creating task: ${error.message}`);
+        }
+      }
+      
+      if (updateError) {
+        return {
+          error: `Failed to update room: ${updateError.message}`,
+        };
+      }
+
+      const result = {
+        type: 'update-result',
+        message: `Room ${roomNumber} ${field} has been updated to "${newValue}"`,
+        data: {
           roomNumber,
-          [dbField]: valueToInsert 
-        });
-    }
-    
-    if (updateResult.error) {
+          field,
+          newValue,
+          status: 'success'
+        }
+      };
+      
+      console.log('Update successful:', JSON.stringify(result));
+      return result;
+    } catch (error) {
+      console.error('Unexpected error in confirmRoomUpdate:', error);
       return {
-        error: `Failed to update room: ${updateResult.error.message}`,
+        error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
-
-    return {
-      type: 'update-result',
-      message: `Room ${roomNumber} ${field} has been updated to "${newValue}"`,
-    };
   },
 }); 

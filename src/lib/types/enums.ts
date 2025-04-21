@@ -37,7 +37,7 @@ export enum Priority {
   HIGH = "HIGH",
 }
 
-export enum roomType {
+export enum RoomStatus {
   STAY_OVER = "STAY_OVER",
   DEPARTURE = "DEPARTURE",
 }
@@ -47,6 +47,11 @@ export enum MessageRole {
   ASSISTANT = "assistant",
   SYSTEM = "system",
   DATA = "data",
+}
+
+export enum Linen {
+  YES = "YES", 
+  NO = "NO"
 }
 
 export type Workspace = {
@@ -78,6 +83,7 @@ export type Task = {
   name: string;
   status: TaskStatus;
   priority: Priority;
+  roomId: number;
   workspaceId: string;
   assigneeId: string;
   projectId: string;
@@ -125,11 +131,6 @@ export type Suggestion = {
 
 export type Room = {
   id: number;
-  name: string;
+  roomNumber: number;
   roomType: RoomType;
-}
-
-export enum Linen {
-  YES = "YES",
-  NO = "NO",
 }

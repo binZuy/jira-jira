@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Priority, TaskStatus } from "@/lib/types/enums";
+import { Priority, TaskStatus, RoomStatus, Linen } from "@/lib/types/enums";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
@@ -13,6 +13,8 @@ export const createTaskSchema = z.object({
   priority: z.nativeEnum(Priority, { required_error: "Required" }),
   dueDate: z.coerce.date(),
   description: z.string().optional(),
+  roomStatus: z.nativeEnum(RoomStatus).optional(),
+  linen: z.nativeEnum(Linen).optional(),
   attachments: z
     .custom<File[]>((value) => {
       // Nếu không có file, trả về true (không lỗi)

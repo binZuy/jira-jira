@@ -1,8 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import type { Attachment, 
-  // Message,
-   UIMessage } from 'ai';
+import type { Attachment, UIMessage } from 'ai';
 import cx from 'classnames';
 import type React from 'react';
 import {
@@ -22,7 +21,7 @@ import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SuggestedActions } from './suggested-actions';
+// import { SuggestedActions } from './suggested-actions';
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id';
 // import equal from 'fast-deep-equal';
 import { UseChatHelpers } from '@ai-sdk/react';
@@ -183,11 +182,11 @@ function PureMultimodalInput({
 
   return (
     <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
+      {/* {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
           <SuggestedActions append={append} chatId={chatId} workspaceId={workspaceId}/>
-        )}
+        )} */}
 
       <input
         type="file"

@@ -44,7 +44,7 @@ interface EditTaskFormProps {
     imageUrl: string;
   }[];
   memberOptions: { id: string; name: string }[];
-  rooms: {id: number, roomNumber: string; roomType: RoomType }[];
+  rooms: {id: number, roomNumber: number; roomType: RoomType }[];
   initialValues: Task;
 }
 
@@ -57,13 +57,17 @@ export const EditTaskForm = ({
 }: EditTaskFormProps) => {
   const { mutate, isPending } = useUpdateTask();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  console.log(initialValues);
+  console.log("Initial values:", initialValues);
+  console.log("Room ID type:", typeof initialValues.roomId, "value:", initialValues.roomId);
+  console.log("Assignee:", initialValues.assignee);
   const form = useForm<z.infer<typeof createTaskSchema>>({
     resolver: zodResolver(
       createTaskSchema.omit({ workspaceId: true, description: true })
     ),
     defaultValues: {
       ...initialValues,
+      roomId: initialValues.roomId ? String(initialValues.roomId) : undefined,
+      assigneeId: initialValues.assigneeId || initialValues.assignee.id,
       dueDate: initialValues.dueDate
         ? new Date(initialValues.dueDate)
         : undefined,

@@ -1,4 +1,8 @@
 import { memo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, User, Clock, Bed, Tag } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Task {
   id: string;
@@ -7,6 +11,7 @@ interface Task {
   priority?: string;
   description?: string;
   dueDate?: string;
+  assigneeName?: string;
 }
 
 interface RoomInfoProps {
@@ -18,13 +23,43 @@ interface RoomInfoProps {
   linen?: string;
   checkInTime?: string | null;
   checkOutTime?: string | null;
-  capacity?: number;
-  equipment?: string[];
-  features?: string[];
-  lastMaintenance?: string;
-  nextScheduledMaintenance?: string;
-  notes?: string;
   tasks?: Task[];
+  assigneeName?: string;
+  dueDate?: string;
+}
+
+// Map status values to tailwind classes for badge styling
+const statusColorMap: Record<string, string> = {
+  'TO_DO': 'bg-slate-100 text-slate-800 hover:bg-slate-100',
+  'TODO': 'bg-slate-100 text-slate-800 hover:bg-slate-100',
+  'IN_PROGRESS': 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+  'DONE': 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100',
+  'OUT_OF_SERVICE': 'bg-red-100 text-red-800 hover:bg-red-100',
+  'DO_NOT_DISTURB': 'bg-purple-100 text-purple-800 hover:bg-purple-100',
+  'READY_FOR_INSPECTION': 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+  'default': 'bg-slate-100 text-slate-800 hover:bg-slate-100',
+};
+
+// Map priority values to tailwind classes for badge styling
+const priorityColorMap: Record<string, string> = {
+  'HIGH': 'bg-red-100 text-red-800 hover:bg-red-100',
+  'MEDIUM': 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+  'LOW': 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+  'default': 'bg-slate-100 text-slate-800 hover:bg-slate-100',
+};
+
+function formatEnumValue(value: string): string {
+  if (!value) return '';
+  
+  // Handle special cases
+  if (value === 'TODO') return 'To Do';
+  
+  // Replace underscores with spaces and convert to title case
+  return value
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 function PureRoomInfo({
@@ -36,140 +71,114 @@ function PureRoomInfo({
   linen = '',
   checkInTime = null,
   checkOutTime = null,
-  capacity = 30,
-  equipment = [],
-  features = [],
-  lastMaintenance = '2024-03-15',
-  nextScheduledMaintenance = '2024-06-15',
-  notes = '',
   tasks = [],
+  assigneeName = '',
+  dueDate = '',
 }: RoomInfoProps) {
+  // Format due date if exists
+  const formattedDueDate = dueDate ? 
+    formatDistanceToNow(new Date(dueDate), { addSuffix: true }) : 
+    '';
+
   return (
-    <div className="p-4 border rounded-lg bg-gray-50">
-      <h3 className="font-semibold text-gray-700 mb-4">Room {roomNumber} Information</h3>
+    <Card className="w-full overflow-hidden border rounded-lg shadow-sm">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 border-b gap-2">
+        <CardTitle className="text-lg sm:text-xl font-bold text-slate-800 break-words">
+          Room {roomNumber} {roomType && `- ${formatEnumValue(roomType)}`}
+        </CardTitle>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          {priority && (
+            <Badge className={priorityColorMap[priority] || priorityColorMap.default} variant="outline">
+              {formatEnumValue(priority)}
+            </Badge>
+          )}
+          
+          {status && (
+            <Badge className={statusColorMap[status] || statusColorMap.default} variant="outline">
+              {formatEnumValue(status)}
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
       
-      <div className="grid grid-cols-2 gap-4">
-        {roomType && (
-          <div>
-            <p className="text-sm text-gray-500">Room Type</p>
-            <p className="font-medium">{roomType}</p>
+      <CardContent className="p-0">
+        {/* Task description area */}
+        {tasks.length > 0 && tasks[0].description && (
+          <div className="p-4 border-b bg-white">
+            <p className="text-sm text-slate-700">{tasks[0].description}</p>
           </div>
         )}
         
-        {priority && (
-          <div>
-            <p className="text-sm text-gray-500">Priority</p>
-            <p className="font-medium">{priority}</p>
-          </div>
-        )}
-        
-        {status && (
-          <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="font-medium">{status}</p>
-          </div>
-        )}
-        
-        {roomStatus && (
-          <div>
-            <p className="text-sm text-gray-500">Room Status</p>
-            <p className="font-medium">{roomStatus}</p>
-          </div>
-        )}
-        
-        {linen && (
-          <div>
-            <p className="text-sm text-gray-500">Linen</p>
-            <p className="font-medium">{linen}</p>
-          </div>
-        )}
-        
-        {checkInTime && (
-          <div>
-            <p className="text-sm text-gray-500">Check In Time</p>
-            <p className="font-medium">{checkInTime}</p>
-          </div>
-        )}
-        
-        {checkOutTime && (
-          <div>
-            <p className="text-sm text-gray-500">Check Out Time</p>
-            <p className="font-medium">{checkOutTime}</p>
-          </div>
-        )}
-        
-        {capacity > 0 && (
-          <div>
-            <p className="text-sm text-gray-500">Capacity</p>
-            <p className="font-medium">{capacity}</p>
-          </div>
-        )}
-        
-        {equipment?.length > 0 && (
-          <div>
-            <p className="text-sm text-gray-500">Equipment</p>
-            <p className="font-medium">{equipment.join(', ')}</p>
-          </div>
-        )}
-        
-        {features?.length > 0 && (
-          <div>
-            <p className="text-sm text-gray-500">Features</p>
-            <p className="font-medium">{features.join(', ')}</p>
-          </div>
-        )}
-        
-        {lastMaintenance && (
-          <div>
-            <p className="text-sm text-gray-500">Last Maintenance</p>
-            <p className="font-medium">{lastMaintenance}</p>
-          </div>
-        )}
-        
-        {nextScheduledMaintenance && (
-          <div>
-            <p className="text-sm text-gray-500">Next Maintenance</p>
-            <p className="font-medium">{nextScheduledMaintenance}</p>
-          </div>
-        )}
-        
-        {notes && (
-          <div className="col-span-2">
-            <p className="text-sm text-gray-500">Notes</p>
-            <p className="font-medium">{notes}</p>
-          </div>
-        )}
-        
-        {tasks.length > 0 && (
-          <div className="col-span-2 mt-4">
-            <p className="text-sm text-gray-500 mb-2">Associated Tasks</p>
-            <div className="border rounded-md overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Task</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Priority</th>
-                    <th className="px-3 py-2 text-left">Due Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map(task => (
-                    <tr key={task.id} className="border-t">
-                      <td className="px-3 py-2">{task.name}</td>
-                      <td className="px-3 py-2">{task.status}</td>
-                      <td className="px-3 py-2">{task.priority || '-'}</td>
-                      <td className="px-3 py-2">{task.dueDate || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Room details grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white">
+          {roomStatus && (
+            <div className="flex items-center gap-2">
+              <Tag className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Room Status</p>
+                <p className="text-sm font-medium">{formatEnumValue(roomStatus)}</p>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+          
+          {linen && (
+            <div className="flex items-center gap-2">
+              <Bed className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Linen</p>
+                <p className="text-sm font-medium">{formatEnumValue(linen)}</p>
+              </div>
+            </div>
+          )}
+          
+          {assigneeName && (
+            <div className="flex items-center gap-2">
+              <User className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Assignee</p>
+                <p className="text-sm font-medium">{assigneeName}</p>
+              </div>
+            </div>
+          )}
+          
+          {formattedDueDate && (
+            <div className="flex items-center gap-2">
+              <Calendar className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Due</p>
+                <p className="text-sm font-medium">{formattedDueDate}</p>
+              </div>
+            </div>
+          )}
+          
+          {checkInTime && (
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Check In</p>
+                <p className="text-sm font-medium">{checkInTime}</p>
+              </div>
+            </div>
+          )}
+          
+          {checkOutTime && (
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-500">Check Out</p>
+                <p className="text-sm font-medium">{checkOutTime}</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+      </CardContent>
+    </Card>
   );
 }
 
-export const RoomInfo = memo(PureRoomInfo); 
+// Use React.memo to prevent unnecessary re-renders
+const RoomInfo = memo(PureRoomInfo);
+
+export default RoomInfo; 

@@ -251,7 +251,6 @@ const app = new Hono()
       // const attachments = formData.getAll("attachments") as File[];
       const priority = formData.get("priority") as Priority;
       const { taskId } = c.req.param();
-
       // Fetch the existing task
       const { data: existingTask, error: taskError } = await supabase
         .from("tasks")
@@ -347,6 +346,26 @@ const app = new Hono()
       //   }
       // }
       const room = Number(roomId);
+        const { data: roomData } = await supabase
+        .from("rooms")
+        .select("roomNumber, roomType")
+        .eq("id", room)
+        .single();
+
+      if (!roomData) {
+        return c.json({ error: "Room not found" }, 404);
+      }
+
+      const { data: assignee } = await supabase
+        .from("members")
+        .select("name")
+        .eq("userId", assigneeId)
+        .single();
+        
+      if (!assignee) {
+        return c.json({ error: "Assignee not found" }, 404);
+      }
+        
       // Update the task details
       const { error: updateError } = await supabase
         .from("tasks")
@@ -359,6 +378,9 @@ const app = new Hono()
           assigneeId,
           description,
           priority,
+          roomNumber: roomData.roomNumber,
+          roomType: roomData.roomType,
+          assigneeName: assignee.name,
         })
         .eq("id", taskId);
 
@@ -381,6 +403,8 @@ const app = new Hono()
             projectId,
             description,
             priority,
+            roomNumber: roomData.roomNumber,
+            roomType: roomData.roomType,
           },
         },
       ]);
@@ -401,6 +425,8 @@ const app = new Hono()
           projectId,
           description,
           priority,
+          roomNumber: roomData.roomNumber,
+          roomType: roomData.roomType,
         },
       });
     }
@@ -503,7 +529,27 @@ const app = new Hono()
         ? highestPositionTask[0].position + 1000
         : 1000;
 
-    // Create the task document in the tasks table
+    const { data: room } = await supabase
+      .from("rooms")
+      .select("*")
+      .eq("id", Number(roomId))
+      .single();
+
+    if (!room ) {
+      return c.json({ error: "Room not found" }, 404);
+    }
+
+    const { data: assignee } = await supabase
+      .from("members")
+      .select("name")
+      .eq("userId", assigneeId)
+      .single();
+      
+    if (!assignee) {
+      return c.json({ error: "Assignee not found" }, 404);
+    }
+      
+        // Create the task document in the tasks table
     const { data: task, error: taskError } = await supabase
       .from("tasks")
       .insert([
@@ -517,6 +563,9 @@ const app = new Hono()
           description,
           priority,
           position: newPosition,
+          roomNumber: room.roomNumber,
+          roomType: room.roomType,
+          assigneeName: assignee.name,
         },
       ])
       .select()
@@ -524,60 +573,6 @@ const app = new Hono()
 
     if (taskError) {
       return c.json({ error: taskError.message }, 500);
-    }
-
-    // Create roomTask record if a roomId was provided
-    if (roomId) {
-      // First get the room details
-      console.log('roomId:', roomId, 'type:', typeof roomId);
-      const { data: room, error: roomError } = await supabase
-        .from("rooms")
-        .select("*")
-        .eq("id", Number(roomId))
-        .single();
-
-      if (roomError) {
-        console.error("Error fetching room details:", roomError.message);
-        // Continue with task creation even if room fetch fails
-      } else {
-        // Create or update the roomTask record
-        const roomTaskData = {
-          roomId: Number(roomId),
-          roomNumber: room.roomNumber,
-          roomType: room.roomType,
-          status: status,
-          taskId: task.id,
-          priority
-        };
-
-        // Check if roomTask already exists for this room
-        const { data: existingRoomTask } = await supabase
-          .from("roomTask")
-          .select("id")
-          .eq("roomId", Number(roomId))
-          .single();
-
-        if (existingRoomTask) {
-          // Update the existing roomTask with the new task reference
-          const { error: updateRoomTaskError } = await supabase
-            .from("roomTask")
-            .update(roomTaskData)
-            .eq("roomId", Number(roomId));
-
-          if (updateRoomTaskError) {
-            console.error("Error updating roomTask:", updateRoomTaskError.message);
-          }
-        } else {
-          // Create a new roomTask record
-          const { error: insertRoomTaskError } = await supabase
-            .from("roomTask")
-            .insert([roomTaskData]);
-
-          if (insertRoomTaskError) {
-            console.error("Error creating roomTask:", insertRoomTaskError.message);
-          }
-        }
-      }
     }
 
     // Now create attachment records with the task ID

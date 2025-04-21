@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateTaskModal } from "../hooks/use-create-task-modal";
+import { Badge } from "@/components/ui/badge";
+
 interface KanbanColumnHeaderProps {
   board: TaskStatus;
   taskCount: number;
@@ -25,13 +27,13 @@ const statusIconMap: Record<TaskStatus, React.ReactNode> = {
     <CircleCheckIcon className="size-[18px] text-emerald-400" />
   ),
   [TaskStatus.OUT_OF_SERVICE]: (
-    <CircleDashedIcon className="size-[18px] text-pink-400" />
+    <CircleDashedIcon className="size-[18px] text-blue-400" />
   ),
   [TaskStatus.DO_NOT_DISTURB]: (
-    <CircleDotIcon className="size-[18px] text-neutral-900" />
+    <CircleDotIcon className="size-[18px] text-pink-400" />
   ),
   [TaskStatus.READY_FOR_INSPECTION]: (
-    <CircleDotIcon className="size-[18px] text-blue-400" />
+    <CircleDotIcon className="size-[18px] text-green-400" />
   ),
 };
 
@@ -48,7 +50,7 @@ const {open} = useCreateTaskModal();
       <div className="flex items-center gap-x-2">
         {icon}
         <h2 className="text-sm font-medium">{snakeCaseToTitleCase(board)}</h2>
-        <div className="flex size-5 items-center justify-center rounded-md bg-neutral-200 text-xs text-neutral-700 font-medium">{taskCount}</div>
+        <Badge variant={board} className="text-[10px]">{taskCount}</Badge>
       </div>
       <Button onClick={open} variant="ghost" size="icon" className="size-5">
         <PlusIcon className="size-4 text-neutral-500"/>

@@ -38,13 +38,13 @@ export const EditTaskFormWrapper = ({
   }));
 
   const memberOptions = members?.map((member) => ({
-    id: member.id,
+    id: member.userId,
     name: member.name,
   }));
 
   const roomOptions = rooms?.map((room) => ({
     id: room.id,
-    roomNumber: String(room.roomNumber),
+    roomNumber: room.roomNumber,
     roomType: room.roomType,
   }));
 
