@@ -15,7 +15,9 @@ export const useBulkUpdateTasks = () => {
     mutationFn: async ({ json }) => {
       const response = await client.api.tasks["bulk-update"]["$post"]({ json });
       if(!response.ok) {
-        throw new Error("Failed to bulk update tasks");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to bulk update tasks");
       }
       return await response.json();
     },
@@ -25,8 +27,8 @@ export const useBulkUpdateTasks = () => {
       queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: ()=> {
-      toast.error("Failed to update tasks");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

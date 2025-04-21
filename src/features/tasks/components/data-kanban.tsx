@@ -15,8 +15,7 @@ const boards: TaskStatus[] = [
   TaskStatus.IN_PROGRESS,
   TaskStatus.DONE,
   TaskStatus.OUT_OF_SERVICE,
-  TaskStatus.OUT_OF_ORDER,
-  TaskStatus.PICK_UP,
+  TaskStatus.DO_NOT_DISTURB,
   TaskStatus.READY_FOR_INSPECTION,
 ];
 
@@ -38,8 +37,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
       [TaskStatus.IN_PROGRESS]: [],
       [TaskStatus.DONE]: [],
       [TaskStatus.OUT_OF_SERVICE]: [],
-      [TaskStatus.OUT_OF_ORDER]: [],
-      [TaskStatus.PICK_UP]: [],
+      [TaskStatus.DO_NOT_DISTURB]: [],
       [TaskStatus.READY_FOR_INSPECTION]: [],
     };
 
@@ -62,17 +60,14 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
       [TaskStatus.IN_PROGRESS]: [],
       [TaskStatus.DONE]: [],
       [TaskStatus.OUT_OF_SERVICE]: [],
-      [TaskStatus.OUT_OF_ORDER]: [],
-      [TaskStatus.PICK_UP]: [],
+      [TaskStatus.DO_NOT_DISTURB]: [],
       [TaskStatus.READY_FOR_INSPECTION]: [],
     };
     data.forEach((task) => {
       newTasks[task.status].push(task);
     });
     Object.keys(newTasks).forEach((status) => {
-      newTasks[status as TaskStatus].sort(
-        (a, b) => a.position - b.position
-      );
+      newTasks[status as TaskStatus].sort((a, b) => a.position - b.position);
     });
     setTasks(newTasks);
   }, [data]);

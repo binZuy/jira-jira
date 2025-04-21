@@ -223,14 +223,15 @@ export type Database = {
       messages: {
         Row: {
           chatId: string | null
+          content: string | null
           created_at: string
           id: string
-          content: string | null
           parts: Json | null
           role: Database["public"]["Enums"]["messageRole"] | null
         }
         Insert: {
           chatId?: string | null
+          content?: string | null
           created_at?: string
           id?: string
           parts?: Json | null
@@ -238,6 +239,7 @@ export type Database = {
         }
         Update: {
           chatId?: string | null
+          content?: string | null
           created_at?: string
           id?: string
           parts?: Json | null
@@ -289,19 +291,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          name: string | null
+          roomNumber: number | null
           roomType: Database["public"]["Enums"]["roomType"] | null
         }
         Insert: {
           created_at?: string
           id?: number
-          name?: string | null
+          roomNumber?: number | null
           roomType?: Database["public"]["Enums"]["roomType"] | null
         }
         Update: {
           created_at?: string
           id?: number
-          name?: string | null
+          roomNumber?: number | null
           roomType?: Database["public"]["Enums"]["roomType"] | null
         }
         Relationships: []
@@ -310,7 +312,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
-          document_create_at: string | null
+          document_created_at: string | null
           documentId: string | null
           id: string
           originalText: string | null
@@ -319,7 +321,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
-          document_create_at?: string | null
+          document_created_at?: string | null
           documentId?: string | null
           id?: string
           originalText?: string | null
@@ -328,7 +330,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
-          document_create_at?: string | null
+          document_created_at?: string | null
           documentId?: string | null
           id?: string
           originalText?: string | null
@@ -336,8 +338,8 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "suggestions_documentId_document_create_at_fkey"
-            columns: ["documentId", "document_create_at"]
+            foreignKeyName: "suggestions_documentid_document_create_at_fkey"
+            columns: ["documentId", "document_created_at"]
             isOneToOne: false
             referencedRelation: "documents"
             referencedColumns: ["id", "created_at"]
@@ -347,56 +349,77 @@ export type Database = {
       tasks: {
         Row: {
           assigneeId: string | null
+          checkIn: string | null
+          checkOut: string | null
           created_at: string
           credit: number | null
           description: string | null
           dueDate: string | null
           id: string
+          linen: Database["public"]["Enums"]["linen"] | null
           name: string | null
           position: number | null
-          priority: Database["public"]["Enums"]["cleaningPriority"] | null
+          priority: Database["public"]["Enums"]["priority"] | null
           projectId: string | null
           roomId: number | null
+          roomNumber: number | null
+          roomStatus: Database["public"]["Enums"]["roomStatus"] | null
+          roomType: Database["public"]["Enums"]["roomType"] | null
           status: Database["public"]["Enums"]["status"] | null
+          assigneeName: string | null
         }
         Insert: {
           assigneeId?: string | null
+          checkIn?: string | null
+          checkOut?: string | null
           created_at?: string
           credit?: number | null
           description?: string | null
           dueDate?: string | null
           id?: string
+          linen?: Database["public"]["Enums"]["linen"] | null
           name?: string | null
           position?: number | null
-          priority?: Database["public"]["Enums"]["cleaningPriority"] | null
+          priority?: Database["public"]["Enums"]["priority"] | null
           projectId?: string | null
           roomId?: number | null
+          roomNumber?: number | null
+          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
+          roomType?: Database["public"]["Enums"]["roomType"] | null
           status?: Database["public"]["Enums"]["status"] | null
+          assigneeName?: string | null
         }
         Update: {
           assigneeId?: string | null
+          checkIn?: string | null
+          checkOut?: string | null
           created_at?: string
           credit?: number | null
           description?: string | null
           dueDate?: string | null
           id?: string
+          linen?: Database["public"]["Enums"]["linen"] | null
           name?: string | null
           position?: number | null
-          priority?: Database["public"]["Enums"]["cleaningPriority"] | null
+          priority?: Database["public"]["Enums"]["priority"] | null
           projectId?: string | null
           roomId?: number | null
+          roomNumber?: number | null
+          roomStatus?: Database["public"]["Enums"]["roomStatus"] | null
+          roomType?: Database["public"]["Enums"]["roomType"] | null
           status?: Database["public"]["Enums"]["status"] | null
+          assigneeName?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_projectId_fkey1"
+            foreignKeyName: "tasks_projectId_fkey"
             columns: ["projectId"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_roomId_fkey1"
+            foreignKeyName: "tasks_roomId_fkey"
             columns: ["roomId"]
             isOneToOne: false
             referencedRelation: "rooms"
@@ -439,20 +462,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      action: "CREATED" | "UPDATED" | "COMMENTED" | "ASSIGNED_TO"
-      cleaningPriority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL"
-      kind: "text" | "code" | "sheet" | "image" | "task"
+      action: "CREATED" | "UPDATED" | "COMMENTED" | "ASSIGNED_TO" | "DELETED"
+      kind: "text" | "code" | "sheet"
+      linen: "YES" | "NO"
       memberRole: "ADMIN" | "MEMBER"
       messageRole: "user" | "assistant" | "system" | "data"
+      priority: "LOW" | "HIGH" | "MEDIUM"
+      roomStatus: "STAY_OVER" | "DEPARTURE"
       roomType: "STANDARD" | "SUITE" | "DELUXE" | "PRESIDENT"
       status:
         | "TODO"
         | "IN_PROGRESS"
         | "DONE"
         | "OUT_OF_SERVICE"
-        | "OUT_OF_ORDER"
         | "READY_FOR_INSPECTION"
-        | "PICK_UP"
+        | "DO_NOT_DISTURB"
       taskType: "STAY_OVER" | "DO_NOT_DISTURB" | "DEPARTURE"
     }
     CompositeTypes: {
@@ -572,20 +596,21 @@ export const Constants = {
   },
   public: {
     Enums: {
-      action: ["CREATED", "UPDATED", "COMMENTED", "ASSIGNED_TO"],
-      cleaningPriority: ["LOW", "HIGH", "MEDIUM", "CRITICAL"],
-      kind: ["text", "code", "sheet", "image", "task"],
+      action: ["CREATED", "UPDATED", "COMMENTED", "ASSIGNED_TO", "DELETED"],
+      kind: ["text", "code", "sheet"],
+      linen: ["YES", "NO"],
       memberRole: ["ADMIN", "MEMBER"],
       messageRole: ["user", "assistant", "system", "data"],
+      priority: ["LOW", "HIGH", "MEDIUM"],
+      roomStatus: ["STAY_OVER", "DEPARTURE"],
       roomType: ["STANDARD", "SUITE", "DELUXE", "PRESIDENT"],
       status: [
         "TODO",
         "IN_PROGRESS",
         "DONE",
         "OUT_OF_SERVICE",
-        "OUT_OF_ORDER",
         "READY_FOR_INSPECTION",
-        "PICK_UP",
+        "DO_NOT_DISTURB",
       ],
       taskType: ["STAY_OVER", "DO_NOT_DISTURB", "DEPARTURE"],
     },

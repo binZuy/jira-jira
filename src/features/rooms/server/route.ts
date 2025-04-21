@@ -56,7 +56,7 @@ const app = new Hono()
     async (c) => {
       const supabase = c.get("supabase"); // Get Supabase instance
       const user = c.get("user"); // Get the current user from context
-      const { name, roomType } = c.req.valid("json");
+      const { roomNumber, roomType } = c.req.valid("json");
 
       if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
@@ -66,7 +66,7 @@ const app = new Hono()
         .from("rooms")
         .insert([
           {
-            name,
+            roomNumber,
             roomType,
           },
         ])
@@ -91,7 +91,7 @@ const app = new Hono()
 
     const { roomId } = c.req.param();
     const id = Number(roomId);
-    const { name, roomType } = c.req.valid("json");
+    const { roomNumber, roomType } = c.req.valid("json");
 
     // Fetch the existing project
     const { data: existingRoom, error: roomError } = await supabase
@@ -107,7 +107,7 @@ const app = new Hono()
     const { data: updatedRoom, error: updateError } = await supabase
       .from("rooms")
       .update({
-        name,
+        roomNumber: roomNumber,
         roomType: roomType,
       })
       .eq("id", id)

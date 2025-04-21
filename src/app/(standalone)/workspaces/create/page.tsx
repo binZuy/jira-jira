@@ -8,8 +8,10 @@ const WorkspaceCreatePage = async () => {
   if (!user) redirect("/sign-in");
 
   return (
-    <div className="w-full lg:max-w-xl">
-      <CreateWorkspaceForm />
+    <div className="w-full lg:max-w-xl mx-auto">
+      <div className="flex flex-col gap-y-4">
+        <CreateWorkspaceForm />
+      </div>
     </div>
   );
 };

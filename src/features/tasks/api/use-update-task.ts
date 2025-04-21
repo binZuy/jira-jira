@@ -15,7 +15,9 @@ export const useUpdateTask = () => {
     mutationFn: async ({ form, param }) => {
       const response = await client.api.tasks[":taskId"]["$patch"]({ form, param });
       if(!response.ok) {
-        throw new Error("Failed to update task");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to update task");
       }
       return await response.json();
     },
@@ -27,8 +29,8 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["task", data.id] });
       queryClient.invalidateQueries({ queryKey: ["task-logs", data.id]});
     },
-    onError: ()=> {
-      toast.error("Failed to update task");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

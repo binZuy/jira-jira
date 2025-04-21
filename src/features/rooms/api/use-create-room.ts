@@ -15,7 +15,9 @@ export const useCreateRoom = () => {
     mutationFn: async ({ json }) => {
       const response = await client.api.rooms["$post"]({ json });
       if(!response.ok) {
-        throw new Error("Failed to create room");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to create room");
       }
       return await response.json();
     },
@@ -23,8 +25,8 @@ export const useCreateRoom = () => {
       toast.success("Room created");
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
     },
-    onError: ()=> {
-      toast.error("Failed to create room");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

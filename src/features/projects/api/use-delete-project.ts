@@ -15,7 +15,9 @@ export const useDeleteProject = () => {
     mutationFn: async ({ param }) => {
       const response = await client.api.projects[":projectId"]["$delete"]({ param });
       if(!response.ok) {
-        throw new Error("Failed to delete project");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to delete project");
       }
       return await response.json();
     },
@@ -24,7 +26,7 @@ export const useDeleteProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
     },
-    onError: ()=> {
+    onError: (error) => {
       toast.error("Failed to delete project");
     },
   });

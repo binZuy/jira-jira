@@ -15,7 +15,9 @@ export const useDeleteRoom = () => {
     mutationFn: async ({ param }) => {
       const response = await client.api.rooms[":roomId"]["$delete"]({ param });
       if(!response.ok) {
-        throw new Error("Failed to delete room");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to delete room");
       }
       return await response.json();
     },
@@ -24,8 +26,8 @@ export const useDeleteRoom = () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
       queryClient.invalidateQueries({ queryKey: ["room", data.id] });
     },
-    onError: ()=> {
-      toast.error("Failed to delete room");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

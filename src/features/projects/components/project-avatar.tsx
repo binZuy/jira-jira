@@ -1,4 +1,4 @@
-import Image from "next/image";
+// import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -12,20 +12,20 @@ interface ProjectAvatarProps {
 }
 
 export const ProjectAvatar = ({
-  image,
+  // image,
   name,
   className,
   fallbackClassName,
 }: ProjectAvatarProps) => {
-  if (image) {
-    return (
-      <div
-        className={cn("size-5 relative rounded-md overflow-hidden", className)}
-      >
-        <Image src={image} alt={name} fill className="object-cover" />
-      </div>
-    );
-  }
+  // if (image) {
+  //   return (
+  //     <div
+  //       className={cn("size-5 relative rounded-md overflow-hidden", className)}
+  //     >
+  //       <Image src={image} alt={name} fill className="object-cover" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <Avatar className={cn("size-5 rounded-md", className)}>

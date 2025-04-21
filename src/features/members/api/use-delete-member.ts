@@ -4,18 +4,27 @@ import { InferRequestType, InferResponseType } from "hono";
 
 import { client } from "@/lib/rpc";
 
-type ResponseType = InferResponseType<typeof client.api.members[":memberId"]["$delete"], 200>;
+type ResponseType = InferResponseType<
+  (typeof client.api.members)[":memberId"]["$delete"],
+  200
+>;
 
-type RequestType = InferRequestType<typeof client.api.members[":memberId"]["$delete"]>;
+type RequestType = InferRequestType<
+  (typeof client.api.members)[":memberId"]["$delete"]
+>;
 
 export const useDeleteMember = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.members[":memberId"]["$delete"]({ param });
-      if(!response.ok) {
-        throw new Error("Failed to delete member");
+      const response = await client.api.members[":memberId"]["$delete"]({
+        param,
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to delete member");
       }
       return await response.json();
     },
@@ -23,8 +32,8 @@ export const useDeleteMember = () => {
       toast.success("Member deleted");
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },
-    onError: ()=> {
-      toast.error("Failed to delete member");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

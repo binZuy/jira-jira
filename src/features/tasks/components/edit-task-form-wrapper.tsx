@@ -30,7 +30,6 @@ export const EditTaskFormWrapper = ({
 
   const { data: rooms, isLoading: isLoadingRooms } = useGetRooms();
 
-  console.log(rooms);
   const projectOptions = projects?.map((project) => ({
     id: project.id,
     name: project.name,
@@ -38,8 +37,14 @@ export const EditTaskFormWrapper = ({
   }));
 
   const memberOptions = members?.map((member) => ({
-    id: member.id,
+    id: member.userId,
     name: member.name,
+  }));
+
+  const roomOptions = rooms?.map((room) => ({
+    id: room.id,
+    roomNumber: room.roomNumber,
+    roomType: room.roomType,
   }));
 
   const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask ||  isLoadingRooms;
@@ -63,7 +68,7 @@ export const EditTaskFormWrapper = ({
       onCancel={onCancel}
       projectOptions={projectOptions ?? []}
       memberOptions={memberOptions ?? []}
-      rooms={rooms ?? []}
+      rooms={roomOptions ?? []}
       initialValues={initialValues}
     />
   );

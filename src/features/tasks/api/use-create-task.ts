@@ -14,8 +14,10 @@ export const useCreateTask = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ form }) => {
       const response = await client.api.tasks["$post"]({ form });
-      if(!response.ok) {
-        throw new Error("Failed to create task");
+      if(!response.ok) {                    
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to create task");
       }
       return await response.json();
     },
@@ -25,8 +27,8 @@ export const useCreateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: ()=> {
-      toast.error("Failed to create task");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

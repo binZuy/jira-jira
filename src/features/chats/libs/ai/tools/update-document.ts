@@ -25,7 +25,7 @@ export const updateDocument = ({dataStream }: UpdateDocumentProps) =>
             ...rawDocument,
             id: rawDocument.id,
             title: rawDocument.title ?? 'Untitled Document',
-            kind: rawDocument.kind as 'code' | 'text' | 'sheet' | 'task',
+            kind: rawDocument.kind as 'code' | 'text' | 'sheet',
             content: rawDocument.content ?? '',
             userId: rawDocument.userId,
           }

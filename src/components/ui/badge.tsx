@@ -17,19 +17,17 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
         [TaskStatus.TODO]:
-          "border-transparent bg-red-400 text-primary hover:bg-red-400/80",
+          "border-transparent bg-rose-500 text-primary hover:bg-rose-500/80",
         [TaskStatus.IN_PROGRESS]:
-          "border-transparent bg-yellow-400 text-primary hover:bg-yellow-400/80",
-        [TaskStatus.OUT_OF_SERVICE]:
-          "border-transparent bg-blue-400 text-primary hover:bg-yellow-400/80",
+          "border-transparent bg-amber-500 text-primary hover:bg-amber-500/80",
+        [TaskStatus.OUT_OF_SERVICE]: 
+          "border-transparent bg-slate-500 text-primary hover:bg-slate-500/80",
         [TaskStatus.DONE]:
-          "border-transparent bg-emerald-400 text-primary hover:bg-yellow-400/80",
-        [TaskStatus.PICK_UP]:
-          "border-transparent bg-pink-400 text-primary hover:bg-yellow-400/80",
-        [TaskStatus.OUT_OF_ORDER]:
-          "border-transparent bg-gray-400 text-primary hover:bg-yellow-400/80",
+          "border-transparent bg-emerald-500 text-primary hover:bg-emerald-500/80",
+        [TaskStatus.DO_NOT_DISTURB]:
+          "border-transparent bg-purple-500 text-primary hover:bg-purple-500/80",
         [TaskStatus.READY_FOR_INSPECTION]:
-          "border-transparent bg-green-400 text-primary hover:bg-yellow-400/80",
+          "border-transparent bg-sky-500 text-primary hover:bg-sky-500/80",
       },
     },
     defaultVariants: {

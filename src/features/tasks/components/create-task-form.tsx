@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
-import { RoomType, TaskStatus } from "@/lib/types/enums";
+import { RoomType, TaskStatus, Priority } from "@/lib/types/enums";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { FileIcon, XIcon } from "lucide-react";
 
@@ -44,14 +44,14 @@ interface CreateTaskFormProps {
     imageUrl: string;
   }[];
   memberOptions: { id: string; name: string }[];
-  rooms: {id: number, name: string; roomType: RoomType }[];
+  rooms: { id: number; roomNumber: number; roomType: RoomType }[];
 }
 
 export const CreateTaskForm = ({
   onCancel,
   projectOptions,
   memberOptions,
-  rooms
+  rooms,
 }: CreateTaskFormProps) => {
   const workspaceId = useWorkspaceId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -195,7 +195,7 @@ export const CreateTaskForm = ({
                         {rooms.map((room) => (
                           <SelectItem key={room.id} value={String(room.id)}>
                             <div className="flex items-center gap-x-2">
-                              {room.name} - {room.roomType}
+                              `Room {room.roomNumber} - {room.roomType}`
                             </div>
                           </SelectItem>
                         ))}
@@ -230,15 +230,38 @@ export const CreateTaskForm = ({
                         <SelectItem value={TaskStatus.OUT_OF_SERVICE}>
                           Out Of Service
                         </SelectItem>
-                        <SelectItem value={TaskStatus.OUT_OF_ORDER}>
-                          Out Of Order
-                        </SelectItem>
-                        <SelectItem value={TaskStatus.PICK_UP}>
-                          Pick Up
+                        <SelectItem value={TaskStatus.DO_NOT_DISTURB}>
+                          Do Not Disturb
                         </SelectItem>
                         <SelectItem value={TaskStatus.READY_FOR_INSPECTION}>
                           Inspection Ready
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        <SelectItem value={Priority.LOW}>Low</SelectItem>
+                        <SelectItem value={Priority.MEDIUM}>Medium</SelectItem>
+                        <SelectItem value={Priority.HIGH}>High</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

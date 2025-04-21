@@ -23,7 +23,9 @@ export const useUpdateMember = () => {
         json,
       });
       if (!response.ok) {
-        throw new Error("Failed to update member");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to update member");
       }
       return await response.json();
     },
@@ -31,8 +33,8 @@ export const useUpdateMember = () => {
       toast.success("Member updated");
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },
-    onError: () => {
-      toast.error("Failed to update member");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

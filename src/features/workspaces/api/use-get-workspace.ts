@@ -14,12 +14,14 @@ export const useGetWorkspace = ({ workspaceId }: UseGetWorkspaceProps) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch workspace");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to fetch workspace");
       }
 
       const { data } = await response.json();
 
-      return data;
+      return data;  
     },
   });
   return query;

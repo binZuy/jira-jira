@@ -21,7 +21,7 @@ import { CodeEditor } from "./code-editor";
 import { useArtifact } from "@/features/chats/hooks/use-artifact";
 import equal from "fast-deep-equal";
 import { SpreadsheetEditor } from "./sheet-editor";
-import { ImageEditor } from "./image-editor";
+// import { ImageEditor } from "./image-editor";
 
 interface DocumentPreviewProps {
   isReadonly: boolean;
@@ -276,16 +276,18 @@ const DocumentContent = ({ document }: { document: Document }) => {
             <SpreadsheetEditor {...commonProps} />
           </div>
         </div>
-      ) : document.kind === "image" as ArtifactKind ? (
-        <ImageEditor
-          title={document.title}
-          content={document.content ?? ""}
-          isCurrentVersion={true}
-          currentVersionIndex={0}
-          status={artifact.status}
-          isInline={true}
-        />
-      ) : null}
+      ) 
+      // : document.kind === "image" as ArtifactKind ? (
+      //   <ImageEditor
+      //     title={document.title}
+      //     content={document.content ?? ""}
+      //     isCurrentVersion={true}
+      //     currentVersionIndex={0}
+      //     status={artifact.status}
+      //     isInline={true}
+      //   />
+      // )
+       : null}
     </div>
   );
 };

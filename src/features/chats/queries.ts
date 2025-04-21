@@ -39,16 +39,6 @@ export async function deleteChatById({ id }: { id: string }) {
     console.log(error);
     throw error;
   }
-  console.log(`Chat with ID ${id} deleted successfully.`);
-
-  const { error: messagesError } = await supabase
-    .from("messages")
-    .delete()
-    .eq("chatId", id);
-  if (messagesError) {
-    console.log(messagesError);
-    throw messagesError;
-  }
   console.log(`All messages for chat ID ${id} deleted successfully.`);
 
   return true;

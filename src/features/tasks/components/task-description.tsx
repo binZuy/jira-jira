@@ -78,7 +78,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
               <span className="text-muted-foreground">No description set</span>
             )}
           </div>
-          
+
           {task.attachments && task.attachments.length > 0 && (
             <div className="mt-6">
               <h3 className="text-sm font-medium mb-2">Attachments</h3>
@@ -103,7 +103,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <Link 
+                      <Link
                         href={attachment.fileUrl}
                         target="_blank"
                         className="text-sm font-medium truncate hover:underline"

@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { client } from "@/lib/rpc";
-import { TaskStatus } from "@/lib/types/enums";
+import { TaskStatus, Priority } from "@/lib/types/enums";
 
 interface UseGetTasksProps {
   workspaceId: string;
   projectId?: string | null;
   status?: TaskStatus | null;
+  priority?: Priority | null;
   assigneeId?: string | null;
   search?: string | null;
   dueDate?: string | null;
@@ -16,6 +17,7 @@ export const useGetTasks = ({
   projectId,
   search,
   status,
+  priority,
   assigneeId,
   dueDate,
 }: UseGetTasksProps) => {
@@ -25,6 +27,7 @@ export const useGetTasks = ({
       workspaceId,
       projectId,
       status,
+      priority,
       search,
       assigneeId,
       dueDate,
@@ -35,6 +38,7 @@ export const useGetTasks = ({
           workspaceId,
           projectId: projectId ?? undefined,
           status: status ?? undefined,
+          priority: priority ?? undefined,
           assigneeId: assigneeId ?? undefined,
           search: search ?? undefined,
           dueDate: dueDate ?? undefined
@@ -42,7 +46,9 @@ export const useGetTasks = ({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
+        const errorData = await response.json();
+        if ("error" in errorData) throw new Error(errorData.error);
+        else throw new Error("Failed to fetch tasks");
       }
 
       const { data } = await response.json();
