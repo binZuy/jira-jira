@@ -29,11 +29,11 @@ interface TaskData {
 }
 
 export const getRoomInfo = tool({
-  description: 'Get information about a specific room by its room number',
+  description: 'Get information about a specific room by its room number. This tool will automatically display the information in a visual card format. Do not include text explanations when using this tool - the visual representation is sufficient.',
   parameters: z.object({
     roomNumber: z.string().describe('The room number to get information about'),
   }),
-  execute: async ({ roomNumber }) => {
+  execute: async ({ roomNumber }, { toolCallId, messages }) => {
     const supabase = await createClient();
     
     // Get room data from Supabase

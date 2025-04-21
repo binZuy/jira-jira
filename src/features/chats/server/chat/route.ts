@@ -25,6 +25,7 @@ import { requestSuggestions } from "../../libs/ai/tools/request-suggestions";
 import { getRoomInfo } from "../../libs/ai/tools/get-room-info";
 import { filterRooms } from "../../libs/ai/tools/filter-rooms";
 import { updateRoomData, confirmRoomUpdate } from "../../libs/ai/tools/update-room-data";
+import { getFloorOverview } from "../../libs/ai/tools/get-floor-overview";
 // import { createTask, deleteTask, updateTask, getTaskDetail, listTasks } from "../../libs/ai/tools/tool-task";
 import { saveChat, saveMessages, getChatById, deleteChatById } from "@/features/chats/queries";
 import { supabaseMiddleware } from "@/lib/supabase-middleware";
@@ -125,7 +126,7 @@ const app = new Hono()
               experimental_activeTools:
                 selectedChatModel === "chat-model-reasoning"
                   ? []
-                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions", "getRoomInfo", "filterRooms", "updateRoomData"],
+                  : ["getWeather", "createDocument", "updateDocument", "requestSuggestions", "getRoomInfo", "filterRooms", "updateRoomData", "getFloorOverview"],
               experimental_transform: smoothStream({ chunking: "word" }),
               experimental_generateMessageId: generateID,
               tools: {
@@ -137,6 +138,7 @@ const app = new Hono()
                 filterRooms,
                 updateRoomData,
                 confirmRoomUpdate,
+                getFloorOverview,
               },
               onFinish: async ({ response }) => {
                 console.log("Stream finished successfully:", response);

@@ -34,7 +34,7 @@ export const ChatIdClient = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 top-16">
      <Chat
           id={data.chat.id}
           initialMessages={convertToUIMessages(data.messages)}
